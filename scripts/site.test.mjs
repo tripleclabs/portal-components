@@ -34,7 +34,7 @@ test('supplied theme text pairs and control boundaries retain contrast',async()=
     const values=Object.fromEntries([...body.matchAll(/--portal-([\w-]+):\s*(#[\da-f]{6});/g)].map(([,key,value])=>[key,value]));
     if(!name)Object.assign(base,values);
     const theme={...base,...values};
-    for(const [foreground,background,minimum] of [['text','surface',4.5],['text-muted','surface',4.5],['primary-content','primary',4.5],['danger-content','danger',4.5],['border','surface',3]]) {
+    for(const [foreground,background,minimum] of [['text','surface',4.5],['text-muted','surface',4.5],['primary-content','primary',4.5],['danger-content','danger',4.5],['secondary-content','secondary',4.5],['accent-content','accent',4.5],['info-content','info',4.5],['success-content','success',4.5],['warning-content','warning',4.5],['border','surface',3]]) {
       if(!theme[foreground]||!theme[background])continue;
       assert.ok(ratio(theme[foreground],theme[background])>=minimum,`${name??'light'} ${foreground}/${background}`);
     }
@@ -65,4 +65,12 @@ test('provenance rejects changed, added, deleted inputs and tampered output',asy
     await writeFile(path.join(base,'rendered/card.html'),'<html>tampered</html>');
     await assert.rejects(verifyRendered(catalogue,base),/integrity mismatch/);
   } finally { await rm(base,{recursive:true,force:true}); }
+});
+
+test('component styling references declared tokens or documented optional overrides', async()=>{
+  const tokens=await read('styles/tokens.css'), css=await read('styles/components.css');
+  const declared=new Set([...tokens.matchAll(/(--portal-[a-z0-9-]+):/g)].map(m=>m[1]));
+  const optional=new Set(['--portal-button-background','--portal-button-color','--portal-input-background','--portal-input-color','--portal-card-shadow']);
+  for(const [,token] of css.matchAll(/var\((--portal-[a-z0-9-]+)/g)) assert.ok(declared.has(token)||optional.has(token),`Undocumented token ${token}`);
+  assert.ok(!/font-weight:\s*\d/.test(css),'Component font weights must be theme driven');
 });

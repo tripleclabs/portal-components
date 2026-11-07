@@ -177,6 +177,65 @@ Colour pairs must be checked together. The default themes supply text/background
 
 See [the generated token reference](tokens.md) for all exact names/defaults. Typography, spacing, border, radius and content-width tokens are site-wide defaults; the library deliberately avoids an undocumented variable for every declaration.
 
+## Branding contract
+
+Set tokens on the theme root after the bundled stylesheet. The same rules work
+with a named theme: `.portal-theme.my-brand` has the same specificity as a bundled
+`data-theme` selector, so the later author stylesheet wins. Inline custom
+properties also work. Existing published sites retain their captured library CSS.
+
+| Area | Main controls |
+| --- | --- |
+| Surfaces and text | `--portal-canvas`, `--portal-surface`, `--portal-surface-muted`, `--portal-text`, `--portal-text-muted` |
+| Semantic colours | `primary`, `secondary`, `accent`, `info`, `success`, `warning`, `danger`, with matching `-content` foreground tokens (all prefixed `--portal-`) |
+| Body typography | `--portal-font-family`, `--portal-font-mono`, `--portal-font-size`, `--portal-font-size-xs/sm/lg/xl`, `--portal-line-height`, `--portal-letter-spacing`, `--portal-font-weight-normal/medium/bold` |
+| Headings | `--portal-heading-font-family`, `--portal-heading-font-weight`, `--portal-heading-line-height`, `--portal-heading-letter-spacing`, `--portal-heading-size-1` through `-6` |
+| Form controls | `--portal-control-font-family`, `--portal-control-font-size`, `--portal-control-font-weight`, `--portal-control-line-height`, `--portal-control-height` and `-sm/-lg`, `--portal-choice-size` |
+| Borders and shape | `--portal-border`, `--portal-border-width`, `--portal-border-style`, `--portal-border-width-strong/accent`, `--portal-radius-sm/md/lg/pill` |
+| Elevation | `--portal-shadow` (cards), `--portal-shadow-control`, `--portal-shadow-button`, `--portal-shadow-overlay` (available for authored compositions) |
+| Focus and disabled state | `--portal-focus`, `--portal-focus-width`, `--portal-focus-offset`, `--portal-disabled-opacity` |
+| Layout | `--portal-space-*`, `--portal-content-width`, `--portal-reading-width` |
+
+Semantic tokens are available for authored content as well as library components;
+not every colour role has a built-in component variant. For example, `accent` and
+its content pair can style a branded callout without introducing new markup APIs.
+Heading font defaults to inheritance; heading size tokens apply to ordinary h1–h6
+inside the theme. Component-specific small headings use the size scale (`lg`/`xl`).
+Controls inherit body typography unless their control tokens are changed.
+
+```css
+.portal-theme.my-brand {
+  --portal-primary: #145744;
+  --portal-primary-content: #ffffff;
+  --portal-font-family: Georgia, serif;
+  --portal-font-size: 1.125rem;
+  --portal-line-height: 1.6;
+  --portal-heading-font-family: system-ui, sans-serif;
+  --portal-heading-font-weight: 700;
+  --portal-heading-letter-spacing: -.02em;
+  --portal-heading-size-1: 2.5rem;
+  --portal-control-font-family: system-ui, sans-serif;
+  --portal-border-width: 2px;
+  --portal-border-style: solid;
+  --portal-radius-md: .25rem;
+  --portal-radius-lg: .5rem;
+  --portal-shadow: 0 6px 20px rgb(20 87 68 / 12%);
+  --portal-shadow-control: inset 0 1px 2px rgb(0 0 0 / 8%);
+  --portal-focus-width: 3px;
+  --portal-focus-offset: 4px;
+}
+```
+
+Optional per-component overrides are resolved where used, so they also work on a
+wrapper inside an existing theme: `--portal-button-background`/`--portal-button-color`
+(primary buttons), `--portal-input-background`/`--portal-input-color`, and
+`--portal-card-shadow`. They fall back to the semantic tokens; they are not required
+root declarations. A wrapper can also override the shared tokens directly.
+Forced-colour mode deliberately retains system-colour borders rather than allowing
+brand borders to remove essential affordances. Custom themes remain responsible for
+contrast; full shadow strings can be set to `none` for a flat design. No font is
+fetched automatically: use available system fonts or provide an allowed font asset.
+
 
 # Token reference
 
@@ -196,11 +255,41 @@ Generated from styles/tokens.css. Override on the theme root or a component wrap
 | `--portal-danger-content` | `#ffffff` |
 | `--portal-success` | `#17603b` |
 | `--portal-warning` | `#795300` |
+| `--portal-info` | `#1657c0` |
+| `--portal-info-content` | `#ffffff` |
+| `--portal-success-content` | `#ffffff` |
+| `--portal-warning-content` | `#ffffff` |
+| `--portal-secondary` | `#eef1f5` |
+| `--portal-secondary-content` | `#17212f` |
+| `--portal-accent` | `#6e3db4` |
+| `--portal-accent-content` | `#ffffff` |
 | `--portal-focus` | `#1657c0` |
 | `--portal-font-family` | `ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif` |
 | `--portal-font-mono` | `ui-monospace, SFMono-Regular, Consolas, monospace` |
 | `--portal-font-size` | `1rem` |
 | `--portal-line-height` | `1.55` |
+| `--portal-font-size-xs` | `.8125rem` |
+| `--portal-font-size-sm` | `.875rem` |
+| `--portal-font-size-lg` | `1.125rem` |
+| `--portal-font-size-xl` | `1.25rem` |
+| `--portal-font-weight-normal` | `400` |
+| `--portal-font-weight-medium` | `650` |
+| `--portal-font-weight-bold` | `700` |
+| `--portal-letter-spacing` | `normal` |
+| `--portal-heading-font-family` | `inherit` |
+| `--portal-heading-font-weight` | `700` |
+| `--portal-heading-line-height` | `1.2` |
+| `--portal-heading-letter-spacing` | `normal` |
+| `--portal-heading-size-1` | `2rem` |
+| `--portal-heading-size-2` | `1.5rem` |
+| `--portal-heading-size-3` | `1.25rem` |
+| `--portal-heading-size-4` | `1rem` |
+| `--portal-heading-size-5` | `.875rem` |
+| `--portal-heading-size-6` | `.8125rem` |
+| `--portal-control-font-family` | `inherit` |
+| `--portal-control-font-size` | `1em` |
+| `--portal-control-font-weight` | `400` |
+| `--portal-control-line-height` | `inherit` |
 | `--portal-space-1` | `.25rem` |
 | `--portal-space-2` | `.5rem` |
 | `--portal-space-3` | `.75rem` |
@@ -211,15 +300,29 @@ Generated from styles/tokens.css. Override on the theme root or a component wrap
 | `--portal-radius-md` | `.65rem` |
 | `--portal-radius-lg` | `1rem` |
 | `--portal-border-width` | `1px` |
+| `--portal-border-style` | `solid` |
+| `--portal-border-width-strong` | `2px` |
+| `--portal-border-width-accent` | `4px` |
+| `--portal-radius-pill` | `999px` |
+| `--portal-focus-width` | `3px` |
+| `--portal-focus-offset` | `3px` |
+| `--portal-disabled-opacity` | `.55` |
 | `--portal-control-height` | `2.75rem` |
+| `--portal-control-height-sm` | `2.25rem` |
+| `--portal-control-height-lg` | `3.25rem` |
+| `--portal-choice-size` | `1.2rem` |
 | `--portal-content-width` | `72rem` |
+| `--portal-reading-width` | `48rem` |
 | `--portal-shadow` | `0 2px 8px #17212f0a` |
+| `--portal-shadow-control` | `none` |
+| `--portal-shadow-button` | `none` |
+| `--portal-shadow-overlay` | `0 12px 32px #17212f26` |
 | `--portal-motion-duration` | `120ms` |
 
 
 # Component reference
 
-Generated from catalogue.json, component contracts and executable example source. Do not edit this file directly. Library 0.1.0, contract 1.
+Generated from catalogue.json, component contracts and executable example source. Do not edit this file directly. Library 0.1.1, contract 1.
 
 ## button
 

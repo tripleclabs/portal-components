@@ -1,6 +1,6 @@
 {
   "name": "@wearecococo/portal-components",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "contractVersion": 1,
   "license": "MIT",
   "components": [
@@ -990,6 +990,38 @@
       "default": "#795300"
     },
     {
+      "name": "--portal-info",
+      "default": "#1657c0"
+    },
+    {
+      "name": "--portal-info-content",
+      "default": "#ffffff"
+    },
+    {
+      "name": "--portal-success-content",
+      "default": "#ffffff"
+    },
+    {
+      "name": "--portal-warning-content",
+      "default": "#ffffff"
+    },
+    {
+      "name": "--portal-secondary",
+      "default": "#eef1f5"
+    },
+    {
+      "name": "--portal-secondary-content",
+      "default": "#17212f"
+    },
+    {
+      "name": "--portal-accent",
+      "default": "#6e3db4"
+    },
+    {
+      "name": "--portal-accent-content",
+      "default": "#ffffff"
+    },
+    {
       "name": "--portal-focus",
       "default": "#1657c0"
     },
@@ -1008,6 +1040,94 @@
     {
       "name": "--portal-line-height",
       "default": "1.55"
+    },
+    {
+      "name": "--portal-font-size-xs",
+      "default": ".8125rem"
+    },
+    {
+      "name": "--portal-font-size-sm",
+      "default": ".875rem"
+    },
+    {
+      "name": "--portal-font-size-lg",
+      "default": "1.125rem"
+    },
+    {
+      "name": "--portal-font-size-xl",
+      "default": "1.25rem"
+    },
+    {
+      "name": "--portal-font-weight-normal",
+      "default": "400"
+    },
+    {
+      "name": "--portal-font-weight-medium",
+      "default": "650"
+    },
+    {
+      "name": "--portal-font-weight-bold",
+      "default": "700"
+    },
+    {
+      "name": "--portal-letter-spacing",
+      "default": "normal"
+    },
+    {
+      "name": "--portal-heading-font-family",
+      "default": "inherit"
+    },
+    {
+      "name": "--portal-heading-font-weight",
+      "default": "700"
+    },
+    {
+      "name": "--portal-heading-line-height",
+      "default": "1.2"
+    },
+    {
+      "name": "--portal-heading-letter-spacing",
+      "default": "normal"
+    },
+    {
+      "name": "--portal-heading-size-1",
+      "default": "2rem"
+    },
+    {
+      "name": "--portal-heading-size-2",
+      "default": "1.5rem"
+    },
+    {
+      "name": "--portal-heading-size-3",
+      "default": "1.25rem"
+    },
+    {
+      "name": "--portal-heading-size-4",
+      "default": "1rem"
+    },
+    {
+      "name": "--portal-heading-size-5",
+      "default": ".875rem"
+    },
+    {
+      "name": "--portal-heading-size-6",
+      "default": ".8125rem"
+    },
+    {
+      "name": "--portal-control-font-family",
+      "default": "inherit"
+    },
+    {
+      "name": "--portal-control-font-size",
+      "default": "1em"
+    },
+    {
+      "name": "--portal-control-font-weight",
+      "default": "400"
+    },
+    {
+      "name": "--portal-control-line-height",
+      "default": "inherit"
     },
     {
       "name": "--portal-space-1",
@@ -1050,16 +1170,72 @@
       "default": "1px"
     },
     {
+      "name": "--portal-border-style",
+      "default": "solid"
+    },
+    {
+      "name": "--portal-border-width-strong",
+      "default": "2px"
+    },
+    {
+      "name": "--portal-border-width-accent",
+      "default": "4px"
+    },
+    {
+      "name": "--portal-radius-pill",
+      "default": "999px"
+    },
+    {
+      "name": "--portal-focus-width",
+      "default": "3px"
+    },
+    {
+      "name": "--portal-focus-offset",
+      "default": "3px"
+    },
+    {
+      "name": "--portal-disabled-opacity",
+      "default": ".55"
+    },
+    {
       "name": "--portal-control-height",
       "default": "2.75rem"
+    },
+    {
+      "name": "--portal-control-height-sm",
+      "default": "2.25rem"
+    },
+    {
+      "name": "--portal-control-height-lg",
+      "default": "3.25rem"
+    },
+    {
+      "name": "--portal-choice-size",
+      "default": "1.2rem"
     },
     {
       "name": "--portal-content-width",
       "default": "72rem"
     },
     {
+      "name": "--portal-reading-width",
+      "default": "48rem"
+    },
+    {
       "name": "--portal-shadow",
       "default": "0 2px 8px #17212f0a"
+    },
+    {
+      "name": "--portal-shadow-control",
+      "default": "none"
+    },
+    {
+      "name": "--portal-shadow-button",
+      "default": "none"
+    },
+    {
+      "name": "--portal-shadow-overlay",
+      "default": "0 12px 32px #17212f26"
     },
     {
       "name": "--portal-motion-duration",

@@ -88,6 +88,40 @@ try {
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),`${component.name} mobile overflow`);
     await page.setViewportSize({width:1280,height:900});
   }
+  // Test actual computed styles, not only that tokens are declared in CSS.
+  await page.goto(`${address}rendered/card.html`);
+  const branded = await page.evaluate(()=>{
+    const root=document.querySelector('.portal-theme');
+    const values={'--portal-font-family':'Georgia, serif','--portal-font-size':'20px','--portal-line-height':'1.8','--portal-heading-font-family':'monospace','--portal-heading-size-1':'40px','--portal-heading-font-weight':'500','--portal-border-width':'3px','--portal-border-style':'dashed','--portal-radius-lg':'0px','--portal-shadow':'rgb(1, 2, 3) 0px 4px 8px 0px'};
+    for(const [key,value] of Object.entries(values))root.style.setProperty(key,value);
+    const heading=document.createElement('h1');heading.textContent='Brand heading';root.append(heading);
+    const card=getComputedStyle(root.querySelector('.portal-card')), h=getComputedStyle(heading), body=getComputedStyle(root);
+    return {font:body.fontFamily,size:body.fontSize,line:body.lineHeight,headingFont:h.fontFamily,headingSize:h.fontSize,weight:h.fontWeight,border:card.borderTopWidth,borderStyle:card.borderTopStyle,radius:card.borderTopLeftRadius,shadow:card.boxShadow};
+  });
+  assert.ok(branded.font.includes('Georgia'));assert.equal(branded.size,'20px');assert.equal(branded.line,'36px');
+  assert.equal(branded.headingFont,'monospace');assert.equal(branded.headingSize,'40px');assert.equal(branded.weight,'500');
+  assert.equal(branded.border,'3px');assert.equal(branded.borderStyle,'dashed');assert.equal(branded.radius,'0px');assert.ok(branded.shadow.includes('rgb(1, 2, 3)'));
+  await page.goto(`${address}rendered/button.html`);
+  const buttonTokens=await page.evaluate(()=>{
+    const root=document.querySelector('.portal-theme'),button=root.querySelector('.portal-button');
+    root.style.setProperty('--portal-primary','#123456');root.style.setProperty('--portal-primary-content','#ffffff');
+    root.style.setProperty('--portal-font-weight-medium','500');root.style.setProperty('--portal-shadow-button','rgb(3, 4, 5) 0px 2px 3px');
+    button.focus();root.style.setProperty('--portal-focus-width','5px');root.style.setProperty('--portal-focus-offset','6px');
+    const inherited=getComputedStyle(button);const result={background:inherited.backgroundColor,weight:inherited.fontWeight,shadow:inherited.boxShadow,focus:inherited.outlineWidth,offset:inherited.outlineOffset};
+    const wrapper=document.createElement('div');wrapper.style.setProperty('--portal-primary','#654321');button.replaceWith(wrapper);wrapper.append(button);
+    result.localBackground=getComputedStyle(button).backgroundColor;
+    wrapper.style.setProperty('--portal-button-background','#345678');result.componentBackground=getComputedStyle(button).backgroundColor;
+    return result;
+  });
+  assert.equal(buttonTokens.background,'rgb(18, 52, 86)');assert.equal(buttonTokens.localBackground,'rgb(101, 67, 33)');assert.equal(buttonTokens.componentBackground,'rgb(52, 86, 120)');
+  assert.equal(buttonTokens.weight,'500');assert.ok(buttonTokens.shadow.includes('rgb(3, 4, 5)'));assert.equal(buttonTokens.focus,'5px');assert.equal(buttonTokens.offset,'6px');
+  await page.goto(`${address}rendered/input.html`);
+  const controlTokens=await page.evaluate(()=>{
+    const root=document.querySelector('.portal-theme');
+    for(const [key,value] of Object.entries({'--portal-control-font-family':'monospace','--portal-control-font-size':'22px','--portal-control-font-weight':'500','--portal-control-height':'60px','--portal-shadow-control':'rgb(5, 6, 7) 0px 1px 2px inset','--portal-input-background':'#abcdef','--portal-input-color':'#123456'}))root.style.setProperty(key,value);
+    const s=getComputedStyle(root.querySelector('input'));return {font:s.fontFamily,size:s.fontSize,weight:s.fontWeight,height:s.minHeight,shadow:s.boxShadow,bg:s.backgroundColor,color:s.color};
+  });
+  assert.equal(controlTokens.font,'monospace');assert.equal(controlTokens.size,'22px');assert.equal(controlTokens.weight,'500');assert.equal(controlTokens.height,'60px');assert.ok(controlTokens.shadow.includes('rgb(5, 6, 7)'));assert.equal(controlTokens.bg,'rgb(171, 205, 239)');assert.equal(controlTokens.color,'rgb(18, 52, 86)');
   await page.goto(`${address}reference/disclosure.html`);
   const disclosure=page.frameLocator('iframe').locator('details');
   await disclosure.locator('summary').focus(); await page.keyboard.press('Enter');

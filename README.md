@@ -45,7 +45,7 @@ npm run test:browser # audit examples and native interactions in Chromium
 
 ## Compatibility and scope
 
-Library 0.1 targets Portal component contract 1. Existing plain HTML/Lua sites remain valid. Reusable components are presentation-only; page-owned Lua handles fetching/actions. Stateful browser widgets and file transfers need separate trusted runtime capabilities and are not implied by a styled control.
+Library 0.1.1 targets Portal component contract 1. Existing plain HTML/Lua sites remain valid. Reusable components are presentation-only; page-owned Lua handles fetching/actions. Stateful browser widgets and file transfers need separate trusted runtime capabilities and are not implied by a styled control.
 
 The supplied themes and semantics are tested, but copying components or overriding tokens can affect accessibility. Test your finished application with keyboard navigation, representative content and assistive technology.
 
