@@ -1,0 +1,16 @@
+{
+  "props": {
+    "title": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "slots": {
+    "default": {
+      "required": false
+    },
+    "actions": {
+      "required": false
+    }
+  }
+}

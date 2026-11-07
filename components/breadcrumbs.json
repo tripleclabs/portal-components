@@ -1,0 +1,13 @@
+{
+  "props": {
+    "label": {
+      "type": "string",
+      "default": "Breadcrumb"
+    }
+  },
+  "slots": {
+    "default": {
+      "required": true
+    }
+  }
+}

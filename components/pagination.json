@@ -1,0 +1,13 @@
+{
+  "props": {
+    "label": {
+      "type": "string",
+      "default": "Pagination"
+    }
+  },
+  "slots": {
+    "default": {
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,1069 @@
+{
+  "name": "@wearecococo/portal-components",
+  "version": "0.1.0",
+  "contractVersion": 1,
+  "license": "MIT",
+  "components": [
+    {
+      "name": "button",
+      "category": "Actions",
+      "description": "A native button with explicit type and visual emphasis.",
+      "source": "components/button.html",
+      "contract": "components/button.json",
+      "example": "examples/button.html",
+      "rendered": "rendered/button.html",
+      "accessibility": "Uses a real button. Choose type=\"submit\" inside a form; the default button never submits accidentally. Disabled buttons remain native disabled controls. Visible text supplies the accessible name.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "type": {
+            "type": "string",
+            "default": "button",
+            "enum": [
+              "button",
+              "submit",
+              "reset"
+            ]
+          },
+          "variant": {
+            "type": "string",
+            "default": "primary",
+            "enum": [
+              "primary",
+              "secondary",
+              "ghost",
+              "danger"
+            ]
+          },
+          "size": {
+            "type": "string",
+            "default": "md",
+            "enum": [
+              "sm",
+              "md",
+              "lg"
+            ]
+          },
+          "disabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <div style=\"display:flex;gap:1rem;flex-wrap:wrap\">\n    <portal-component name=\"button\">Continue</portal-component>\n    <portal-component name=\"button\">\n      <portal-prop name=\"variant\" value=\"secondary\"/>\n      Save draft\n    </portal-component>\n  </div>\n</main>\n",
+      "template": "<button xmlns:t=\"urn:cococo:dataxml\" class=\"portal-button\" t:attr-type=\"props.type\" t:attr-data-variant=\"props.variant\" t:attr-data-size=\"props.size\" t:attr-disabled=\"props.disabled\" t:attr-name=\"props.name\" t:attr-value=\"props.value\">\n  <portal-outlet name=\"default\"/>\n</button>\n"
+    },
+    {
+      "name": "link",
+      "category": "Actions",
+      "description": "A native navigation link with optional visual emphasis.",
+      "source": "components/link.html",
+      "contract": "components/link.json",
+      "example": "examples/link.html",
+      "rendered": "rendered/link.html",
+      "accessibility": "Use meaningful link text. Internal hrefs receive ordinary Portal mount resolution. Do not use this as a fake disabled button.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "href": {
+            "type": "string",
+            "required": true
+          },
+          "variant": {
+            "type": "string",
+            "default": "text",
+            "enum": [
+              "text",
+              "button"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"link\">\n    <portal-prop name=\"href\" value=\"#details\"/>\n    View order\n  </portal-component>\n</main>\n",
+      "template": "<a xmlns:t=\"urn:cococo:dataxml\" class=\"portal-link\" t:attr-href=\"props.href\" t:attr-data-variant=\"props.variant\" t:attr-aria-label=\"props.label\">\n  <portal-outlet name=\"default\"/>\n</a>\n"
+    },
+    {
+      "name": "badge",
+      "category": "Status",
+      "description": "A compact textual status marker.",
+      "source": "components/badge.html",
+      "contract": "components/badge.json",
+      "example": "examples/badge.html",
+      "rendered": "rendered/badge.html",
+      "accessibility": "Text communicates status; colour is supplementary. This component does not announce changes as a live region.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "variant": {
+            "type": "string",
+            "default": "neutral",
+            "enum": [
+              "neutral",
+              "primary",
+              "success",
+              "warning",
+              "danger"
+            ]
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"badge\">\n    <portal-prop name=\"variant\" value=\"success\"/>\n    Ready for print\n  </portal-component>\n</main>\n",
+      "template": "<span xmlns:t=\"urn:cococo:dataxml\" class=\"portal-badge\" t:attr-data-variant=\"props.variant\">\n  <portal-outlet name=\"default\"/>\n</span>\n"
+    },
+    {
+      "name": "card",
+      "category": "Structure",
+      "description": "A panel with optional header and footer.",
+      "source": "components/card.html",
+      "contract": "components/card.json",
+      "example": "examples/card.html",
+      "rendered": "rendered/card.html",
+      "accessibility": "Choose heading levels in caller content to match the page hierarchy; Card does not force an h2 or region label.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {},
+        "slots": {
+          "default": {
+            "required": false
+          },
+          "header": {
+            "required": false
+          },
+          "footer": {
+            "required": false
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"card\">\n    <portal-fill name=\"header\">\n      <h2>Business cards</h2>\n    </portal-fill>\n    <p>Premium stock, printed with care.</p>\n    <portal-fill name=\"footer\">\n      <p>From £24</p>\n    </portal-fill>\n  </portal-component>\n</main>\n",
+      "template": "<section xmlns:t=\"urn:cococo:dataxml\" class=\"portal-card\">\n  <header class=\"portal-card__header\" t:if=\"slots.header\">\n    <portal-outlet name=\"header\"/>\n  </header>\n  <div class=\"portal-card__body\">\n    <portal-outlet name=\"default\"/>\n  </div>\n  <footer class=\"portal-card__footer\" t:if=\"slots.footer\">\n    <portal-outlet name=\"footer\"/>\n  </footer>\n</section>\n"
+    },
+    {
+      "name": "alert",
+      "category": "Status",
+      "description": "A static notice with optional heading and actions.",
+      "source": "components/alert.html",
+      "contract": "components/alert.json",
+      "example": "examples/alert.html",
+      "rendered": "rendered/alert.html",
+      "accessibility": "Static notices do not use role=alert, avoiding unsolicited announcements on page load. Dynamic error announcements require the host runtime contract.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "variant": {
+            "type": "string",
+            "default": "info",
+            "enum": [
+              "info",
+              "success",
+              "warning",
+              "danger"
+            ]
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          },
+          "title": {
+            "required": false
+          },
+          "actions": {
+            "required": false
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"alert\">\n    <portal-prop name=\"variant\" value=\"warning\"/>\n    <portal-fill name=\"title\">\n      <strong>Artwork needs attention</strong>\n    </portal-fill>\n    <p>Please upload a PDF with embedded fonts.</p>\n  </portal-component>\n</main>\n",
+      "template": "<aside xmlns:t=\"urn:cococo:dataxml\" class=\"portal-alert\" t:attr-data-variant=\"props.variant\">\n  <div class=\"portal-alert__title\" t:if=\"slots.title\">\n    <portal-outlet name=\"title\"/>\n  </div>\n  <div>\n    <portal-outlet name=\"default\"/>\n  </div>\n  <div t:if=\"slots.actions\">\n    <portal-outlet name=\"actions\"/>\n  </div>\n</aside>\n"
+    },
+    {
+      "name": "separator",
+      "category": "Structure",
+      "description": "A semantic horizontal thematic break.",
+      "source": "components/separator.html",
+      "contract": "components/separator.json",
+      "example": "examples/separator.html",
+      "rendered": "rendered/separator.html",
+      "accessibility": "Preserve semantic HTML and visible focus styles when customizing.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {},
+        "slots": {}
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"separator\"/>\n</main>\n",
+      "template": "<hr xmlns:t=\"urn:cococo:dataxml\" class=\"portal-separator\"/>\n"
+    },
+    {
+      "name": "container",
+      "category": "Structure",
+      "description": "A centered content-width container.",
+      "source": "components/container.html",
+      "contract": "components/container.json",
+      "example": "examples/container.html",
+      "rendered": "rendered/container.html",
+      "accessibility": "Preserve semantic HTML and visible focus styles when customizing.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "width": {
+            "type": "string",
+            "default": "default",
+            "enum": [
+              "default",
+              "reading",
+              "full"
+            ]
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"container\">\n    <p>Readable content with comfortable page gutters.</p>\n  </portal-component>\n</main>\n",
+      "template": "<div xmlns:t=\"urn:cococo:dataxml\" class=\"portal-container\" t:attr-data-width=\"props.width\">\n  <portal-outlet name=\"default\"/>\n</div>\n"
+    },
+    {
+      "name": "stack",
+      "category": "Structure",
+      "description": "A vertical or horizontal flex layout with token spacing.",
+      "source": "components/stack.html",
+      "contract": "components/stack.json",
+      "example": "examples/stack.html",
+      "rendered": "rendered/stack.html",
+      "accessibility": "Preserve semantic HTML and visible focus styles when customizing.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "direction": {
+            "type": "string",
+            "default": "vertical",
+            "enum": [
+              "vertical",
+              "horizontal"
+            ]
+          },
+          "gap": {
+            "type": "string",
+            "default": "md",
+            "enum": [
+              "sm",
+              "md",
+              "lg"
+            ]
+          },
+          "align": {
+            "type": "string",
+            "default": "stretch",
+            "enum": [
+              "stretch",
+              "start",
+              "center",
+              "end"
+            ]
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"stack\">\n    <portal-prop name=\"direction\" value=\"horizontal\"/>\n    <portal-component name=\"badge\">Design</portal-component>\n    <portal-component name=\"badge\">Print</portal-component>\n    <portal-component name=\"badge\">Deliver</portal-component>\n  </portal-component>\n</main>\n",
+      "template": "<div xmlns:t=\"urn:cococo:dataxml\" class=\"portal-stack\" t:attr-data-direction=\"props.direction\" t:attr-data-gap=\"props.gap\" t:attr-data-align=\"props.align\">\n  <portal-outlet name=\"default\"/>\n</div>\n"
+    },
+    {
+      "name": "grid",
+      "category": "Structure",
+      "description": "A responsive grid that collapses on narrow screens.",
+      "source": "components/grid.html",
+      "contract": "components/grid.json",
+      "example": "examples/grid.html",
+      "rendered": "rendered/grid.html",
+      "accessibility": "DOM order remains reading and keyboard order. Do not use CSS to change meaningful content order.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "columns": {
+            "type": "string",
+            "default": "3",
+            "enum": [
+              "2",
+              "3",
+              "4"
+            ]
+          },
+          "gap": {
+            "type": "string",
+            "default": "md",
+            "enum": [
+              "sm",
+              "md",
+              "lg"
+            ]
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"grid\">\n    <div class=\"portal-demo-box\">One</div>\n    <div class=\"portal-demo-box\">Two</div>\n    <div class=\"portal-demo-box\">Three</div>\n  </portal-component>\n</main>\n",
+      "template": "<div xmlns:t=\"urn:cococo:dataxml\" class=\"portal-grid\" t:attr-data-columns=\"props.columns\" t:attr-data-gap=\"props.gap\">\n  <portal-outlet name=\"default\"/>\n</div>\n"
+    },
+    {
+      "name": "field",
+      "category": "Forms",
+      "description": "A label, description and error wrapper for an explicitly identified control.",
+      "source": "components/field.html",
+      "contract": "components/field.json",
+      "example": "examples/field.html",
+      "rendered": "rendered/field.html",
+      "accessibility": "The for prop must equal the nested control id. Also set required on the control. When using description/error, provide descriptionId/errorId and pass those same ids to the nested control describedby prop (space-separated if both). Mark the control invalid=true for an error. IDs must be unique in the document.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "for": {
+            "type": "string",
+            "required": true
+          },
+          "label": {
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "error": {
+            "type": "string",
+            "default": ""
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "descriptionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"field\">\n    <portal-prop name=\"for\" value=\"contact-name\"/>\n    <portal-prop name=\"label\" value=\"Your name\"/>\n    <portal-prop name=\"required\" t:value=\"true\"/>\n    <portal-component name=\"input\">\n      <portal-prop name=\"id\" value=\"contact-name\"/>\n      <portal-prop name=\"name\" value=\"name\"/>\n      <portal-prop name=\"autocomplete\" value=\"name\"/>\n      <portal-prop name=\"required\" t:value=\"true\"/>\n    </portal-component>\n  </portal-component>\n</main>\n",
+      "template": "<div xmlns:t=\"urn:cococo:dataxml\" class=\"portal-field\">\n  <label class=\"portal-label\" t:attr-for=\"props.for\">\n    <span t:text=\"props.label\"/>\n    <span t:if=\"props.required\" aria-hidden=\"true\"> *</span>\n  </label>\n  <p class=\"portal-field__description\" t:attr-id=\"props.descriptionId\" t:if=\"props.description\" t:text=\"props.description\"/>\n  <portal-outlet name=\"default\"/>\n  <p class=\"portal-field__error\" t:attr-id=\"props.errorId\" t:if=\"props.error\" t:text=\"props.error\"/>\n</div>\n"
+    },
+    {
+      "name": "input",
+      "category": "Forms",
+      "description": "A native single-line input with label/error association.",
+      "source": "components/input.html",
+      "contract": "components/input.json",
+      "example": "examples/input.html",
+      "rendered": "rendered/input.html",
+      "accessibility": "Always provide a visible associated label. Placeholder is not a label. Pass a unique id for each repeated control. File inputs do not gain upload capability from this component.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "id": {
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "value": {
+            "type": "string",
+            "default": ""
+          },
+          "disabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "invalid": {
+            "type": "boolean",
+            "default": false
+          },
+          "describedby": {
+            "type": "string",
+            "nullable": true
+          },
+          "autocomplete": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "default": "text",
+            "enum": [
+              "text",
+              "email",
+              "tel",
+              "url",
+              "number",
+              "password",
+              "search",
+              "date",
+              "time",
+              "datetime-local",
+              "month",
+              "week",
+              "color",
+              "range"
+            ]
+          },
+          "placeholder": {
+            "type": "string",
+            "nullable": true
+          },
+          "readonly": {
+            "type": "boolean",
+            "default": false
+          },
+          "inputmode": {
+            "type": "string",
+            "nullable": true
+          },
+          "min": {
+            "type": "string",
+            "nullable": true
+          },
+          "max": {
+            "type": "string",
+            "nullable": true
+          },
+          "step": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "slots": {}
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <label for=\"email-example\">Email address</label>\n  <portal-component name=\"input\">\n    <portal-prop name=\"id\" value=\"email-example\"/>\n    <portal-prop name=\"name\" value=\"email\"/>\n    <portal-prop name=\"type\" value=\"email\"/>\n    <portal-prop name=\"autocomplete\" value=\"email\"/>\n    <portal-prop name=\"placeholder\" value=\"you@example.com\"/>\n  </portal-component>\n</main>\n",
+      "template": "<input xmlns:t=\"urn:cococo:dataxml\" class=\"portal-input\" t:attr-id=\"props.id\" t:attr-name=\"props.name\" t:attr-type=\"props.type\" t:attr-value=\"props.value\" t:attr-placeholder=\"props.placeholder\" t:attr-disabled=\"props.disabled\" t:attr-required=\"props.required\" t:attr-readonly=\"props.readonly\" t:attr-aria-invalid=\"props.invalid\" t:attr-aria-describedby=\"props.describedby\" t:attr-autocomplete=\"props.autocomplete\" t:attr-inputmode=\"props.inputmode\" t:attr-min=\"props.min\" t:attr-max=\"props.max\" t:attr-step=\"props.step\"/>\n"
+    },
+    {
+      "name": "textarea",
+      "category": "Forms",
+      "description": "A native multiline control.",
+      "source": "components/textarea.html",
+      "contract": "components/textarea.json",
+      "example": "examples/textarea.html",
+      "rendered": "rendered/textarea.html",
+      "accessibility": "Always provide a visible associated label. The value is text content, not an HTML value attribute.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "id": {
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "value": {
+            "type": "string",
+            "default": ""
+          },
+          "disabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "invalid": {
+            "type": "boolean",
+            "default": false
+          },
+          "describedby": {
+            "type": "string",
+            "nullable": true
+          },
+          "autocomplete": {
+            "type": "string",
+            "nullable": true
+          },
+          "rows": {
+            "type": "number",
+            "default": 4
+          },
+          "placeholder": {
+            "type": "string",
+            "nullable": true
+          },
+          "readonly": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "slots": {}
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <label for=\"notes-example\">Delivery notes</label>\n  <portal-component name=\"textarea\">\n    <portal-prop name=\"id\" value=\"notes-example\"/>\n    <portal-prop name=\"name\" value=\"notes\"/>\n  </portal-component>\n</main>\n",
+      "template": "<textarea xmlns:t=\"urn:cococo:dataxml\" class=\"portal-textarea\" t:attr-id=\"props.id\" t:attr-name=\"props.name\" t:attr-rows=\"props.rows\" t:attr-placeholder=\"props.placeholder\" t:attr-disabled=\"props.disabled\" t:attr-required=\"props.required\" t:attr-readonly=\"props.readonly\" t:attr-aria-invalid=\"props.invalid\" t:attr-aria-describedby=\"props.describedby\" t:attr-autocomplete=\"props.autocomplete\" t:text=\"props.value\"/>\n"
+    },
+    {
+      "name": "select",
+      "category": "Forms",
+      "description": "A native select with caller-owned option elements.",
+      "source": "components/select.html",
+      "contract": "components/select.json",
+      "example": "examples/select.html",
+      "rendered": "rendered/select.html",
+      "accessibility": "Use option/optgroup elements in the default slot. Set selected on the desired option; the component has no browser-managed value synchronization.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "id": {
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "disabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "invalid": {
+            "type": "boolean",
+            "default": false
+          },
+          "describedby": {
+            "type": "string",
+            "nullable": true
+          },
+          "autocomplete": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <label for=\"paper-example\">Paper finish</label>\n  <portal-component name=\"select\">\n    <portal-prop name=\"id\" value=\"paper-example\"/>\n    <portal-prop name=\"name\" value=\"finish\"/>\n    <option value=\"silk\">Silk</option>\n    <option value=\"uncoated\">Uncoated</option>\n  </portal-component>\n</main>\n",
+      "template": "<select xmlns:t=\"urn:cococo:dataxml\" class=\"portal-select\" t:attr-id=\"props.id\" t:attr-name=\"props.name\" t:attr-disabled=\"props.disabled\" t:attr-required=\"props.required\" t:attr-aria-invalid=\"props.invalid\" t:attr-aria-describedby=\"props.describedby\" t:attr-autocomplete=\"props.autocomplete\">\n  <portal-outlet name=\"default\"/>\n</select>\n"
+    },
+    {
+      "name": "checkbox",
+      "category": "Forms",
+      "description": "A native checkbox with an enclosing text label.",
+      "source": "components/checkbox.html",
+      "contract": "components/checkbox.json",
+      "example": "examples/checkbox.html",
+      "rendered": "rendered/checkbox.html",
+      "accessibility": "The enclosing label associates text without an id. Group related choices in a caller-owned fieldset with a legend. Radios in a group share a name and have distinct values.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "value": {
+            "type": "string",
+            "default": "on"
+          },
+          "checked": {
+            "type": "boolean",
+            "default": false
+          },
+          "disabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "describedby": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"checkbox\">\n    <portal-prop name=\"name\" value=\"proof\"/>\n    <portal-prop name=\"value\" value=\"yes\"/>\n    Send me a proof\n  </portal-component>\n</main>\n",
+      "template": "<label xmlns:t=\"urn:cococo:dataxml\" class=\"portal-choice\">\n  <input type=\"checkbox\" t:attr-name=\"props.name\" t:attr-value=\"props.value\" t:attr-checked=\"props.checked\" t:attr-disabled=\"props.disabled\" t:attr-required=\"props.required\" t:attr-aria-describedby=\"props.describedby\"/>\n  <span>\n    <portal-outlet name=\"default\"/>\n  </span>\n</label>\n"
+    },
+    {
+      "name": "radio",
+      "category": "Forms",
+      "description": "A native radio with an enclosing text label.",
+      "source": "components/radio.html",
+      "contract": "components/radio.json",
+      "example": "examples/radio.html",
+      "rendered": "rendered/radio.html",
+      "accessibility": "The enclosing label associates text without an id. Group related choices in a caller-owned fieldset with a legend. Radios in a group share a name and have distinct values.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "value": {
+            "type": "string",
+            "default": "on"
+          },
+          "checked": {
+            "type": "boolean",
+            "default": false
+          },
+          "disabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "describedby": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"radio\">\n    <portal-prop name=\"name\" value=\"shipping\"/>\n    <portal-prop name=\"value\" value=\"standard\"/>\n    Standard delivery\n  </portal-component>\n</main>\n",
+      "template": "<label xmlns:t=\"urn:cococo:dataxml\" class=\"portal-choice\">\n  <input type=\"radio\" t:attr-name=\"props.name\" t:attr-value=\"props.value\" t:attr-checked=\"props.checked\" t:attr-disabled=\"props.disabled\" t:attr-required=\"props.required\" t:attr-aria-describedby=\"props.describedby\"/>\n  <span>\n    <portal-outlet name=\"default\"/>\n  </span>\n</label>\n"
+    },
+    {
+      "name": "field-error",
+      "category": "Forms",
+      "description": "An explicitly identified error message for aria-describedby.",
+      "source": "components/field-error.html",
+      "contract": "components/field-error.json",
+      "example": "examples/field-error.html",
+      "rendered": "rendered/field-error.html",
+      "accessibility": "Reference this id in the control describedby prop and mark invalid=true. The error is not a live region by default.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "id": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <label for=\"quantity-error\">Quantity</label>\n  <portal-component name=\"input\">\n    <portal-prop name=\"id\" value=\"quantity-error\"/>\n    <portal-prop name=\"name\" value=\"quantity\"/>\n    <portal-prop name=\"value\" value=\"0\"/>\n    <portal-prop name=\"invalid\" t:value=\"true\"/>\n    <portal-prop name=\"describedby\" value=\"quantity-message\"/>\n  </portal-component>\n  <portal-component name=\"field-error\">\n    <portal-prop name=\"id\" value=\"quantity-message\"/>\n    Enter a quantity of at least 1.\n  </portal-component>\n</main>\n",
+      "template": "<p xmlns:t=\"urn:cococo:dataxml\" class=\"portal-field__error\" t:attr-id=\"props.id\">\n  <portal-outlet name=\"default\"/>\n</p>\n"
+    },
+    {
+      "name": "error-summary",
+      "category": "Forms",
+      "description": "A focusable validation summary with caller-owned field links.",
+      "source": "components/error-summary.html",
+      "contract": "components/error-summary.json",
+      "example": "examples/error-summary.html",
+      "rendered": "rendered/error-summary.html",
+      "accessibility": "Give each summary a unique id if more than one is rendered. Link errors to actual control ids. This markup is focusable but does not automatically move focus; that requires the form/runtime integration.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "title": {
+            "type": "string",
+            "default": "Please check your details"
+          },
+          "id": {
+            "type": "string",
+            "default": "form-errors"
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"error-summary\">\n    <ul>\n      <li>\n        <a href=\"#email-example\">Enter a valid email address</a>\n      </li>\n    </ul>\n  </portal-component>\n  <label for=\"email-example\">Email address</label>\n  <portal-component name=\"input\">\n    <portal-prop name=\"id\" value=\"email-example\"/>\n    <portal-prop name=\"name\" value=\"email\"/>\n    <portal-prop name=\"type\" value=\"email\"/>\n    <portal-prop name=\"invalid\" t:value=\"true\"/>\n  </portal-component>\n</main>\n",
+      "template": "<section xmlns:t=\"urn:cococo:dataxml\" class=\"portal-error-summary\" tabindex=\"-1\" t:attr-id=\"props.id\" aria-label=\"Validation errors\">\n  <h2 t:text=\"props.title\"/>\n  <portal-outlet name=\"default\"/>\n</section>\n"
+    },
+    {
+      "name": "disclosure",
+      "category": "Disclosure",
+      "description": "Native details/summary disclosure without JavaScript.",
+      "source": "components/disclosure.html",
+      "contract": "components/disclosure.json",
+      "example": "examples/disclosure.html",
+      "rendered": "rendered/disclosure.html",
+      "accessibility": "Summary is the native keyboard-operable trigger. Do not place other interactive controls inside summary. Each disclosure is independent; no enforced accordion exclusivity.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "open": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "slots": {
+          "summary": {
+            "required": true
+          },
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"disclosure\">\n    <portal-fill name=\"summary\">What file format should I upload?</portal-fill>\n    <p>Use a print-ready PDF with embedded fonts.</p>\n  </portal-component>\n</main>\n",
+      "template": "<details xmlns:t=\"urn:cococo:dataxml\" class=\"portal-disclosure\" t:attr-open=\"props.open\">\n  <summary>\n    <portal-outlet name=\"summary\"/>\n  </summary>\n  <div class=\"portal-disclosure__body\">\n    <portal-outlet name=\"default\"/>\n  </div>\n</details>\n"
+    },
+    {
+      "name": "table",
+      "category": "Data",
+      "description": "A semantic table with caption and caller-owned header/body rows.",
+      "source": "components/table.html",
+      "contract": "components/table.json",
+      "example": "examples/table.html",
+      "rendered": "rendered/table.html",
+      "accessibility": "Use tr elements in slots and appropriate th scope attributes. The caption is visible. No sorting, row selection or grid keyboard model is implied.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "caption": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "slots": {
+          "head": {
+            "required": false
+          },
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"table\">\n    <portal-prop name=\"caption\" value=\"Recent orders\"/>\n    <portal-fill name=\"head\">\n      <tr>\n        <th scope=\"col\">Order</th>\n        <th scope=\"col\">Status</th>\n      </tr>\n    </portal-fill>\n    <tr>\n      <th scope=\"row\">#1042</th>\n      <td>In production</td>\n    </tr>\n  </portal-component>\n</main>\n",
+      "template": "<div xmlns:t=\"urn:cococo:dataxml\" class=\"portal-table-wrap\">\n  <table class=\"portal-table\">\n    <caption t:text=\"props.caption\"/>\n    <thead t:if=\"slots.head\">\n      <portal-outlet name=\"head\"/>\n    </thead>\n    <tbody>\n      <portal-outlet name=\"default\"/>\n    </tbody>\n  </table>\n</div>\n"
+    },
+    {
+      "name": "breadcrumbs",
+      "category": "Navigation",
+      "description": "A labelled breadcrumb navigation list.",
+      "source": "components/breadcrumbs.html",
+      "contract": "components/breadcrumbs.json",
+      "example": "examples/breadcrumbs.html",
+      "rendered": "rendered/breadcrumbs.html",
+      "accessibility": "Supply li items. Mark the current page with aria-current=page and use text rather than a redundant active link. Separators are decorative CSS.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "label": {
+            "type": "string",
+            "default": "Breadcrumb"
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"breadcrumbs\">\n    <li>\n      <a href=\"#home\">Home</a>\n    </li>\n    <li>\n      <span aria-current=\"page\">Orders</span>\n    </li>\n  </portal-component>\n</main>\n",
+      "template": "<nav xmlns:t=\"urn:cococo:dataxml\" class=\"portal-breadcrumbs\" t:attr-aria-label=\"props.label\">\n  <ol>\n    <portal-outlet name=\"default\"/>\n  </ol>\n</nav>\n"
+    },
+    {
+      "name": "pagination",
+      "category": "Navigation",
+      "description": "A labelled container for page navigation.",
+      "source": "components/pagination.html",
+      "contract": "components/pagination.json",
+      "example": "examples/pagination.html",
+      "rendered": "rendered/pagination.html",
+      "accessibility": "Supply li items and real hrefs. Use non-links for unavailable actions and aria-current=page for the current page. No client-only pagination state.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "label": {
+            "type": "string",
+            "default": "Pagination"
+          }
+        },
+        "slots": {
+          "default": {
+            "required": true
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"pagination\">\n    <li>\n      <span aria-disabled=\"true\">Previous</span>\n    </li>\n    <li>\n      <a href=\"?page=1\" aria-current=\"page\" aria-label=\"Page 1\">1</a>\n    </li>\n    <li>\n      <a href=\"?page=2\" aria-label=\"Page 2\">2</a>\n    </li>\n    <li>\n      <a href=\"?page=2\">Next</a>\n    </li>\n  </portal-component>\n</main>\n",
+      "template": "<nav xmlns:t=\"urn:cococo:dataxml\" class=\"portal-pagination\" t:attr-aria-label=\"props.label\">\n  <ul>\n    <portal-outlet name=\"default\"/>\n  </ul>\n</nav>\n"
+    },
+    {
+      "name": "empty-state",
+      "category": "Status",
+      "description": "A centered empty result explanation and optional action.",
+      "source": "components/empty-state.html",
+      "contract": "components/empty-state.json",
+      "example": "examples/empty-state.html",
+      "rendered": "rendered/empty-state.html",
+      "accessibility": "Use this for a real empty result, not as an error/loading substitute. The h2 assumes a page h1 already exists.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "title": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "slots": {
+          "default": {
+            "required": false
+          },
+          "actions": {
+            "required": false
+          }
+        }
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"empty-state\">\n    <portal-prop name=\"title\" value=\"No orders yet\"/>\n    <p>Your orders will appear here after checkout.</p>\n  </portal-component>\n</main>\n",
+      "template": "<section xmlns:t=\"urn:cococo:dataxml\" class=\"portal-empty-state\">\n  <h2 t:text=\"props.title\"/>\n  <div>\n    <portal-outlet name=\"default\"/>\n  </div>\n  <div t:if=\"slots.actions\">\n    <portal-outlet name=\"actions\"/>\n  </div>\n</section>\n"
+    },
+    {
+      "name": "skeleton",
+      "category": "Status",
+      "description": "A decorative placeholder for an explicitly labelled loading region.",
+      "source": "components/skeleton.html",
+      "contract": "components/skeleton.json",
+      "example": "examples/skeleton.html",
+      "rendered": "rendered/skeleton.html",
+      "accessibility": "This is hidden from assistive technology. The caller must supply meaningful loading text and aria-busy on the actual region. No animation by default.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "shape": {
+            "type": "string",
+            "default": "line",
+            "enum": [
+              "line",
+              "block",
+              "circle"
+            ]
+          }
+        },
+        "slots": {}
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <div aria-busy=\"true\">\n    <p>Loading order details…</p>\n    <portal-component name=\"skeleton\"/>\n    <portal-component name=\"skeleton\">\n      <portal-prop name=\"shape\" value=\"block\"/>\n    </portal-component>\n  </div>\n</main>\n",
+      "template": "<span xmlns:t=\"urn:cococo:dataxml\" class=\"portal-skeleton\" aria-hidden=\"true\" t:attr-data-shape=\"props.shape\"/>\n"
+    },
+    {
+      "name": "progress",
+      "category": "Status",
+      "description": "A labelled native determinate progress indicator.",
+      "source": "components/progress.html",
+      "contract": "components/progress.json",
+      "example": "examples/progress.html",
+      "rendered": "rendered/progress.html",
+      "accessibility": "Provide a meaningful label including progress if needed. Value and maximum must describe a real operation; this does not implement upload or polling.",
+      "tokenReference": "docs/tokens.md",
+      "definition": {
+        "props": {
+          "value": {
+            "type": "number",
+            "default": 0
+          },
+          "max": {
+            "type": "number",
+            "default": 100
+          },
+          "label": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "slots": {}
+      },
+      "usage": "<main xmlns:t=\"urn:cococo:dataxml\" class=\"portal-theme portal-example\">\n  <portal-component name=\"progress\">\n    <portal-prop name=\"value\" t:value=\"65\"/>\n    <portal-prop name=\"max\" t:value=\"100\"/>\n    <portal-prop name=\"label\" value=\"Artwork processed: 65%\"/>\n  </portal-component>\n</main>\n",
+      "template": "<label xmlns:t=\"urn:cococo:dataxml\" class=\"portal-progress\">\n  <span t:text=\"props.label\"/>\n  <progress t:attr-value=\"props.value\" t:attr-max=\"props.max\"/>\n</label>\n"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "--portal-canvas",
+      "default": "#f7f8fa"
+    },
+    {
+      "name": "--portal-surface",
+      "default": "#ffffff"
+    },
+    {
+      "name": "--portal-surface-muted",
+      "default": "#eef1f5"
+    },
+    {
+      "name": "--portal-text",
+      "default": "#17212f"
+    },
+    {
+      "name": "--portal-text-muted",
+      "default": "#536171"
+    },
+    {
+      "name": "--portal-border",
+      "default": "#8491a1"
+    },
+    {
+      "name": "--portal-primary",
+      "default": "#1657c0"
+    },
+    {
+      "name": "--portal-primary-content",
+      "default": "#ffffff"
+    },
+    {
+      "name": "--portal-danger",
+      "default": "#a51d2d"
+    },
+    {
+      "name": "--portal-danger-content",
+      "default": "#ffffff"
+    },
+    {
+      "name": "--portal-success",
+      "default": "#17603b"
+    },
+    {
+      "name": "--portal-warning",
+      "default": "#795300"
+    },
+    {
+      "name": "--portal-focus",
+      "default": "#1657c0"
+    },
+    {
+      "name": "--portal-font-family",
+      "default": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+    },
+    {
+      "name": "--portal-font-mono",
+      "default": "ui-monospace, SFMono-Regular, Consolas, monospace"
+    },
+    {
+      "name": "--portal-font-size",
+      "default": "1rem"
+    },
+    {
+      "name": "--portal-line-height",
+      "default": "1.55"
+    },
+    {
+      "name": "--portal-space-1",
+      "default": ".25rem"
+    },
+    {
+      "name": "--portal-space-2",
+      "default": ".5rem"
+    },
+    {
+      "name": "--portal-space-3",
+      "default": ".75rem"
+    },
+    {
+      "name": "--portal-space-4",
+      "default": "1rem"
+    },
+    {
+      "name": "--portal-space-6",
+      "default": "1.5rem"
+    },
+    {
+      "name": "--portal-space-8",
+      "default": "2rem"
+    },
+    {
+      "name": "--portal-radius-sm",
+      "default": ".35rem"
+    },
+    {
+      "name": "--portal-radius-md",
+      "default": ".65rem"
+    },
+    {
+      "name": "--portal-radius-lg",
+      "default": "1rem"
+    },
+    {
+      "name": "--portal-border-width",
+      "default": "1px"
+    },
+    {
+      "name": "--portal-control-height",
+      "default": "2.75rem"
+    },
+    {
+      "name": "--portal-content-width",
+      "default": "72rem"
+    },
+    {
+      "name": "--portal-shadow",
+      "default": "0 2px 8px #17212f0a"
+    },
+    {
+      "name": "--portal-motion-duration",
+      "default": "120ms"
+    }
+  ]
+}

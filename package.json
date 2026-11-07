@@ -1,0 +1,39 @@
+{
+  "name": "@wearecococo/portal-components",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Ownable DataXML components and design tokens for server-rendered portals",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "node scripts/catalogue.mjs --check",
+    "docs": "node scripts/catalogue.mjs",
+    "build": "node scripts/site.mjs",
+    "test": "node --test scripts/*.test.mjs",
+    "test:browser": "node scripts/browser.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tripleclabs/portal-components.git"
+  },
+  "files": [
+    "components",
+    "styles",
+    "catalogue.json",
+    "docs",
+    "examples",
+    "rendered",
+    "llms.txt",
+    "llms-full.txt",
+    "LLM.md",
+    "LICENSE",
+    "README.md"
+  ],
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "axe-core": "4.11.0"
+  }
+}

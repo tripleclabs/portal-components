@@ -1,0 +1,14 @@
+{
+  "props": {},
+  "slots": {
+    "default": {
+      "required": false
+    },
+    "header": {
+      "required": false
+    },
+    "footer": {
+      "required": false
+    }
+  }
+}

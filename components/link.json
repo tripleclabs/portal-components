@@ -1,0 +1,25 @@
+{
+  "props": {
+    "href": {
+      "type": "string",
+      "required": true
+    },
+    "variant": {
+      "type": "string",
+      "default": "text",
+      "enum": [
+        "text",
+        "button"
+      ]
+    },
+    "label": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "slots": {
+    "default": {
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,4 @@
+node_modules/
+site/
+.playwright/
+.DS_Store

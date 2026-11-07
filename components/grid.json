@@ -1,0 +1,27 @@
+{
+  "props": {
+    "columns": {
+      "type": "string",
+      "default": "3",
+      "enum": [
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    "gap": {
+      "type": "string",
+      "default": "md",
+      "enum": [
+        "sm",
+        "md",
+        "lg"
+      ]
+    }
+  },
+  "slots": {
+    "default": {
+      "required": true
+    }
+  }
+}

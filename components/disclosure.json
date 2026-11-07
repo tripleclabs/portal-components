@@ -1,0 +1,16 @@
+{
+  "props": {
+    "open": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "slots": {
+    "summary": {
+      "required": true
+    },
+    "default": {
+      "required": true
+    }
+  }
+}

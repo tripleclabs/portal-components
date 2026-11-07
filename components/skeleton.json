@@ -1,0 +1,14 @@
+{
+  "props": {
+    "shape": {
+      "type": "string",
+      "default": "line",
+      "enum": [
+        "line",
+        "block",
+        "circle"
+      ]
+    }
+  },
+  "slots": {}
+}

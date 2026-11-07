@@ -1,0 +1,16 @@
+{
+  "props": {
+    "caption": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "slots": {
+    "head": {
+      "required": false
+    },
+    "default": {
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,68 @@
+/* Portal Components 0.1 — MIT. Theme tokens inherit; no global reset. */
+.portal-theme {
+  color-scheme: light;
+  --portal-canvas: #f7f8fa;
+  --portal-surface: #ffffff;
+  --portal-surface-muted: #eef1f5;
+  --portal-text: #17212f;
+  --portal-text-muted: #536171;
+  --portal-border: #8491a1;
+  --portal-primary: #1657c0;
+  --portal-primary-content: #ffffff;
+  --portal-danger: #a51d2d;
+  --portal-danger-content: #ffffff;
+  --portal-success: #17603b;
+  --portal-warning: #795300;
+  --portal-focus: #1657c0;
+  --portal-font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --portal-font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --portal-font-size: 1rem;
+  --portal-line-height: 1.55;
+  --portal-space-1: .25rem;
+  --portal-space-2: .5rem;
+  --portal-space-3: .75rem;
+  --portal-space-4: 1rem;
+  --portal-space-6: 1.5rem;
+  --portal-space-8: 2rem;
+  --portal-radius-sm: .35rem;
+  --portal-radius-md: .65rem;
+  --portal-radius-lg: 1rem;
+  --portal-border-width: 1px;
+  --portal-control-height: 2.75rem;
+  --portal-content-width: 72rem;
+  --portal-shadow: 0 2px 8px #17212f0a;
+  --portal-motion-duration: 120ms;
+  font: var(--portal-font-size)/var(--portal-line-height) var(--portal-font-family);
+  color: var(--portal-text);
+  background-color: var(--portal-canvas);
+}
+.portal-theme[data-theme="dark"] {
+  color-scheme: dark;
+  --portal-canvas: #111923;
+  --portal-surface: #182331;
+  --portal-surface-muted: #243244;
+  --portal-text: #edf2f8;
+  --portal-text-muted: #bac7d8;
+  --portal-border: #64748b;
+  --portal-primary: #9fc3ff;
+  --portal-primary-content: #112b55;
+  --portal-danger: #ffb4b8;
+  --portal-danger-content: #500d16;
+  --portal-success: #8dd7ad;
+  --portal-warning: #efd087;
+  --portal-focus: #b9d3ff;
+  --portal-shadow: none;
+}
+.portal-theme[data-theme="atelier"] {
+  --portal-primary: #145744;
+  --portal-primary-content: #ffffff;
+  --portal-focus: #145744;
+  --portal-canvas: #f6f3ed;
+  --portal-surface-muted: #eeeee5;
+  --portal-radius-sm: .15rem;
+  --portal-radius-md: .25rem;
+  --portal-radius-lg: .4rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-theme { --portal-motion-duration: 0ms; }
+}

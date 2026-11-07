@@ -1,0 +1,10 @@
+# Portal Components
+
+> Ownable DataXML presentation components; Lua remains page/server-side.
+
+- [Authoring instructions](LLM.md)
+- [Complete LLM reference](llms-full.txt)
+- [Machine-readable catalogue](catalogue.generated.json)
+- [Authoring](docs/authoring.md)
+- [Components](docs/components.md)
+- [Theme tokens](docs/tokens.md)

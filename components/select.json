@@ -1,0 +1,37 @@
+{
+  "props": {
+    "id": {
+      "type": "string",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "invalid": {
+      "type": "boolean",
+      "default": false
+    },
+    "describedby": {
+      "type": "string",
+      "nullable": true
+    },
+    "autocomplete": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "slots": {
+    "default": {
+      "required": true
+    }
+  }
+}

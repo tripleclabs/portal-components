@@ -1,0 +1,9 @@
+<section xmlns:t="urn:cococo:dataxml" class="portal-empty-state">
+  <h2 t:text="props.title"/>
+  <div>
+    <portal-outlet name="default"/>
+  </div>
+  <div t:if="slots.actions">
+    <portal-outlet name="actions"/>
+  </div>
+</section>

@@ -1,0 +1,17 @@
+{
+  "props": {
+    "title": {
+      "type": "string",
+      "default": "Please check your details"
+    },
+    "id": {
+      "type": "string",
+      "default": "form-errors"
+    }
+  },
+  "slots": {
+    "default": {
+      "required": true
+    }
+  }
+}

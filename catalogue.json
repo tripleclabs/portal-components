@@ -1,0 +1,272 @@
+{
+  "name": "@wearecococo/portal-components",
+  "version": "0.1.0",
+  "contractVersion": 1,
+  "license": "MIT",
+  "components": [
+    {
+      "name": "button",
+      "category": "Actions",
+      "description": "A native button with explicit type and visual emphasis.",
+      "source": "components/button.html",
+      "contract": "components/button.json",
+      "example": "examples/button.html",
+      "rendered": "rendered/button.html",
+      "accessibility": "Uses a real button. Choose type=\"submit\" inside a form; the default button never submits accidentally. Disabled buttons remain native disabled controls. Visible text supplies the accessible name.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "link",
+      "category": "Actions",
+      "description": "A native navigation link with optional visual emphasis.",
+      "source": "components/link.html",
+      "contract": "components/link.json",
+      "example": "examples/link.html",
+      "rendered": "rendered/link.html",
+      "accessibility": "Use meaningful link text. Internal hrefs receive ordinary Portal mount resolution. Do not use this as a fake disabled button.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "badge",
+      "category": "Status",
+      "description": "A compact textual status marker.",
+      "source": "components/badge.html",
+      "contract": "components/badge.json",
+      "example": "examples/badge.html",
+      "rendered": "rendered/badge.html",
+      "accessibility": "Text communicates status; colour is supplementary. This component does not announce changes as a live region.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "card",
+      "category": "Structure",
+      "description": "A panel with optional header and footer.",
+      "source": "components/card.html",
+      "contract": "components/card.json",
+      "example": "examples/card.html",
+      "rendered": "rendered/card.html",
+      "accessibility": "Choose heading levels in caller content to match the page hierarchy; Card does not force an h2 or region label.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "alert",
+      "category": "Status",
+      "description": "A static notice with optional heading and actions.",
+      "source": "components/alert.html",
+      "contract": "components/alert.json",
+      "example": "examples/alert.html",
+      "rendered": "rendered/alert.html",
+      "accessibility": "Static notices do not use role=alert, avoiding unsolicited announcements on page load. Dynamic error announcements require the host runtime contract.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "separator",
+      "category": "Structure",
+      "description": "A semantic horizontal thematic break.",
+      "source": "components/separator.html",
+      "contract": "components/separator.json",
+      "example": "examples/separator.html",
+      "rendered": "rendered/separator.html",
+      "accessibility": "Preserve semantic HTML and visible focus styles when customizing.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "container",
+      "category": "Structure",
+      "description": "A centered content-width container.",
+      "source": "components/container.html",
+      "contract": "components/container.json",
+      "example": "examples/container.html",
+      "rendered": "rendered/container.html",
+      "accessibility": "Preserve semantic HTML and visible focus styles when customizing.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "stack",
+      "category": "Structure",
+      "description": "A vertical or horizontal flex layout with token spacing.",
+      "source": "components/stack.html",
+      "contract": "components/stack.json",
+      "example": "examples/stack.html",
+      "rendered": "rendered/stack.html",
+      "accessibility": "Preserve semantic HTML and visible focus styles when customizing.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "grid",
+      "category": "Structure",
+      "description": "A responsive grid that collapses on narrow screens.",
+      "source": "components/grid.html",
+      "contract": "components/grid.json",
+      "example": "examples/grid.html",
+      "rendered": "rendered/grid.html",
+      "accessibility": "DOM order remains reading and keyboard order. Do not use CSS to change meaningful content order.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "field",
+      "category": "Forms",
+      "description": "A label, description and error wrapper for an explicitly identified control.",
+      "source": "components/field.html",
+      "contract": "components/field.json",
+      "example": "examples/field.html",
+      "rendered": "rendered/field.html",
+      "accessibility": "The for prop must equal the nested control id. Also set required on the control. When using description/error, provide descriptionId/errorId and pass those same ids to the nested control describedby prop (space-separated if both). Mark the control invalid=true for an error. IDs must be unique in the document.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "input",
+      "category": "Forms",
+      "description": "A native single-line input with label/error association.",
+      "source": "components/input.html",
+      "contract": "components/input.json",
+      "example": "examples/input.html",
+      "rendered": "rendered/input.html",
+      "accessibility": "Always provide a visible associated label. Placeholder is not a label. Pass a unique id for each repeated control. File inputs do not gain upload capability from this component.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "textarea",
+      "category": "Forms",
+      "description": "A native multiline control.",
+      "source": "components/textarea.html",
+      "contract": "components/textarea.json",
+      "example": "examples/textarea.html",
+      "rendered": "rendered/textarea.html",
+      "accessibility": "Always provide a visible associated label. The value is text content, not an HTML value attribute.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "select",
+      "category": "Forms",
+      "description": "A native select with caller-owned option elements.",
+      "source": "components/select.html",
+      "contract": "components/select.json",
+      "example": "examples/select.html",
+      "rendered": "rendered/select.html",
+      "accessibility": "Use option/optgroup elements in the default slot. Set selected on the desired option; the component has no browser-managed value synchronization.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "checkbox",
+      "category": "Forms",
+      "description": "A native checkbox with an enclosing text label.",
+      "source": "components/checkbox.html",
+      "contract": "components/checkbox.json",
+      "example": "examples/checkbox.html",
+      "rendered": "rendered/checkbox.html",
+      "accessibility": "The enclosing label associates text without an id. Group related choices in a caller-owned fieldset with a legend. Radios in a group share a name and have distinct values.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "radio",
+      "category": "Forms",
+      "description": "A native radio with an enclosing text label.",
+      "source": "components/radio.html",
+      "contract": "components/radio.json",
+      "example": "examples/radio.html",
+      "rendered": "rendered/radio.html",
+      "accessibility": "The enclosing label associates text without an id. Group related choices in a caller-owned fieldset with a legend. Radios in a group share a name and have distinct values.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "field-error",
+      "category": "Forms",
+      "description": "An explicitly identified error message for aria-describedby.",
+      "source": "components/field-error.html",
+      "contract": "components/field-error.json",
+      "example": "examples/field-error.html",
+      "rendered": "rendered/field-error.html",
+      "accessibility": "Reference this id in the control describedby prop and mark invalid=true. The error is not a live region by default.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "error-summary",
+      "category": "Forms",
+      "description": "A focusable validation summary with caller-owned field links.",
+      "source": "components/error-summary.html",
+      "contract": "components/error-summary.json",
+      "example": "examples/error-summary.html",
+      "rendered": "rendered/error-summary.html",
+      "accessibility": "Give each summary a unique id if more than one is rendered. Link errors to actual control ids. This markup is focusable but does not automatically move focus; that requires the form/runtime integration.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "disclosure",
+      "category": "Disclosure",
+      "description": "Native details/summary disclosure without JavaScript.",
+      "source": "components/disclosure.html",
+      "contract": "components/disclosure.json",
+      "example": "examples/disclosure.html",
+      "rendered": "rendered/disclosure.html",
+      "accessibility": "Summary is the native keyboard-operable trigger. Do not place other interactive controls inside summary. Each disclosure is independent; no enforced accordion exclusivity.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "table",
+      "category": "Data",
+      "description": "A semantic table with caption and caller-owned header/body rows.",
+      "source": "components/table.html",
+      "contract": "components/table.json",
+      "example": "examples/table.html",
+      "rendered": "rendered/table.html",
+      "accessibility": "Use tr elements in slots and appropriate th scope attributes. The caption is visible. No sorting, row selection or grid keyboard model is implied.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "breadcrumbs",
+      "category": "Navigation",
+      "description": "A labelled breadcrumb navigation list.",
+      "source": "components/breadcrumbs.html",
+      "contract": "components/breadcrumbs.json",
+      "example": "examples/breadcrumbs.html",
+      "rendered": "rendered/breadcrumbs.html",
+      "accessibility": "Supply li items. Mark the current page with aria-current=page and use text rather than a redundant active link. Separators are decorative CSS.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "pagination",
+      "category": "Navigation",
+      "description": "A labelled container for page navigation.",
+      "source": "components/pagination.html",
+      "contract": "components/pagination.json",
+      "example": "examples/pagination.html",
+      "rendered": "rendered/pagination.html",
+      "accessibility": "Supply li items and real hrefs. Use non-links for unavailable actions and aria-current=page for the current page. No client-only pagination state.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "empty-state",
+      "category": "Status",
+      "description": "A centered empty result explanation and optional action.",
+      "source": "components/empty-state.html",
+      "contract": "components/empty-state.json",
+      "example": "examples/empty-state.html",
+      "rendered": "rendered/empty-state.html",
+      "accessibility": "Use this for a real empty result, not as an error/loading substitute. The h2 assumes a page h1 already exists.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "skeleton",
+      "category": "Status",
+      "description": "A decorative placeholder for an explicitly labelled loading region.",
+      "source": "components/skeleton.html",
+      "contract": "components/skeleton.json",
+      "example": "examples/skeleton.html",
+      "rendered": "rendered/skeleton.html",
+      "accessibility": "This is hidden from assistive technology. The caller must supply meaningful loading text and aria-busy on the actual region. No animation by default.",
+      "tokenReference": "docs/tokens.md"
+    },
+    {
+      "name": "progress",
+      "category": "Status",
+      "description": "A labelled native determinate progress indicator.",
+      "source": "components/progress.html",
+      "contract": "components/progress.json",
+      "example": "examples/progress.html",
+      "rendered": "rendered/progress.html",
+      "accessibility": "Provide a meaningful label including progress if needed. Value and maximum must describe a real operation; this does not implement upload or polling.",
+      "tokenReference": "docs/tokens.md"
+    }
+  ]
+}

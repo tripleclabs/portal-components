@@ -1,0 +1,14 @@
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <label for="quantity-error">Quantity</label>
+  <portal-component name="input">
+    <portal-prop name="id" value="quantity-error"/>
+    <portal-prop name="name" value="quantity"/>
+    <portal-prop name="value" value="0"/>
+    <portal-prop name="invalid" t:value="true"/>
+    <portal-prop name="describedby" value="quantity-message"/>
+  </portal-component>
+  <portal-component name="field-error">
+    <portal-prop name="id" value="quantity-message"/>
+    Enter a quantity of at least 1.
+  </portal-component>
+</main>

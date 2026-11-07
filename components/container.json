@@ -1,0 +1,18 @@
+{
+  "props": {
+    "width": {
+      "type": "string",
+      "default": "default",
+      "enum": [
+        "default",
+        "reading",
+        "full"
+      ]
+    }
+  },
+  "slots": {
+    "default": {
+      "required": true
+    }
+  }
+}

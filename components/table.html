@@ -1,0 +1,11 @@
+<div xmlns:t="urn:cococo:dataxml" class="portal-table-wrap">
+  <table class="portal-table">
+    <caption t:text="props.caption"/>
+    <thead t:if="slots.head">
+      <portal-outlet name="head"/>
+    </thead>
+    <tbody>
+      <portal-outlet name="default"/>
+    </tbody>
+  </table>
+</div>

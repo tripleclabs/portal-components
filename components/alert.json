@@ -1,0 +1,25 @@
+{
+  "props": {
+    "variant": {
+      "type": "string",
+      "default": "info",
+      "enum": [
+        "info",
+        "success",
+        "warning",
+        "danger"
+      ]
+    }
+  },
+  "slots": {
+    "default": {
+      "required": true
+    },
+    "title": {
+      "required": false
+    },
+    "actions": {
+      "required": false
+    }
+  }
+}

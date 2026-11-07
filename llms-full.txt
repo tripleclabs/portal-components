@@ -1,0 +1,1052 @@
+# Authoring with Portal Components
+
+Read `docs/authoring.md` and `docs/components.md` before generating a page. `catalogue.generated.json` is the machine-readable source of valid props, types, enums, slots and exact working usage. `llms-full.txt` combines the maintained instructions/reference for one-context consumption.
+
+## Hard rules
+
+1. Write XML-shaped HTML with `xmlns:t="urn:cococo:dataxml"`. Close void elements in source: `<input/>`.
+2. Invoke `<portal-component name="button">`. Pass literal props with `<portal-prop name="variant" value="secondary"/>`; pass typed data with `<portal-prop name="disabled" t:value="input.disabled"/>`. Do not invent Vue bindings, JS expressions or direct prop attributes.
+3. Unnamed children fill the default slot. Named content uses `<portal-fill name="footer">`. Caller slots keep caller scope; component internals only receive `props`, slot-presence flags and `component.id`.
+4. Only use props and slots listed in the component contract. Names/enum values are exact. Use `t:value="true"` / `t:value="false"` for boolean constants and `t:value="65"` for numeric constants; `value` always supplies a string. Dynamic values must have the declared type.
+5. Components do not fetch or mutate. Keep Lua in page/server handlers and use normal protected page forms. No `<script>`, onclick, client Lua or arbitrary networking.
+6. Use real HTML labels, control ids, names and native form semantics. Set button type=submit intentionally. Provide unique ids for repeated controls, and match `for`/`describedby` exactly.
+7. Internal URLs use the standard Portal mount-aware helpers/HTML handling. Do not hardcode a staff-preview prefix.
+8. Brand with documented `--portal-*` variables. To change markup copy the complete `.html` and `.json` pair locally; do not edit the host bundle.
+9. Do not infer upload, sorting, payment, dialog, tabs, client state or combobox functionality from visual markup. Read each component's limits.
+10. Compile the result with the real Portal compiler. A plausible-looking snippet is not evidence it compiles.
+
+## Recommended workflow
+
+Choose components from the catalogue, build the semantic native page first, then connect page Lua and progressive regions. Include complete namespaces and contracts in standalone examples. Keep fetched view models serializable and keep repeated presentation components free of loaders. Verify native no-JavaScript behavior, errors, empty results, mobile layout and keyboard use.
+
+If an API is missing from this documentation, say so instead of inventing it. Components are not a general Vue-compatible environment.
+
+
+# Authoring contract
+
+## Props
+
+Literal values are supplied through `portal-prop` children:
+
+```xml
+<portal-component name="button">
+  <portal-prop name="variant" value="secondary"/>
+  <portal-prop name="disabled" t:value="true"/>
+  Save draft
+</portal-component>
+```
+
+Dynamic values use the existing DataXML expression evaluator:
+
+```xml
+<portal-component name="badge">
+  <portal-prop name="variant" t:value="data.statusVariant"/>
+  <span t:text="data.statusLabel"/>
+</portal-component>
+```
+
+A string, number or boolean stays that type; values are validated before rendering. Defaults apply when a prop is absent. Explicit null is accepted only when declared nullable. Unknown props, invalid types/enums and missing required values are errors. Do not use direct attributes such as `<portal-component variant="secondary">`.
+
+## Slots and isolation
+
+Unnamed children fill the default slot. `portal-fill` selects a declared named slot. Content runs in the caller's lexical scope; a child's template sees its own props, `slots.<name>` presence flags and `component.id`, not caller data or credentials. Empty supplied slots suppress fallback content. Named fills are not separate components and cannot fetch data.
+
+A component source has one root and uses `portal-outlet`:
+
+```xml
+<section xmlns:t="urn:cococo:dataxml">
+  <header t:if="slots.header"><portal-outlet name="header"/></header>
+  <portal-outlet name="default"><p>No content supplied.</p></portal-outlet>
+</section>
+```
+
+The corresponding contract is a separate JSON file:
+
+```json
+{
+  "props": {},
+  "slots": { "header": { "required": false }, "default": { "required": false } }
+}
+```
+
+This illustrates a local custom component, not a replacement for the richer bundled Card. Unknown slots, duplicate named fills and incomplete local file pairs fail validation.
+
+## Native forms
+
+Use a caller-owned form and page-owned action handler. The handler must be declared in the page/site contract; components do not register it implicitly.
+
+```xml
+<form xmlns:t="urn:cococo:dataxml" data-portal-action="saveContact">
+  <portal-component name="field">
+    <portal-prop name="for" value="customer-email"/>
+    <portal-prop name="label" value="Email address"/>
+    <portal-component name="input">
+      <portal-prop name="id" value="customer-email"/>
+      <portal-prop name="name" value="email"/>
+      <portal-prop name="type" value="email"/>
+      <portal-prop name="autocomplete" value="email"/>
+      <portal-prop name="required" t:value="true"/>
+    </portal-component>
+  </portal-component>
+  <portal-component name="button">
+    <portal-prop name="type" value="submit"/>
+    Save contact
+  </portal-component>
+</form>
+```
+
+The Portal host adds protected action routing and form fences. Server-side authorization and validation remain required. Use a native GET form with an ordinary action for filtering. The showcase can demonstrate native controls but cannot execute an instance's business APIs.
+
+## IDs, keys and overrides
+
+Pass stable, unique IDs for form controls and association references. A component's internal generated identity does not leak into caller slot scope. Prefer page view models containing precomputed IDs when rendering repeated fields; never reuse one literal id in a loop. Component invocation keys identify repeated siblings; they do not authorize access or replace explicit HTML form IDs.
+
+To override Card, copy both `components/card.html` and `components/card.json` to your site's same paths. Local resolution takes precedence. Keep all required slots/props expected by existing callers or change those callers. There is no automatic update merge or CLI installer in v1.
+
+## Frequent errors
+
+| Incorrect | Correct |
+| --- | --- |
+| `<Button variant="primary">` | `<portal-component name="button"><portal-prop name="variant" value="primary"/>…</portal-component>` |
+| `:disabled="loading"` | `<portal-prop name="disabled" t:value="input.loading"/>` with a boolean |
+| `<template #footer>` | `<portal-fill name="footer">…</portal-fill>` |
+| `onclick="save()"` | A page-owned protected native form action |
+| A component reads `data.customer` implicitly | Pass a declared prop from the caller |
+| Copy only component HTML | Copy the `.html` and `.json` pair |
+| A placeholder used instead of a label | A visible label associated with the input id |
+
+Scoped slots, automatic client hydration and component-owned Lua loaders are not v1 features. The source/contract model leaves room for later extensions without inventing them today.
+
+## Repeated fields with descriptions and errors
+
+Give the page loader a view model containing unique association IDs. For example, `data.lines` can contain:
+
+```json
+[
+  {"key":"line-42","controlId":"quantity-42","descriptionId":"quantity-42-hint","errorId":"quantity-42-error","describedby":"quantity-42-hint quantity-42-error","quantity":"0","error":"Enter at least 1","invalid":true}
+]
+```
+
+Use a keyed invocation inside the DataXML loop:
+
+```xml
+<section xmlns:t="urn:cococo:dataxml">
+  <div t:for="data.lines" t:as="line">
+    <portal-component name="field" t:attr-key="line.key">
+      <portal-prop name="for" t:value="line.controlId"/>
+      <portal-prop name="label" value="Quantity"/>
+      <portal-prop name="description" value="Minimum 1 item"/>
+      <portal-prop name="descriptionId" t:value="line.descriptionId"/>
+      <portal-prop name="error" t:value="line.error"/>
+      <portal-prop name="errorId" t:value="line.errorId"/>
+      <portal-component name="input">
+        <portal-prop name="id" t:value="line.controlId"/>
+        <portal-prop name="name" t:value="line.controlId"/>
+        <portal-prop name="type" value="number"/>
+        <portal-prop name="min" value="1"/>
+        <portal-prop name="value" t:value="line.quantity"/>
+        <portal-prop name="invalid" t:value="line.invalid"/>
+        <portal-prop name="describedby" t:value="line.describedby"/>
+      </portal-component>
+    </portal-component>
+  </div>
+</section>
+```
+
+The caller slot can still read `line`; it cannot read Field's private props. Keep the `describedby` list limited to elements actually rendered: omit the error ID when there is no error. The input value remains a string even when its HTML type is number; validate/coerce native form input on the server. This example deliberately uses unique control names because repeated-name collection behavior belongs to the form handler contract, not the component library.
+
+
+# Theme tokens
+
+Add `portal-theme` to the site content root. The supplied stylesheet has no global reset, remote fonts or mandatory CSS framework. Tokens inherit through components. The default theme is light; `data-theme="dark"` and `data-theme="atelier"` select bundled examples.
+
+```css
+/* Place after the bundled styles. */
+.portal-theme.my-brand {
+  --portal-primary: #145744;
+  --portal-primary-content: #ffffff;
+  --portal-focus: #145744;
+  --portal-radius-md: .25rem;
+  --portal-font-family: Georgia, serif;
+}
+```
+
+For a local override, set a token on a wrapper around a component. Do not add a second `portal-theme` class on every nested element: that resets the defaults at each new theme root. Copy a component when you need different structure or selectors.
+
+Colour pairs must be checked together. The default themes supply text/background pairs; a custom token can break contrast or focus visibility. Preserve native semantics and test high contrast/forced-colour mode. `prefers-reduced-motion` sets the motion-duration token to zero. V1 components do not rely on animation.
+
+See [the generated token reference](tokens.md) for all exact names/defaults. Typography, spacing, border, radius and content-width tokens are site-wide defaults; the library deliberately avoids an undocumented variable for every declaration.
+
+
+# Token reference
+
+Generated from styles/tokens.css. Override on the theme root or a component wrapper.
+
+| Token | Light default |
+| --- | --- |
+| `--portal-canvas` | `#f7f8fa` |
+| `--portal-surface` | `#ffffff` |
+| `--portal-surface-muted` | `#eef1f5` |
+| `--portal-text` | `#17212f` |
+| `--portal-text-muted` | `#536171` |
+| `--portal-border` | `#8491a1` |
+| `--portal-primary` | `#1657c0` |
+| `--portal-primary-content` | `#ffffff` |
+| `--portal-danger` | `#a51d2d` |
+| `--portal-danger-content` | `#ffffff` |
+| `--portal-success` | `#17603b` |
+| `--portal-warning` | `#795300` |
+| `--portal-focus` | `#1657c0` |
+| `--portal-font-family` | `ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif` |
+| `--portal-font-mono` | `ui-monospace, SFMono-Regular, Consolas, monospace` |
+| `--portal-font-size` | `1rem` |
+| `--portal-line-height` | `1.55` |
+| `--portal-space-1` | `.25rem` |
+| `--portal-space-2` | `.5rem` |
+| `--portal-space-3` | `.75rem` |
+| `--portal-space-4` | `1rem` |
+| `--portal-space-6` | `1.5rem` |
+| `--portal-space-8` | `2rem` |
+| `--portal-radius-sm` | `.35rem` |
+| `--portal-radius-md` | `.65rem` |
+| `--portal-radius-lg` | `1rem` |
+| `--portal-border-width` | `1px` |
+| `--portal-control-height` | `2.75rem` |
+| `--portal-content-width` | `72rem` |
+| `--portal-shadow` | `0 2px 8px #17212f0a` |
+| `--portal-motion-duration` | `120ms` |
+
+
+# Component reference
+
+Generated from catalogue.json, component contracts and executable example source. Do not edit this file directly. Library 0.1.0, contract 1.
+
+## button
+
+A native button with explicit type and visual emphasis.
+
+Source: [template](../components/button.html) · [contract](../components/button.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `type` | string | `"button"` | `button`, `submit`, `reset` |
+| `variant` | string | `"primary"` | `primary`, `secondary`, `ghost`, `danger` |
+| `size` | string | `"md"` | `sm`, `md`, `lg` |
+| `disabled` | boolean | `false` | — |
+| `name` | string or null | omitted | — |
+| `value` | string or null | omitted | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <div style="display:flex;gap:1rem;flex-wrap:wrap">
+    <portal-component name="button">Continue</portal-component>
+    <portal-component name="button">
+      <portal-prop name="variant" value="secondary"/>
+      Save draft
+    </portal-component>
+  </div>
+</main>
+```
+
+### Accessibility and limits
+
+Uses a real button. Choose type="submit" inside a form; the default button never submits accidentally. Disabled buttons remain native disabled controls. Visible text supplies the accessible name.
+
+## link
+
+A native navigation link with optional visual emphasis.
+
+Source: [template](../components/link.html) · [contract](../components/link.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `href` | string | required | — |
+| `variant` | string | `"text"` | `text`, `button` |
+| `label` | string or null | omitted | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="link">
+    <portal-prop name="href" value="#details"/>
+    View order
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Use meaningful link text. Internal hrefs receive ordinary Portal mount resolution. Do not use this as a fake disabled button.
+
+## badge
+
+A compact textual status marker.
+
+Source: [template](../components/badge.html) · [contract](../components/badge.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `variant` | string | `"neutral"` | `neutral`, `primary`, `success`, `warning`, `danger` |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="badge">
+    <portal-prop name="variant" value="success"/>
+    Ready for print
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Text communicates status; colour is supplementary. This component does not announce changes as a live region.
+
+## card
+
+A panel with optional header and footer.
+
+Source: [template](../components/card.html) · [contract](../components/card.json)
+
+No props.
+
+Slots:
+
+- `default`: optional
+- `header`: optional
+- `footer`: optional
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="card">
+    <portal-fill name="header">
+      <h2>Business cards</h2>
+    </portal-fill>
+    <p>Premium stock, printed with care.</p>
+    <portal-fill name="footer">
+      <p>From £24</p>
+    </portal-fill>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Choose heading levels in caller content to match the page hierarchy; Card does not force an h2 or region label.
+
+## alert
+
+A static notice with optional heading and actions.
+
+Source: [template](../components/alert.html) · [contract](../components/alert.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `variant` | string | `"info"` | `info`, `success`, `warning`, `danger` |
+
+Slots:
+
+- `default`: required
+- `title`: optional
+- `actions`: optional
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="alert">
+    <portal-prop name="variant" value="warning"/>
+    <portal-fill name="title">
+      <strong>Artwork needs attention</strong>
+    </portal-fill>
+    <p>Please upload a PDF with embedded fonts.</p>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Static notices do not use role=alert, avoiding unsolicited announcements on page load. Dynamic error announcements require the host runtime contract.
+
+## separator
+
+A semantic horizontal thematic break.
+
+Source: [template](../components/separator.html) · [contract](../components/separator.json)
+
+No props.
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="separator"/>
+</main>
+```
+
+### Accessibility and limits
+
+Preserve semantic HTML and visible focus styles when customizing.
+
+## container
+
+A centered content-width container.
+
+Source: [template](../components/container.html) · [contract](../components/container.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `width` | string | `"default"` | `default`, `reading`, `full` |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="container">
+    <p>Readable content with comfortable page gutters.</p>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Preserve semantic HTML and visible focus styles when customizing.
+
+## stack
+
+A vertical or horizontal flex layout with token spacing.
+
+Source: [template](../components/stack.html) · [contract](../components/stack.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `direction` | string | `"vertical"` | `vertical`, `horizontal` |
+| `gap` | string | `"md"` | `sm`, `md`, `lg` |
+| `align` | string | `"stretch"` | `stretch`, `start`, `center`, `end` |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="stack">
+    <portal-prop name="direction" value="horizontal"/>
+    <portal-component name="badge">Design</portal-component>
+    <portal-component name="badge">Print</portal-component>
+    <portal-component name="badge">Deliver</portal-component>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Preserve semantic HTML and visible focus styles when customizing.
+
+## grid
+
+A responsive grid that collapses on narrow screens.
+
+Source: [template](../components/grid.html) · [contract](../components/grid.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `columns` | string | `"3"` | `2`, `3`, `4` |
+| `gap` | string | `"md"` | `sm`, `md`, `lg` |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="grid">
+    <div class="portal-demo-box">One</div>
+    <div class="portal-demo-box">Two</div>
+    <div class="portal-demo-box">Three</div>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+DOM order remains reading and keyboard order. Do not use CSS to change meaningful content order.
+
+## field
+
+A label, description and error wrapper for an explicitly identified control.
+
+Source: [template](../components/field.html) · [contract](../components/field.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `for` | string | required | — |
+| `label` | string | required | — |
+| `description` | string | `""` | — |
+| `error` | string | `""` | — |
+| `required` | boolean | `false` | — |
+| `descriptionId` | string or null | omitted | — |
+| `errorId` | string or null | omitted | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="field">
+    <portal-prop name="for" value="contact-name"/>
+    <portal-prop name="label" value="Your name"/>
+    <portal-prop name="required" t:value="true"/>
+    <portal-component name="input">
+      <portal-prop name="id" value="contact-name"/>
+      <portal-prop name="name" value="name"/>
+      <portal-prop name="autocomplete" value="name"/>
+      <portal-prop name="required" t:value="true"/>
+    </portal-component>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+The for prop must equal the nested control id. Also set required on the control. When using description/error, provide descriptionId/errorId and pass those same ids to the nested control describedby prop (space-separated if both). Mark the control invalid=true for an error. IDs must be unique in the document.
+
+## input
+
+A native single-line input with label/error association.
+
+Source: [template](../components/input.html) · [contract](../components/input.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `id` | string | required | — |
+| `name` | string | required | — |
+| `value` | string | `""` | — |
+| `disabled` | boolean | `false` | — |
+| `required` | boolean | `false` | — |
+| `invalid` | boolean | `false` | — |
+| `describedby` | string or null | omitted | — |
+| `autocomplete` | string or null | omitted | — |
+| `type` | string | `"text"` | `text`, `email`, `tel`, `url`, `number`, `password`, `search`, `date`, `time`, `datetime-local`, `month`, `week`, `color`, `range` |
+| `placeholder` | string or null | omitted | — |
+| `readonly` | boolean | `false` | — |
+| `inputmode` | string or null | omitted | — |
+| `min` | string or null | omitted | — |
+| `max` | string or null | omitted | — |
+| `step` | string or null | omitted | — |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <label for="email-example">Email address</label>
+  <portal-component name="input">
+    <portal-prop name="id" value="email-example"/>
+    <portal-prop name="name" value="email"/>
+    <portal-prop name="type" value="email"/>
+    <portal-prop name="autocomplete" value="email"/>
+    <portal-prop name="placeholder" value="you@example.com"/>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Always provide a visible associated label. Placeholder is not a label. Pass a unique id for each repeated control. File inputs do not gain upload capability from this component.
+
+## textarea
+
+A native multiline control.
+
+Source: [template](../components/textarea.html) · [contract](../components/textarea.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `id` | string | required | — |
+| `name` | string | required | — |
+| `value` | string | `""` | — |
+| `disabled` | boolean | `false` | — |
+| `required` | boolean | `false` | — |
+| `invalid` | boolean | `false` | — |
+| `describedby` | string or null | omitted | — |
+| `autocomplete` | string or null | omitted | — |
+| `rows` | number | `4` | — |
+| `placeholder` | string or null | omitted | — |
+| `readonly` | boolean | `false` | — |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <label for="notes-example">Delivery notes</label>
+  <portal-component name="textarea">
+    <portal-prop name="id" value="notes-example"/>
+    <portal-prop name="name" value="notes"/>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Always provide a visible associated label. The value is text content, not an HTML value attribute.
+
+## select
+
+A native select with caller-owned option elements.
+
+Source: [template](../components/select.html) · [contract](../components/select.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `id` | string | required | — |
+| `name` | string | required | — |
+| `disabled` | boolean | `false` | — |
+| `required` | boolean | `false` | — |
+| `invalid` | boolean | `false` | — |
+| `describedby` | string or null | omitted | — |
+| `autocomplete` | string or null | omitted | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <label for="paper-example">Paper finish</label>
+  <portal-component name="select">
+    <portal-prop name="id" value="paper-example"/>
+    <portal-prop name="name" value="finish"/>
+    <option value="silk">Silk</option>
+    <option value="uncoated">Uncoated</option>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Use option/optgroup elements in the default slot. Set selected on the desired option; the component has no browser-managed value synchronization.
+
+## checkbox
+
+A native checkbox with an enclosing text label.
+
+Source: [template](../components/checkbox.html) · [contract](../components/checkbox.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `name` | string | required | — |
+| `value` | string | `"on"` | — |
+| `checked` | boolean | `false` | — |
+| `disabled` | boolean | `false` | — |
+| `required` | boolean | `false` | — |
+| `describedby` | string or null | omitted | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="checkbox">
+    <portal-prop name="name" value="proof"/>
+    <portal-prop name="value" value="yes"/>
+    Send me a proof
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+The enclosing label associates text without an id. Group related choices in a caller-owned fieldset with a legend. Radios in a group share a name and have distinct values.
+
+## radio
+
+A native radio with an enclosing text label.
+
+Source: [template](../components/radio.html) · [contract](../components/radio.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `name` | string | required | — |
+| `value` | string | `"on"` | — |
+| `checked` | boolean | `false` | — |
+| `disabled` | boolean | `false` | — |
+| `required` | boolean | `false` | — |
+| `describedby` | string or null | omitted | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="radio">
+    <portal-prop name="name" value="shipping"/>
+    <portal-prop name="value" value="standard"/>
+    Standard delivery
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+The enclosing label associates text without an id. Group related choices in a caller-owned fieldset with a legend. Radios in a group share a name and have distinct values.
+
+## field-error
+
+An explicitly identified error message for aria-describedby.
+
+Source: [template](../components/field-error.html) · [contract](../components/field-error.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `id` | string | required | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <label for="quantity-error">Quantity</label>
+  <portal-component name="input">
+    <portal-prop name="id" value="quantity-error"/>
+    <portal-prop name="name" value="quantity"/>
+    <portal-prop name="value" value="0"/>
+    <portal-prop name="invalid" t:value="true"/>
+    <portal-prop name="describedby" value="quantity-message"/>
+  </portal-component>
+  <portal-component name="field-error">
+    <portal-prop name="id" value="quantity-message"/>
+    Enter a quantity of at least 1.
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Reference this id in the control describedby prop and mark invalid=true. The error is not a live region by default.
+
+## error-summary
+
+A focusable validation summary with caller-owned field links.
+
+Source: [template](../components/error-summary.html) · [contract](../components/error-summary.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `title` | string | `"Please check your details"` | — |
+| `id` | string | `"form-errors"` | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="error-summary">
+    <ul>
+      <li>
+        <a href="#email-example">Enter a valid email address</a>
+      </li>
+    </ul>
+  </portal-component>
+  <label for="email-example">Email address</label>
+  <portal-component name="input">
+    <portal-prop name="id" value="email-example"/>
+    <portal-prop name="name" value="email"/>
+    <portal-prop name="type" value="email"/>
+    <portal-prop name="invalid" t:value="true"/>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Give each summary a unique id if more than one is rendered. Link errors to actual control ids. This markup is focusable but does not automatically move focus; that requires the form/runtime integration.
+
+## disclosure
+
+Native details/summary disclosure without JavaScript.
+
+Source: [template](../components/disclosure.html) · [contract](../components/disclosure.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `open` | boolean | `false` | — |
+
+Slots:
+
+- `summary`: required
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="disclosure">
+    <portal-fill name="summary">What file format should I upload?</portal-fill>
+    <p>Use a print-ready PDF with embedded fonts.</p>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Summary is the native keyboard-operable trigger. Do not place other interactive controls inside summary. Each disclosure is independent; no enforced accordion exclusivity.
+
+## table
+
+A semantic table with caption and caller-owned header/body rows.
+
+Source: [template](../components/table.html) · [contract](../components/table.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `caption` | string | required | — |
+
+Slots:
+
+- `head`: optional
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="table">
+    <portal-prop name="caption" value="Recent orders"/>
+    <portal-fill name="head">
+      <tr>
+        <th scope="col">Order</th>
+        <th scope="col">Status</th>
+      </tr>
+    </portal-fill>
+    <tr>
+      <th scope="row">#1042</th>
+      <td>In production</td>
+    </tr>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Use tr elements in slots and appropriate th scope attributes. The caption is visible. No sorting, row selection or grid keyboard model is implied.
+
+## breadcrumbs
+
+A labelled breadcrumb navigation list.
+
+Source: [template](../components/breadcrumbs.html) · [contract](../components/breadcrumbs.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `label` | string | `"Breadcrumb"` | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="breadcrumbs">
+    <li>
+      <a href="#home">Home</a>
+    </li>
+    <li>
+      <span aria-current="page">Orders</span>
+    </li>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Supply li items. Mark the current page with aria-current=page and use text rather than a redundant active link. Separators are decorative CSS.
+
+## pagination
+
+A labelled container for page navigation.
+
+Source: [template](../components/pagination.html) · [contract](../components/pagination.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `label` | string | `"Pagination"` | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="pagination">
+    <li>
+      <span aria-disabled="true">Previous</span>
+    </li>
+    <li>
+      <a href="?page=1" aria-current="page" aria-label="Page 1">1</a>
+    </li>
+    <li>
+      <a href="?page=2" aria-label="Page 2">2</a>
+    </li>
+    <li>
+      <a href="?page=2">Next</a>
+    </li>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Supply li items and real hrefs. Use non-links for unavailable actions and aria-current=page for the current page. No client-only pagination state.
+
+## empty-state
+
+A centered empty result explanation and optional action.
+
+Source: [template](../components/empty-state.html) · [contract](../components/empty-state.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `title` | string | required | — |
+
+Slots:
+
+- `default`: optional
+- `actions`: optional
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="empty-state">
+    <portal-prop name="title" value="No orders yet"/>
+    <p>Your orders will appear here after checkout.</p>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Use this for a real empty result, not as an error/loading substitute. The h2 assumes a page h1 already exists.
+
+## skeleton
+
+A decorative placeholder for an explicitly labelled loading region.
+
+Source: [template](../components/skeleton.html) · [contract](../components/skeleton.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `shape` | string | `"line"` | `line`, `block`, `circle` |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <div aria-busy="true">
+    <p>Loading order details…</p>
+    <portal-component name="skeleton"/>
+    <portal-component name="skeleton">
+      <portal-prop name="shape" value="block"/>
+    </portal-component>
+  </div>
+</main>
+```
+
+### Accessibility and limits
+
+This is hidden from assistive technology. The caller must supply meaningful loading text and aria-busy on the actual region. No animation by default.
+
+## progress
+
+A labelled native determinate progress indicator.
+
+Source: [template](../components/progress.html) · [contract](../components/progress.json)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `value` | number | `0` | — |
+| `max` | number | `100` | — |
+| `label` | string | required | — |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <portal-component name="progress">
+    <portal-prop name="value" t:value="65"/>
+    <portal-prop name="max" t:value="100"/>
+    <portal-prop name="label" value="Artwork processed: 65%"/>
+  </portal-component>
+</main>
+```
+
+### Accessibility and limits
+
+Provide a meaningful label including progress if needed. Value and maximum must describe a real operation; this does not implement upload or polling.

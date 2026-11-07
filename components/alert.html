@@ -1,0 +1,11 @@
+<aside xmlns:t="urn:cococo:dataxml" class="portal-alert" t:attr-data-variant="props.variant">
+  <div class="portal-alert__title" t:if="slots.title">
+    <portal-outlet name="title"/>
+  </div>
+  <div>
+    <portal-outlet name="default"/>
+  </div>
+  <div t:if="slots.actions">
+    <portal-outlet name="actions"/>
+  </div>
+</aside>
