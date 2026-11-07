@@ -15,3 +15,23 @@ The public build needs Node only; it does not clone private Swift dependencies. 
 `npm run build` writes `site/`. All internal links are relative, so the site works under GitHub Pages' repository prefix. The workflow deploys that folder only. Configuring the actual GitHub repository and Pages environment is a release step, not a side effect of the build.
 
 Example iframes are titled and use static local assets. The documentation's theme/copy controls are trusted site tooling; they do not imply arbitrary scripts are permitted in PortalSite source. Native form submissions in examples are disabled or harmless; executing real actions requires an instance and visitor identity.
+
+## Mobile navigation and theme exploration
+
+On a phone, use **Components** in the header to open the searchable component
+navigation. Escape closes it and returns focus to the button. Without JavaScript,
+the navigation remains visible.
+
+[Build a theme](https://tripleclabs.github.io/portal-components/theme.html) edits all
+published tokens against real rendered examples. Choose a starting palette, edit
+values or colour swatches, and use **Apply to site** to explore the documentation
+and component previews together. The preview stays visible while editing on mobile.
+**Copy CSS** exports the complete base palette plus overrides, ready for
+`.portal-theme.my-theme` after the bundled styles.
+
+The docs default to **System**, following OS light/dark changes for both the page
+and preview documents. Explicit Light, Dark, Atelier or My theme selections take
+precedence until System is chosen again. Theme drafts and selections are stored
+only in this browser's local storage; they are never uploaded. Reset editor and
+Reset site theme are separate actions. Invalid values are not applied or exported.
+Storage-unavailable browsers can still preview and export on the current page.

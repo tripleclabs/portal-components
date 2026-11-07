@@ -3,3 +3,46 @@
 [hidden]{display:none!important}
 
 .source-details{margin-bottom:32px;border:1px solid var(--line);border-radius:8px;padding:15px}.source-details summary{cursor:pointer;font-size:13px;font-weight:600}.source-details h2{font-size:16px}.source-details pre{overflow:auto;background:#edf1e9;padding:15px;font-size:11px}
+
+/* Mobile navigation is a disclosure, not a modal: no focus trap is needed. */
+.mobile-menu{display:none;border:1px solid var(--line);background:white;border-radius:6px;padding:8px 11px;font-size:12px;color:var(--green)}
+.builder-nav{display:block;font-size:13px;font-weight:650;margin-bottom:24px}
+.theme-notice{font-size:13px;color:var(--muted)}
+.builder-toolbar{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin-bottom:12px}
+.builder-toolbar label{display:grid;gap:5px;font-size:12px}
+.builder-toolbar button,.builder-toolbar select{border:1px solid #8491a1;border-radius:6px;padding:9px 12px;background:white;color:#202d38;font-size:13px}
+#apply-theme{background:var(--green);color:white}#apply-theme:disabled{opacity:.6;cursor:not-allowed}
+#theme-status{min-height:1.6em;font-size:13px;color:var(--green)}
+.theme-builder{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,1.3fr);gap:28px;align-items:start}
+.token-group{border:1px solid var(--line);border-radius:8px;margin-bottom:12px;background:white;overflow:hidden}
+.token-group summary{padding:14px 16px;cursor:pointer;font-weight:650;font-size:14px}.token-group summary span{float:right;color:var(--muted)}
+.token-field{padding:12px 16px;border-top:1px solid var(--line)}.token-field label{display:block;text-transform:capitalize;font-size:13px;font-weight:600}
+.token-field code{display:block;font-size:10px;color:var(--muted);margin:3px 0 7px;overflow-wrap:anywhere}.token-field input{width:100%;padding:9px;border:1px solid #8491a1;border-radius:5px;font-size:13px;background:white;color:#202d38}.token-field input[aria-invalid=true]{border-color:#a51d2d}.token-error{color:#a51d2d;font-size:12px;margin-bottom:0}
+.builder-previews .example-panel{margin-bottom:16px}.builder-previews h3{font-size:13px;text-transform:capitalize;margin:0;padding:12px 18px;background:#f2f4ef}
+.theme-builder+section{margin-top:32px}
+@media(max-width:720px){.mobile-menu{display:block}.top-links{gap:10px}.top-links .version{display:none}.top-links>a.theme-link{display:inline;font-size:12px}.sidebar.mobile-open{display:block;position:static;height:auto;max-height:65vh;border-bottom:1px solid var(--line);border-right:0;padding:20px}.theme-builder{grid-template-columns:1fr}.builder-toolbar{align-items:stretch}.builder-toolbar button{flex:1 1 40%}.builder-previews{display:grid;grid-template-columns:1fr}.topbar{flex-wrap:wrap}.sidebar.mobile-open nav{columns:2}.sidebar nav h2{break-after:avoid}.sidebar nav a{break-inside:avoid}}
+@media(min-width:721px){.sidebar{display:block!important}}
+/* An applied theme also colours the docs shell, while source code keeps its readable syntax palette. */
+:root.themed-docs{--green:var(--portal-primary);--muted:var(--portal-text-muted);--line:var(--portal-border);background:var(--portal-canvas);color:var(--portal-text);font-family:var(--portal-font-family);font-size:var(--portal-font-size);line-height:var(--portal-line-height)}
+.themed-docs .topbar,.themed-docs .sidebar{background:var(--portal-canvas)}
+.themed-docs .brand,.themed-docs .component-card h3,.themed-docs .facts strong,.themed-docs .sidebar nav a{color:var(--portal-text)}
+.themed-docs .component-card,.themed-docs .token-group,.themed-docs .example-panel{background:var(--portal-surface);border-color:var(--portal-border);border-radius:var(--portal-radius-lg);box-shadow:var(--portal-shadow)}
+.themed-docs .principles,.themed-docs .a11y-note,.themed-docs .example-toolbar,.themed-docs thead th,.themed-docs .builder-previews h3{background:var(--portal-surface-muted);color:var(--portal-text)}
+.themed-docs .principles p,.themed-docs .category,.themed-docs .sidebar nav h2{color:var(--portal-text-muted)}
+.themed-docs .sidebar nav a[aria-current],.themed-docs .sidebar nav a:hover{background:var(--portal-surface-muted);color:var(--portal-primary)}
+.themed-docs :where(h1,h2,h3){font-family:var(--portal-heading-font-family);font-weight:var(--portal-heading-font-weight);letter-spacing:var(--portal-heading-letter-spacing)}
+@media(max-width:720px){.sidebar:not(.navigation-enhanced){display:block;position:static;height:auto;max-height:60vh}.token-field input[type=color]{width:44px;height:34px;padding:2px;margin-top:7px}}
+.themed-docs .primary-link,.themed-docs .brand-mark,.themed-docs #apply-theme{color:var(--portal-primary-content)}
+.themed-docs .mobile-menu,.themed-docs .sidebar input,.themed-docs .builder-toolbar select,.themed-docs .builder-toolbar button:not(#apply-theme),.themed-docs .token-field input,.themed-docs .example-toolbar select,.themed-docs .usage button{background:var(--portal-surface);color:var(--portal-text);border-color:var(--portal-border)}
+.themed-docs td code,.themed-docs .source-details pre{background:var(--portal-surface-muted);color:var(--portal-text)}
+.builder-previews{position:sticky;top:100px;background:#fbfbf8;max-height:calc(100vh - 120px);overflow:auto}.preview-picker{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;padding:10px 0}.preview-picker select{padding:6px;border:1px solid #8491a1;border-radius:5px;background:white;color:#202d38;text-transform:capitalize}
+.themed-docs .builder-previews{background:var(--portal-canvas)}
+@media(max-width:720px){.builder-previews{order:-1;top:0;z-index:2;max-height:42vh;padding-top:4px}.builder-previews .example-panel{margin-bottom:8px}.builder-previews h3{display:none}}
+.themed-docs .required,.themed-docs .token-error{color:var(--portal-danger);border-color:var(--portal-danger)}
+.themed-docs .preview-picker select{background:var(--portal-surface);color:var(--portal-text);border-color:var(--portal-border)}
+.custom-theme h1,.custom-theme .hero h1,.custom-theme .component-heading h1{font-size:var(--portal-heading-size-1);line-height:var(--portal-heading-line-height)}
+.custom-theme h2{font-size:var(--portal-heading-size-2);line-height:var(--portal-heading-line-height)}
+.custom-theme h3{font-size:var(--portal-heading-size-3);line-height:var(--portal-heading-line-height)}
+.custom-theme .lead{font-size:var(--portal-font-size-lg);line-height:var(--portal-line-height)}
+.custom-theme :is(button,input,select,textarea){font-family:var(--portal-control-font-family);font-size:var(--portal-control-font-size);font-weight:var(--portal-control-font-weight);line-height:var(--portal-control-line-height)}
+.custom-theme .component-card,.custom-theme .token-group,.custom-theme .example-panel{border-width:var(--portal-border-width);border-style:var(--portal-border-style)}
