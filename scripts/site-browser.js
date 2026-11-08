@@ -66,7 +66,11 @@ function applyFrame(frame){
   if(root){if(!frame.hasAttribute('data-layout-example')){root.style.padding='24px';root.style.minHeight='130px';}doc.body.style.margin='0';doc.body.style.background=doc.defaultView.getComputedStyle(root).backgroundColor;
     root.querySelectorAll('.portal-demo-box').forEach(box=>{box.style.padding='16px';box.style.background='var(--portal-surface-muted)';box.style.borderRadius='var(--portal-radius-md)';});}
   if(frame.hasAttribute('data-layout-example'))frame.style.height='600px';
-  requestAnimationFrame(()=>{frame.style.height=`${Math.max(150,doc.documentElement.scrollHeight)}px`;});
+  requestAnimationFrame(()=>{
+    // Navigation can detach the frame or replace its document before this runs.
+    if(!frame.isConnected || frame.contentDocument!==doc || !doc.documentElement)return;
+    frame.style.height=`${Math.max(150,doc.documentElement.scrollHeight)}px`;
+  });
 }
 function previews(){frames.forEach(applyFrame);}
 for(const frame of frames){frame.addEventListener('load',()=>{applyFrame(frame);frame.contentDocument?.addEventListener('toggle',()=>applyFrame(frame),true);frame.contentDocument?.addEventListener('submit',event=>event.preventDefault());});}

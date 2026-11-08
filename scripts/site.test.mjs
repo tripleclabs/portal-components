@@ -86,3 +86,22 @@ test('layout recipes are complete, script-free compositions with explicit integr
     assert.ok(recipe.usage.includes('Business actions are disabled'));
   }
 });
+
+
+test('queued preview sizing ignores detached or replaced documents', async () => {
+  const { runInNewContext } = await import('node:vm');
+  const source = await read('scripts/site-browser.js');
+  const functionSource = source.slice(source.indexOf('function applyFrame('), source.indexOf('function previews('));
+  for (const change of ['detached', 'replaced', 'cleared', 'current']) {
+    const document = { documentElement: { scrollHeight: 240 }, querySelectorAll:()=>[], querySelector:()=>null };
+    const frame = { contentDocument:document, isConnected:true, hasAttribute:()=>false, style:{} };
+    let scheduled;
+    const context = { frame, active:{}, draft:{}, requestAnimationFrame:callback=>{ scheduled=callback; } };
+    runInNewContext(functionSource+';applyFrame(frame);', context);
+    if(change==='detached')frame.isConnected=false;
+    if(change==='replaced')frame.contentDocument={};
+    if(change==='cleared')document.documentElement=null;
+    assert.doesNotThrow(()=>scheduled());
+    assert.equal(frame.style.height,change==='current'?'240px':undefined);
+  }
+});
