@@ -664,7 +664,7 @@ Slots:
 
 ### Accessibility and limits
 
-Use tr elements in slots and appropriate th scope attributes. The caption is visible. No sorting, row selection or grid keyboard model is implied.
+Use tr elements in slots and appropriate th scope attributes. The caption is visible. The labelled wrapper is keyboard-focusable so overflowing columns can be scrolled with arrow keys. No sorting, row selection or grid keyboard model is implied.
 
 ## breadcrumbs
 

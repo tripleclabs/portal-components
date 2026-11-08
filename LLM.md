@@ -20,3 +20,7 @@ Read `docs/authoring.md` and `docs/components.md` before generating a page. `cat
 Choose components from the catalogue, build the semantic native page first, then connect page Lua and progressive regions. Include complete namespaces and contracts in standalone examples. Keep fetched view models serializable and keep repeated presentation components free of loaders. Verify native no-JavaScript behavior, errors, empty results, mobile layout and keyboard use.
 
 If an API is missing from this documentation, say so instead of inventing it. Components are not a general Vue-compatible environment.
+
+## Complete page compositions
+
+Use `docs/layouts.md` for sign-in, print catalogue, order tracking and order request recipes. Each includes full DataXML source and integration notes. Copy `styles/layouts.css` after bundled styles; theme tokens remain inherited. These are static layouts with fictional content and disabled business actions, not working authentication, filtering, uploading or checkout. Do not remove disabled actions without wiring the appropriate protected Portal flow. Reuse components and native HTML; do not invent client scripts or handler capabilities from a screenshot.

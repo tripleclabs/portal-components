@@ -8,3 +8,4 @@
 - [Authoring](docs/authoring.md)
 - [Components](docs/components.md)
 - [Theme tokens](docs/tokens.md)
+- [Page layout recipes](docs/layouts.md)

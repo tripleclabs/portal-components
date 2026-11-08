@@ -74,3 +74,15 @@ test('component styling references declared tokens or documented optional overri
   for(const [,token] of css.matchAll(/var\((--portal-[a-z0-9-]+)/g)) assert.ok(declared.has(token)||optional.has(token),`Undocumented token ${token}`);
   assert.ok(!/font-weight:\s*\d/.test(css),'Component font weights must be theme driven');
 });
+
+test('layout recipes are complete, script-free compositions with explicit integration notes',async()=>{
+  const catalogue=await loadCatalogue();
+  assert.equal(catalogue.layouts.length,4);
+  for(const recipe of catalogue.layouts) {
+    assert.ok(recipe.usage.includes('portal-theme portal-layout'));
+    assert.ok(recipe.components.length>=4);
+    assert.ok(recipe.integration.length>100);
+    assert.ok(!/<script|<form|on(?:click|submit)=/i.test(recipe.usage),'Static examples must not execute scripts or submit data');
+    assert.ok(recipe.usage.includes('Business actions are disabled'));
+  }
+});

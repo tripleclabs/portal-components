@@ -1,0 +1,79 @@
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-sign-in">
+  <header class="recipe-header">
+    <a class="recipe-brand" href="#page-content">
+      <span aria-hidden="true">p.</span>
+       Paper &amp; Form
+    </a>
+    <span class="recipe-header-label">Customer portal</span>
+  </header>
+  <div class="login-layout" id="page-content">
+    <section class="login-story">
+      <p class="recipe-kicker">YOUR NEXT GREAT IMPRESSION</p>
+      <h1>
+        Good ideas.
+        <br/>
+        Beautifully printed.
+      </h1>
+      <p>One place for your print projects, proofs and deliveries. A little less admin. A lot more possibility.</p>
+      <div class="print-art print-art-cards" aria-hidden="true">
+        <div class="print-sheet">
+          <span>Paper &amp; Form</span>
+          <strong>
+            Make
+            <br/>
+            your mark.
+          </strong>
+          <i>Made to make an impression.</i>
+        </div>
+      </div>
+      <div class="story-facts">
+        <span>Thoughtfully made</span>
+        <span>From first proof to final print</span>
+      </div>
+    </section>
+    <section class="login-panel" aria-labelledby="login-title">
+      <div>
+        <p class="recipe-kicker">WELCOME BACK</p>
+        <h2 id="login-title">Your projects start here.</h2>
+        <p class="recipe-muted">Sign in to your Paper &amp; Form account.</p>
+      </div>
+      <div class="recipe-fields" role="group" aria-label="Example sign-in fields">
+        <portal-component name="field">
+          <portal-prop name="for" value="email"/>
+          <portal-prop name="label" value="Email address"/>
+          <portal-component name="input">
+            <portal-prop name="id" value="email"/>
+            <portal-prop name="name" value="email"/>
+            <portal-prop name="type" value="email"/>
+            <portal-prop name="value" value=""/>
+            <portal-prop name="placeholder" value="you@company.com"/>
+            <portal-prop name="autocomplete" value="off"/>
+          </portal-component>
+        </portal-component>
+        <portal-component name="field">
+          <portal-prop name="for" value="password"/>
+          <portal-prop name="label" value="Password"/>
+          <portal-component name="input">
+            <portal-prop name="id" value="password"/>
+            <portal-prop name="name" value="password"/>
+            <portal-prop name="type" value="password"/>
+            <portal-prop name="value" value=""/>
+            <portal-prop name="autocomplete" value="off"/>
+          </portal-component>
+        </portal-component>
+        <p class="recipe-muted recipe-small">Demo only. Please do not enter real credentials.</p>
+        <portal-component name="button">
+          <portal-prop name="disabled" t:value="true"/>
+          <portal-prop name="size" value="lg"/>
+          Sign in
+        </portal-component>
+      </div>
+      <portal-component name="disclosure">
+        <portal-fill name="summary">Need help signing in?</portal-fill>
+        <p>In your portal, link this section to password recovery or your customer support team. This example has no authentication service.</p>
+      </portal-component>
+      <p class="recipe-small recipe-muted">New to Paper &amp; Form? Your account contact can invite you to the customer portal.</p>
+      <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>
+    </section>
+  </div>
+</main>

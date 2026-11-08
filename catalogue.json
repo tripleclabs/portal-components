@@ -210,7 +210,7 @@
       "contract": "components/table.json",
       "example": "examples/table.html",
       "rendered": "rendered/table.html",
-      "accessibility": "Use tr elements in slots and appropriate th scope attributes. The caption is visible. No sorting, row selection or grid keyboard model is implied.",
+      "accessibility": "Use tr elements in slots and appropriate th scope attributes. The caption is visible. The labelled wrapper is keyboard-focusable so overflowing columns can be scrolled with arrow keys. No sorting, row selection or grid keyboard model is implied.",
       "tokenReference": "docs/tokens.md"
     },
     {
@@ -267,6 +267,72 @@
       "rendered": "rendered/progress.html",
       "accessibility": "Provide a meaningful label including progress if needed. Value and maximum must describe a real operation; this does not implement upload or polling.",
       "tokenReference": "docs/tokens.md"
+    }
+  ],
+  "layouts": [
+    {
+      "name": "layout-sign-in",
+      "title": "Sign in",
+      "description": "A welcoming account entry point with a branded panel, labelled fields and recovery guidance.",
+      "example": "examples/layout-sign-in.html",
+      "rendered": "rendered/layout-sign-in.html",
+      "components": [
+        "card",
+        "field",
+        "input",
+        "button",
+        "disclosure"
+      ],
+      "integration": "Use your Portal authentication flow; never put credentials in query strings or client storage. The demo has no form or authentication endpoint. Fields are illustrative and the action is disabled."
+    },
+    {
+      "name": "layout-catalogue",
+      "title": "Print catalogue",
+      "description": "A responsive product collection with filters, sorting and a distinctive editorial product grid.",
+      "example": "examples/layout-catalogue.html",
+      "rendered": "rendered/layout-catalogue.html",
+      "components": [
+        "card",
+        "field",
+        "input",
+        "select",
+        "checkbox",
+        "badge",
+        "button"
+      ],
+      "integration": "Replace the six synthetic products with Lua loader output. Keep filter controls outside the results region; use a native GET form and a targeted live region when connecting search. This static example does not filter or navigate products."
+    },
+    {
+      "name": "layout-order-tracking",
+      "title": "Order tracking",
+      "description": "A clear production timeline, delivery details and an itemised order summary.",
+      "example": "examples/layout-order-tracking.html",
+      "rendered": "rendered/layout-order-tracking.html",
+      "components": [
+        "card",
+        "badge",
+        "table",
+        "disclosure"
+      ],
+      "integration": "Fetch the order through an authorised Lua read handler scoped to the current PortalUser and customer membership. Treat the order reference as an identifier, not permission to view an order. Tracking and totals here are fictional."
+    },
+    {
+      "name": "layout-order-request",
+      "title": "Order request",
+      "description": "A guided product configuration with artwork guidance and an adjacent quote summary.",
+      "example": "examples/layout-order-request.html",
+      "rendered": "rendered/layout-order-request.html",
+      "components": [
+        "card",
+        "field",
+        "input",
+        "select",
+        "badge",
+        "alert",
+        "button",
+        "disclosure"
+      ],
+      "integration": "Keep editable configuration outside the replaceable quote region. Calculate and validate prices on the server. Wire submission to a protected Lua action; group related writes in the platform transaction capability. Connect authorised Folder uploads separately; this sample does not accept files or orders."
     }
   ]
 }

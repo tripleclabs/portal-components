@@ -1,0 +1,293 @@
+<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-catalogue">
+  <header class="recipe-header">
+    <a class="recipe-brand" href="#page-content">
+      <span aria-hidden="true">p.</span>
+       Paper &amp; Form
+    </a>
+    <span class="recipe-header-label">Print shop</span>
+  </header>
+  <section class="catalog-hero" id="page-content">
+    <div>
+      <p class="recipe-kicker">PRINT SOMETHING GREAT</p>
+      <h1>
+        Ideas deserve
+        <br/>
+        a little paper.
+      </h1>
+      <p class="recipe-muted">
+        Everyday essentials and unexpected favourites.
+        <br/>
+        Made to feel as good as they look.
+      </p>
+    </div>
+    <div class="hero-stamp" aria-hidden="true">
+      MAKE
+      <br/>
+      <em>it</em>
+      <br/>
+      TANGIBLE
+    </div>
+  </section>
+  <div class="catalog-controls">
+    <div class="catalog-search">
+      <portal-component name="field">
+        <portal-prop name="for" value="search"/>
+        <portal-prop name="label" value="Find your next print"/>
+        <portal-component name="input">
+          <portal-prop name="id" value="search"/>
+          <portal-prop name="name" value="search"/>
+          <portal-prop name="type" value="search"/>
+          <portal-prop name="value" value=""/>
+          <portal-prop name="placeholder" value="Try business cards or booklets"/>
+        </portal-component>
+      </portal-component>
+    </div>
+    <div>
+      <portal-component name="field">
+        <portal-prop name="for" value="sort"/>
+        <portal-prop name="label" value="Sort by"/>
+        <portal-component name="select">
+          <portal-prop name="id" value="sort"/>
+          <portal-prop name="name" value="sort"/>
+          <option>Recommended</option>
+          <option>Price: low to high</option>
+        </portal-component>
+      </portal-component>
+    </div>
+  </div>
+  <div class="catalog-layout">
+    <aside class="catalog-filters" aria-labelledby="filters-title">
+      <h2 id="filters-title">Made for your moment</h2>
+      <portal-component name="disclosure">
+        <portal-prop name="open" t:value="true"/>
+        <portal-fill name="summary">Product categories</portal-fill>
+        <div class="recipe-fields">
+          <portal-component name="checkbox">
+            <portal-prop name="name" value="category"/>
+            <portal-prop name="value" value="all"/>
+            <portal-prop name="checked" t:value="true"/>
+            All products
+          </portal-component>
+          <portal-component name="checkbox">
+            <portal-prop name="name" value="category"/>
+            <portal-prop name="value" value="stationery"/>
+            <portal-prop name="checked" t:value="false"/>
+            Business stationery
+          </portal-component>
+          <portal-component name="checkbox">
+            <portal-prop name="name" value="category"/>
+            <portal-prop name="value" value="marketing"/>
+            <portal-prop name="checked" t:value="false"/>
+            Marketing &amp; events
+          </portal-component>
+          <portal-component name="checkbox">
+            <portal-prop name="name" value="category"/>
+            <portal-prop name="value" value="packaging"/>
+            <portal-prop name="checked" t:value="false"/>
+            Packaging &amp; labels
+          </portal-component>
+        </div>
+      </portal-component>
+      <p class="recipe-small recipe-muted">Search, sorting and filters are shown as composition examples. This static catalogue does not filter.</p>
+    </aside>
+    <section aria-labelledby="products-title">
+      <div class="recipe-section-heading">
+        <h2 id="products-title">The print collection</h2>
+        <span class="recipe-muted recipe-small">6 products</span>
+      </div>
+      <div class="product-grid">
+        <portal-component name="card">
+          <div class="print-art print-art-cards" aria-hidden="true">
+            <div class="print-sheet">
+              <span>Paper &amp; Form</span>
+              <strong>
+                Hello.
+                <br/>
+                Again.
+              </strong>
+              <i>Made to make an impression.</i>
+            </div>
+          </div>
+          <div class="product-copy">
+            <div class="product-heading">
+              <h3>Business cards</h3>
+              <portal-component name="badge">
+                <portal-prop name="variant" value="primary"/>
+                Bestseller
+              </portal-component>
+            </div>
+            <p class="recipe-muted">A small introduction. A lasting impression.</p>
+            <div class="product-price">
+              <span>
+                From 
+                <strong>£24</strong>
+              </span>
+              <span class="recipe-small recipe-muted">250 cards</span>
+            </div>
+            <portal-component name="button">
+              <portal-prop name="disabled" t:value="true"/>
+              <portal-prop name="variant" value="secondary"/>
+              Configure business cards
+            </portal-component>
+          </div>
+        </portal-component>
+        <portal-component name="card">
+          <div class="print-art print-art-poster" aria-hidden="true">
+            <div class="print-sheet">
+              <span>Paper &amp; Form</span>
+              <strong>
+                Something
+                <br/>
+                worth seeing.
+              </strong>
+              <i>Made to make an impression.</i>
+            </div>
+          </div>
+          <div class="product-copy">
+            <div class="product-heading">
+              <h3>Art prints</h3>
+            </div>
+            <p class="recipe-muted">Big ideas, beautifully reproduced.</p>
+            <div class="product-price">
+              <span>
+                From 
+                <strong>£18</strong>
+              </span>
+              <span class="recipe-small recipe-muted">10 prints</span>
+            </div>
+            <portal-component name="button">
+              <portal-prop name="disabled" t:value="true"/>
+              <portal-prop name="variant" value="secondary"/>
+              Configure art prints
+            </portal-component>
+          </div>
+        </portal-component>
+        <portal-component name="card">
+          <div class="print-art print-art-book" aria-hidden="true">
+            <div class="print-sheet">
+              <span>Paper &amp; Form</span>
+              <strong>
+                A story
+                <br/>
+                to keep.
+              </strong>
+              <i>Made to make an impression.</i>
+            </div>
+          </div>
+          <div class="product-copy">
+            <div class="product-heading">
+              <h3>Booklets</h3>
+            </div>
+            <p class="recipe-muted">Give your next chapter a proper home.</p>
+            <div class="product-price">
+              <span>
+                From 
+                <strong>£65</strong>
+              </span>
+              <span class="recipe-small recipe-muted">25 booklets</span>
+            </div>
+            <portal-component name="button">
+              <portal-prop name="disabled" t:value="true"/>
+              <portal-prop name="variant" value="secondary"/>
+              Configure booklets
+            </portal-component>
+          </div>
+        </portal-component>
+        <portal-component name="card">
+          <div class="print-art print-art-label" aria-hidden="true">
+            <div class="print-sheet">
+              <span>Paper &amp; Form</span>
+              <strong>
+                Good
+                <br/>
+                things.
+              </strong>
+              <i>Made to make an impression.</i>
+            </div>
+          </div>
+          <div class="product-copy">
+            <div class="product-heading">
+              <h3>Product labels</h3>
+            </div>
+            <p class="recipe-muted">The finishing touch for something special.</p>
+            <div class="product-price">
+              <span>
+                From 
+                <strong>£32</strong>
+              </span>
+              <span class="recipe-small recipe-muted">100 labels</span>
+            </div>
+            <portal-component name="button">
+              <portal-prop name="disabled" t:value="true"/>
+              <portal-prop name="variant" value="secondary"/>
+              Configure product labels
+            </portal-component>
+          </div>
+        </portal-component>
+        <portal-component name="card">
+          <div class="print-art print-art-postcard" aria-hidden="true">
+            <div class="print-sheet">
+              <span>Paper &amp; Form</span>
+              <strong>
+                Wish you
+                <br/>
+                were here.
+              </strong>
+              <i>Made to make an impression.</i>
+            </div>
+          </div>
+          <div class="product-copy">
+            <div class="product-heading">
+              <h3>Postcards</h3>
+            </div>
+            <p class="recipe-muted">A thoughtful note, delivered in colour.</p>
+            <div class="product-price">
+              <span>
+                From 
+                <strong>£29</strong>
+              </span>
+              <span class="recipe-small recipe-muted">100 postcards</span>
+            </div>
+            <portal-component name="button">
+              <portal-prop name="disabled" t:value="true"/>
+              <portal-prop name="variant" value="secondary"/>
+              Configure postcards
+            </portal-component>
+          </div>
+        </portal-component>
+        <portal-component name="card">
+          <div class="print-art print-art-fold" aria-hidden="true">
+            <div class="print-sheet">
+              <span>Paper &amp; Form</span>
+              <strong>
+                Meet your
+                <br/>
+                next idea.
+              </strong>
+              <i>Made to make an impression.</i>
+            </div>
+          </div>
+          <div class="product-copy">
+            <div class="product-heading">
+              <h3>Folded leaflets</h3>
+            </div>
+            <p class="recipe-muted">More room for the details that matter.</p>
+            <div class="product-price">
+              <span>
+                From 
+                <strong>£42</strong>
+              </span>
+              <span class="recipe-small recipe-muted">250 leaflets</span>
+            </div>
+            <portal-component name="button">
+              <portal-prop name="disabled" t:value="true"/>
+              <portal-prop name="variant" value="secondary"/>
+              Configure folded leaflets
+            </portal-component>
+          </div>
+        </portal-component>
+      </div>
+    </section>
+  </div>
+  <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>
+</main>

@@ -50,3 +50,11 @@ Library 0.1.1 targets Portal component contract 1. Existing plain HTML/Lua sites
 The supplied themes and semantics are tested, but copying components or overriding tokens can affect accessibility. Test your finished application with keyboard navigation, representative content and assistive technology.
 
 MIT licensed. Repository publication and GitHub Pages deployment are separate release steps; local builds do not publish anything.
+
+## Complete page examples
+
+The [page examples](https://tripleclabs.github.io/portal-components/layouts.html)
+show components working together in a sign-in page, print catalogue, order tracker
+and guided order request. Preview your theme at mobile or desktop widths, then
+copy the DataXML and shared CSS. See [recipes and integration notes](docs/layouts.md).
+They use fictional data and disabled business actions, not live authentication or commerce.

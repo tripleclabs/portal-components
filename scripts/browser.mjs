@@ -64,6 +64,54 @@ try {
   assert.equal(await page.locator('.sidebar nav a:visible').count(),1);
   const links=await page.locator('a[href]').evaluateAll(nodes=>nodes.map(n=>n.href));
   for(const link of new Set(links))if(link.startsWith(address))assert.ok((await page.request.get(link)).ok(),link);
+  await page.goto(`${address}layouts.html`);
+  await auditDocumentation('page examples');
+  assert.equal(await page.locator('.layout-card').count(),4);
+  for(const layout of catalogue.layouts??[]) {
+    await page.goto(`${address}layouts/${layout.name}.html`);
+    await page.locator('html[data-theme-ready=true]').waitFor();
+    await auditDocumentation(layout.name);
+    assert.equal(await page.locator('#usage-source').textContent(),layout.usage.trim());
+    await page.locator('[data-copy="usage-source"]').click();
+    assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),layout.usage.trim());
+    const iframe=await (await page.locator('[data-layout-example]').elementHandle()).contentFrame();
+    await iframe.locator('.portal-layout').waitFor();
+    await iframe.addScriptTag({content:axe});
+    assert.equal(await iframe.locator('form').count(),0,'Static examples must never submit credentials or business data');
+    assert.equal(await iframe.locator('button:not([disabled])').count(),0,'Illustrative business actions must stay disabled');
+    assert.equal(await iframe.locator('h1').count(),1);
+    for(const theme of ['light','dark','atelier']) {
+      await page.locator('[data-theme-select]').selectOption(theme);
+      assert.equal(await iframe.locator('.portal-layout').getAttribute('data-theme'),theme);
+      const violations=await iframe.evaluate(async()=>{
+        const result=await window.axe.run(document.querySelector('.portal-layout'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});
+        return result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}));
+      });
+      assert.deepEqual(violations,[],`${layout.name}/${theme}: ${JSON.stringify(violations)}`);
+    }
+    await page.locator('[data-preview-width="390"]').click();
+    assert.equal(await page.locator('[data-preview-width="390"]').getAttribute('aria-pressed'),'true');
+    await page.waitForFunction(()=>document.querySelector('[data-layout-example]').clientWidth<=390);
+    assert.ok(await iframe.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${layout.name} simulated mobile overflow`);
+    await page.locator('[data-preview-width="full"]').click();
+    await page.setViewportSize({width:375,height:812});
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${layout.name} docs mobile overflow`);
+    assert.ok(await iframe.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${layout.name} page mobile overflow`);
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await page.screenshot({path:path.join(base,`${layout.name}-mobile.png`),fullPage:false});
+    await page.setViewportSize({width:1440,height:1000});
+    await page.locator('[data-theme-select]').selectOption('light');
+    const standalone=await browser.newPage({viewport:{width:1280,height:900},javaScriptEnabled:false});
+    await standalone.goto(`${address}${layout.rendered}`);
+    await standalone.screenshot({path:path.join(base,`${layout.name}-desktop.png`),fullPage:true});
+    const disclosure=standalone.locator('summary').first();
+    if(await disclosure.count()) { const wasOpen=await disclosure.evaluate(n=>n.parentElement.open);await disclosure.click();assert.equal(await disclosure.evaluate(n=>n.parentElement.open),!wasOpen); }
+    await standalone.setViewportSize({width:390,height:844});
+    assert.ok(await standalone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${layout.name} standalone no-JS mobile overflow`);
+    await standalone.screenshot({path:path.join(base,`${layout.name}-page-mobile.png`),fullPage:true});
+    await standalone.close();
+    await page.setViewportSize({width:1280,height:900});
+  }
   for(const component of catalogue.components) {
     await page.goto(`${address}reference/${component.name}.html`);
     await auditDocumentation(component.name);
@@ -180,6 +228,12 @@ try {
   await page.emulateMedia({colorScheme:'dark'});await page.emulateMedia({colorScheme:'light'});
   assert.equal(await page.frameLocator('iframe').locator('.portal-button').first().evaluate(node=>getComputedStyle(node).backgroundColor),'rgb(171, 205, 239)');
   await page.reload();await page.locator('html[data-theme-ready=true]').waitFor();assert.equal(await page.locator('[data-theme-select]').inputValue(),'custom');
+  await page.getByRole('link',{name:'Examples',exact:true}).click();
+  await page.locator('.layout-card').filter({hasText:'Print catalogue'}).click();
+  await page.locator('html[data-theme-ready=true]').waitFor();
+  assert.equal(await page.locator('[data-theme-select]').inputValue(),'custom');
+  assert.equal(await page.frameLocator('iframe').locator('.print-art-cards .print-sheet').evaluate(node=>getComputedStyle(node).backgroundColor),'rgb(171, 205, 239)');
+  await auditDocumentation('custom theme page recipe');
   await page.getByRole('link',{name:'Build a theme',exact:true}).click();await page.locator('html[data-theme-ready=true]').waitFor();
   assert.equal(await page.locator('#theme-base').inputValue(),'dark');assert.equal(await primary.inputValue(),'#abcdef');
   await page.locator('#reset-editor').click();assert.equal(await primary.inputValue(),'');
@@ -213,5 +267,5 @@ try {
   await page.setViewportSize({width:375,height:812});await page.screenshot({path:path.join(root,'site/field-mobile.png'),fullPage:true});await page.setViewportSize({width:1280,height:900});
   await page.goto(address);await page.screenshot({path:path.join(root,'site/overview.png'),fullPage:true});
   assert.deepEqual(failures,[]);
-  console.log(`Verified ${catalogue.components.length} components: accessibility, themes, IDs, mobile, prefix links and native keyboard behavior.`);
+  console.log(`Verified ${catalogue.components.length} components and ${catalogue.layouts.length} page layouts: accessibility, themes, IDs, mobile, prefix links and native keyboard behavior.`);
 }finally{if(browser)await browser.close();await new Promise(resolve=>server.close(resolve));}

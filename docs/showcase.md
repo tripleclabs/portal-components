@@ -35,3 +35,26 @@ precedence until System is chosen again. Theme drafts and selections are stored
 only in this browser's local storage; they are never uploaded. Reset editor and
 Reset site theme are separate actions. Invalid values are not applied or exported.
 Storage-unavailable browsers can still preview and export on the current page.
+
+## Page examples
+
+**Examples** in the header opens four full-page recipes: sign-in, print catalogue,
+order tracking and order request. The same links are available in mobile navigation.
+Each page offers responsive/mobile preview widths, the site's active theme, full
+DataXML source, shared layout CSS and explicit integration notes. These layouts
+are rendered by the same Swift pipeline as individual components and included in
+its manifest and regression fixture. They add no second rendering implementation.
+
+The sign-in layout never submits credentials. All business buttons stay disabled;
+filtering, pricing, authentication, upload and ordering require real Portal flows.
+Native disclosures and form controls still work as presentation examples. See
+[complete recipes](layouts.md) for copyable source and implementation guidance.
+
+Responsive regression checks cover 320, 375, 390, 701, 768, 800, 1024 and 1440
+CSS-pixel viewports for each complete page, both standalone and embedded in the
+docs. They check the responsive and mobile preview modes, control containment,
+clipping ancestors, toolbar bounds and keyboard access to overflowing tables.
+Standalone pages are also checked with JavaScript disabled and 200% root text
+size at 320, 768 and 1440 pixels. This is a text-size/reflow test, not a claim of
+native browser-menu zoom automation. Screenshots and the matrix report are
+written to `site/responsive/` by `npm run test:browser`.
