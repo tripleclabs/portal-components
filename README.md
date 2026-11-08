@@ -57,3 +57,7 @@ show components working together in a sign-in page, print catalogue, order track
 and guided order request. Preview your theme at mobile or desktop widths, then
 copy the DataXML and shared CSS. See [recipes and integration notes](docs/layouts.md).
 They use fictional data and disabled business actions, not live authentication or commerce.
+
+## Documentation identity
+
+The documentation uses CoCoCo brand artwork and self-hosted Sofia Sans fonts. Components and code remain MIT licensed; [brand and font credits](brand/NOTICE.md) describe the separate asset licenses. The docs default to the CoCoCo palette while custom themes continue to apply to the site and component previews.

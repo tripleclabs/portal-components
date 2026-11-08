@@ -11,3 +11,7 @@ The static documentation site uses system fonts and local assets. It contains no
 ## Public distribution boundary
 
 The production compiler and server implementation are not distributed here. Rendered HTML is static synthetic output; its manifest contains relative library paths, hashes and version metadata, not embedded server source. Public Node scripts build documentation and run tests only. A clean repository export excludes node_modules, generated site output, Git metadata and build caches; it includes only the explicitly reviewed public library, documentation, examples, render artifacts and tooling.
+
+## Documentation branding
+
+The docs shell uses official CoCoCo artwork and self-hosted Sofia Sans fonts. See [brand asset provenance and license scope](brand/NOTICE.md). Font binaries are presentation assets, not server code; only the reviewed brand folder is included in the public export.

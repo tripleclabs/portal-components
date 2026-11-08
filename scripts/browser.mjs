@@ -18,7 +18,7 @@ const server=createServer(async(req,res)=>{
     const file=path.resolve(base,relative);
     if(!file.startsWith(base+path.sep)) {res.writeHead(403).end();return;}
     if(!(await stat(file)).isFile()) {res.writeHead(404).end();return;}
-    const types={'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json','.md':'text/plain','.txt':'text/plain'};
+    const types={'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json','.md':'text/plain','.txt':'text/plain','.svg':'image/svg+xml','.woff2':'font/woff2'};
     res.setHeader('content-type',types[path.extname(file)]??'application/octet-stream');res.end(await readFile(file));
   } catch {res.writeHead(404).end();}
 });
@@ -45,19 +45,25 @@ try {
   await page.emulateMedia({colorScheme:'dark'});
   await page.goto(`${address}reference/button.html`);await page.locator('html[data-theme-ready=true]').waitFor();
   assert.equal(await page.locator('[data-theme-select]').inputValue(),'system');
-  assert.equal(await page.locator('html').evaluate(node=>getComputedStyle(node).backgroundColor),'rgb(17, 25, 35)');
-  assert.equal(await page.locator('.topbar').evaluate(node=>getComputedStyle(node).backgroundColor),'rgb(17, 25, 35)');
+  assert.equal(await page.locator('html').evaluate(node=>getComputedStyle(node).backgroundColor),'rgb(37, 22, 32)');
+  assert.equal(await page.locator('.topbar').evaluate(node=>getComputedStyle(node).backgroundColor),'rgb(37, 22, 32)');
   assert.equal(await page.frameLocator('iframe').locator('.portal-theme').getAttribute('data-theme'),'dark');
   await auditDocumentation('system dark');
   await page.emulateMedia({colorScheme:'light'});
   await page.waitForFunction(()=>document.documentElement.dataset.theme==='light');
   assert.equal(await page.frameLocator('iframe').locator('.portal-theme').getAttribute('data-theme'),'light');
-  assert.equal(await page.locator('html').evaluate(node=>getComputedStyle(node).backgroundColor),'rgb(251, 251, 248)');
+  assert.equal(await page.locator('html').evaluate(node=>getComputedStyle(node).backgroundColor),'rgb(255, 255, 255)');
   await page.locator('[data-theme-select]').selectOption('dark');
   await page.emulateMedia({colorScheme:'dark'});await page.emulateMedia({colorScheme:'light'});
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
   await page.locator('[data-theme-select]').selectOption('system');
   await page.goto(address);
+  await page.evaluate(()=>document.fonts.ready);
+  assert.ok(await page.locator('.brand img').evaluate(img=>img.complete&&img.naturalWidth>0),'Official logo loads');
+  assert.equal(await page.locator('.brand img').getAttribute('alt'),'CoCoCo');
+  assert.ok(await page.locator('html').evaluate(node=>getComputedStyle(node).fontFamily.includes('Sofia Sans')));
+  assert.ok(await page.locator('.hero h1').evaluate(node=>getComputedStyle(node).fontFamily.includes('Sofia Sans Condensed')));
+  assert.ok(await page.evaluate(()=>document.fonts.check('400 17px "Sofia Sans"')&&document.fonts.check('700 48px "Sofia Sans Condensed"')));
   await auditDocumentation('index');
   assert.equal(await page.locator('.component-card').count(),catalogue.components.length);
   await page.locator('#filter').fill('disclosure');

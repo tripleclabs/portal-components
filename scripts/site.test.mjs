@@ -105,3 +105,20 @@ test('queued preview sizing ignores detached or replaced documents', async () =>
     assert.equal(frame.style.height,change==='current'?'240px':undefined);
   }
 });
+
+
+test('brand assets are local, licensed and limited to presentation', async () => {
+  const { readdir, readFile } = await import('node:fs/promises');
+  const { root } = await import('./catalogue.mjs');
+  const files=await readdir(path.join(root,'brand'));
+  const fonts=files.filter(name=>name.endsWith('.woff2'));
+  assert.equal(fonts.length,6);
+  for(const font of fonts)assert.equal((await readFile(path.join(root,'brand',font))).subarray(0,4).toString(),'wOF2');
+  assert.match(await read('brand/OFL.txt'),/SIL OPEN FONT LICENSE/);
+  for(const name of ['cococo-logo.svg','cococo-outline.svg']) {
+    const svg=await read('brand/'+name);
+    assert.doesNotMatch(svg,/<script|\son\w+=|(?:href|src)=/i);
+  }
+  assert.doesNotMatch(await read('brand/fonts.css'),/https?:/);
+  assert.match(await read('brand/NOTICE.md'),/MIT license does not relicense/);
+});
