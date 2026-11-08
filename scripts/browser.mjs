@@ -124,6 +124,8 @@ try {
     const frame=page.frameLocator('iframe');
     await frame.locator('.portal-theme').waitFor();
     assert.equal(await page.locator('#usage-source').textContent(),component.usage.trim());
+    assert.ok(await page.locator('#usage-source .hljs-name').count()>0,'DataXML tags are highlighted');
+    assert.ok(await page.locator('.language-json .hljs-attr').count()>0,'Contract keys are highlighted');
     if(component.name==='button') {
       await page.locator('[data-copy]').focus();await page.keyboard.press('Enter');
       await page.waitForFunction(()=>document.querySelector('.copy-status')?.textContent==='Source copied.');
@@ -220,6 +222,9 @@ try {
   assert.ok(!(await page.locator('#theme-css').textContent()).match(/--portal-[\w-]+:\s*;/));
   assert.ok((await page.locator('#theme-css').textContent()).includes('--portal-control-line-height: inherit;'));
   assert.ok((await page.locator('#theme-css').textContent()).includes('--portal-primary: #abcdef;'));
+  assert.ok(await page.locator('#theme-css .hljs-attribute').count()>0,'Live CSS remains highlighted after editing');
+  await page.locator('[data-copy="theme-css"]').click();
+  assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),await page.locator('#theme-css').textContent());
   await primary.fill('red; background: url(https://example.invalid)');
   assert.equal(await primary.getAttribute('aria-invalid'),'true');assert.ok(await page.locator('#apply-theme').isDisabled());
   assert.ok(!(await page.locator('#theme-css').textContent()).includes('example.invalid'));
@@ -257,6 +262,8 @@ try {
   await checkbox.focus();await page.keyboard.press('Space');assert.ok(await checkbox.isChecked());
   const nojs=await browser.newContext({javaScriptEnabled:false});const native=await nojs.newPage();
   await native.setViewportSize({width:375,height:812});await native.goto(`${address}reference/button.html`);assert.ok(await native.locator('.sidebar nav a').filter({hasText:/^table$/}).isVisible());
+  assert.ok(await native.locator('#usage-source .hljs-name').count()>0,'Highlighting works without JavaScript');
+  assert.equal(await native.locator('#usage-source').textContent(),catalogue.components.find(c=>c.name==='button').usage.trim());
   await native.goto(`${address}rendered/disclosure.html`);await native.locator('summary').click();assert.equal(await native.locator('details').getAttribute('open'),'');
   await native.goto(`${address}rendered/field.html`);
   const required=native.locator('input[name=name]');

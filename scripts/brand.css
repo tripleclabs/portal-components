@@ -62,3 +62,18 @@ td code { background:var(--docs-soft)!important; color:var(--docs-text)!importan
 }
 
 :root[data-theme="dark"] .hero::after { opacity:.25; }
+
+/* Code colours are scoped to code blocks; source remains selectable plain text. */
+pre .hljs { color:var(--docs-code-text); }
+pre .hljs-name,pre .hljs-selector-class,pre .hljs-selector-tag,pre .hljs-selector-id { color:#ff79c9; }
+pre .hljs-attr,pre .hljs-attribute,pre .hljs-property { color:#fbdc9c; }
+pre .hljs-string { color:#bde9d7; }
+pre .hljs-number,pre .hljs-literal,pre .hljs-keyword { color:#d5bdff; }
+pre .hljs-comment,pre .hljs-meta { color:#d3becd; font-style:italic; }
+pre .hljs-tag,pre .hljs-punctuation { color:var(--docs-code-text); }
+.custom-theme pre .hljs-name,.custom-theme pre .hljs-selector-class,.custom-theme pre .hljs-selector-tag,.custom-theme pre .hljs-selector-id { color:color-mix(in srgb,var(--docs-code-text) 85%,#ff79c9); }
+.custom-theme pre .hljs-attr,.custom-theme pre .hljs-attribute,.custom-theme pre .hljs-property { color:color-mix(in srgb,var(--docs-code-text) 85%,#a76300); }
+.custom-theme pre .hljs-string { color:color-mix(in srgb,var(--docs-code-text) 85%,#16804e); }
+.custom-theme pre .hljs-number,.custom-theme pre .hljs-literal,.custom-theme pre .hljs-keyword { color:color-mix(in srgb,var(--docs-code-text) 85%,#9065cc); }
+.custom-theme pre .hljs-comment,.custom-theme pre .hljs-meta { color:var(--docs-code-text); }
+@media(forced-colors:active) { pre .hljs span { color:CanvasText!important; } }

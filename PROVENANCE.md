@@ -15,3 +15,5 @@ The production compiler and server implementation are not distributed here. Rend
 ## Documentation branding
 
 The docs shell uses official CoCoCo artwork and self-hosted Sofia Sans fonts. See [brand asset provenance and license scope](brand/NOTICE.md). Font binaries are presentation assets, not server code; only the reviewed brand folder is included in the public export.
+
+The docs build pre-highlights XML/DataXML, CSS and JSON with Highlight.js. The same escaped renderer highlights live theme exports. Its BSD license is preserved in [third-party credits](docs/third-party.md); the browser bundle contains only public dependencies and docs code.

@@ -1,3 +1,4 @@
+import { highlight } from './syntax.mjs';
 const menu = document.querySelector('.mobile-menu');
 const sidebar = document.querySelector('.sidebar');
 function closeMenu() { sidebar?.classList.remove('mobile-open'); menu?.setAttribute('aria-expanded','false'); }
@@ -84,7 +85,8 @@ for(const button of document.querySelectorAll('[data-preview-width]'))button.add
 function exportCSS(){
   const output=document.querySelector('#theme-css');if(!output)return;
   const values={...baseValues(draft.base),...draft.values};
-  output.textContent=`/* Portal Components theme; load after bundled styles. */\n.portal-theme.my-theme {\n  color-scheme: ${draft.base==='dark'?'dark':'light'};\n${schema.map(t=>`  ${t.name}: ${values[t.name]};`).join('\n')}\n}\n`;
+  const source=`/* Portal Components theme; load after bundled styles. */\n.portal-theme.my-theme {\n  color-scheme: ${draft.base==='dark'?'dark':'light'};\n${schema.map(t=>`  ${t.name}: ${values[t.name]};`).join('\n')}\n}\n`;
+  output.innerHTML=highlight(source,'css');
 }
 function refreshEditor(){
   if(!editor)return;

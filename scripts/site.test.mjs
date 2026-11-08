@@ -122,3 +122,21 @@ test('brand assets are local, licensed and limited to presentation', async () =>
   assert.doesNotMatch(await read('brand/fonts.css'),/https?:/);
   assert.match(await read('brand/NOTICE.md'),/MIT license does not relicense/);
 });
+
+test('syntax highlighting preserves source and escapes active markup', async () => {
+  const { highlight } = await import('./syntax.mjs');
+  const samples = [
+    ['xml','<ui:button t:bind-disabled="data.busy">Save &amp; close</ui:button>\n'],
+    ['xml','</code><script>alert("x")</script><img src=x onerror=alert(1)>'],
+    ['css','/* Theme */\n.portal-theme { --name: "<img onerror=x>"; color: #ff79c9; }\n'],
+    ['json','{ "count": 3, "enabled": false, "source": "<script>" }\n']
+  ];
+  for (const [language, source] of samples) {
+    const result=highlight(source,language);
+    assert.match(result,/<span class="hljs-/);
+    assert.doesNotMatch(result,/<(?:script|img|ui:button)\b/i);
+    const restored=result.replace(/<\/?span\b[^>]*>/g,'').replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&quot;','"').replaceAll('&#x27;',"'").replaceAll('&#39;',"'").replaceAll('&amp;','&');
+    assert.equal(restored,source);
+  }
+  assert.throws(()=>highlight('x','unknown'),/Unsupported code language/);
+});
