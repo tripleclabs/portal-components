@@ -1,9 +1,7 @@
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
   <label for="paper-example">Paper finish</label>
-  <portal-component name="select">
-    <portal-prop name="id" value="paper-example"/>
-    <portal-prop name="name" value="finish"/>
+  <ui:select id="paper-example" name="finish">
     <option value="silk">Silk</option>
     <option value="uncoated">Uncoated</option>
-  </portal-component>
+  </ui:select>
 </main>

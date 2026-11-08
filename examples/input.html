@@ -1,10 +1,5 @@
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
   <label for="email-example">Email address</label>
-  <portal-component name="input">
-    <portal-prop name="id" value="email-example"/>
-    <portal-prop name="name" value="email"/>
-    <portal-prop name="type" value="email"/>
-    <portal-prop name="autocomplete" value="email"/>
-    <portal-prop name="placeholder" value="you@example.com"/>
-  </portal-component>
+  <ui:input id="email-example" name="email" type="email" autocomplete="email" placeholder="you@example.com">
+  </ui:input>
 </main>

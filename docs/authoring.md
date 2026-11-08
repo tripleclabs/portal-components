@@ -2,37 +2,34 @@
 
 ## Props
 
-Literal values are supplied through `portal-prop` children:
+Declare `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` on the document root. Literal attributes supply string props; `t:bind-PROP` preserves the JSON type of a DataXML expression:
 
 ```xml
-<portal-component name="button">
-  <portal-prop name="variant" value="secondary"/>
-  <portal-prop name="disabled" t:value="true"/>
+<ui:button xmlns:t="urn:cococo:dataxml" xmlns:ui="urn:cococo:ui" variant="secondary" t:bind-disabled="true">
   Save draft
-</portal-component>
+</ui:button>
 ```
 
 Dynamic values use the existing DataXML expression evaluator:
 
 ```xml
-<portal-component name="badge">
-  <portal-prop name="variant" t:value="data.statusVariant"/>
+<ui:badge xmlns:t="urn:cococo:dataxml" xmlns:ui="urn:cococo:ui" t:bind-variant="data.statusVariant">
   <span t:text="data.statusLabel"/>
-</portal-component>
+</ui:badge>
 ```
 
-A string, number or boolean stays that type; values are validated before rendering. Defaults apply when a prop is absent. Explicit null is accepted only when declared nullable. Unknown props, invalid types/enums and missing required values are errors. Do not use direct attributes such as `<portal-component variant="secondary">`.
+A string, number or boolean stays that type; values are validated before rendering. Defaults apply when a prop is absent. Explicit null is accepted only when declared nullable. Unknown props, invalid types/enums and missing required values are errors. Attribute names match declared props exactly, including camelCase names. Native HTML still uses `t:attr-*`; component props use `t:bind-*`. There is no automatic attribute fallthrough.
 
 ## Slots and isolation
 
-Unnamed children fill the default slot. `portal-fill` selects a declared named slot. Content runs in the caller's lexical scope; a child's template sees its own props, `slots.<name>` presence flags and `component.id`, not caller data or credentials. Empty supplied slots suppress fallback content. Named fills are not separate components and cannot fetch data.
+Unnamed children fill the default slot. `ui:fill` selects a declared named slot. Content runs in the caller's lexical scope; a child's template sees its own props, `slots.<name>` presence flags and `component.id`, not caller data or credentials. Empty supplied slots suppress fallback content. Named fills are not separate components and cannot fetch data.
 
-A component source has one root and uses `portal-outlet`:
+A component source has one root and uses `ui:outlet`:
 
 ```xml
-<section xmlns:t="urn:cococo:dataxml">
-  <header t:if="slots.header"><portal-outlet name="header"/></header>
-  <portal-outlet name="default"><p>No content supplied.</p></portal-outlet>
+<section xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml">
+  <header t:if="slots.header"><ui:outlet name="header"/></header>
+  <ui:outlet name="default"><p>No content supplied.</p></ui:outlet>
 </section>
 ```
 
@@ -52,22 +49,14 @@ This illustrates a local custom component, not a replacement for the richer bund
 Use a caller-owned form and page-owned action handler. The handler must be declared in the page/site contract; components do not register it implicitly.
 
 ```xml
-<form xmlns:t="urn:cococo:dataxml" data-portal-action="saveContact">
-  <portal-component name="field">
-    <portal-prop name="for" value="customer-email"/>
-    <portal-prop name="label" value="Email address"/>
-    <portal-component name="input">
-      <portal-prop name="id" value="customer-email"/>
-      <portal-prop name="name" value="email"/>
-      <portal-prop name="type" value="email"/>
-      <portal-prop name="autocomplete" value="email"/>
-      <portal-prop name="required" t:value="true"/>
-    </portal-component>
-  </portal-component>
-  <portal-component name="button">
-    <portal-prop name="type" value="submit"/>
+<form xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" data-portal-action="saveContact">
+  <ui:field for="customer-email" label="Email address">
+    <ui:input id="customer-email" name="email" type="email" autocomplete="email" t:bind-required="true">
+    </ui:input>
+  </ui:field>
+  <ui:button type="submit">
     Save contact
-  </portal-component>
+  </ui:button>
 </form>
 ```
 
@@ -83,9 +72,9 @@ To override Card, copy both `components/card.html` and `components/card.json` to
 
 | Incorrect | Correct |
 | --- | --- |
-| `<Button variant="primary">` | `<portal-component name="button"><portal-prop name="variant" value="primary"/>…</portal-component>` |
-| `:disabled="loading"` | `<portal-prop name="disabled" t:value="input.loading"/>` with a boolean |
-| `<template #footer>` | `<portal-fill name="footer">…</portal-fill>` |
+| `<Button variant="primary">` | `<ui:button variant="primary">…</ui:button>` |
+| `:disabled="loading"` | `t:bind-disabled="input.loading"` with a boolean |
+| `<template #footer>` | `<ui:fill name="footer">…</ui:fill>` |
 | `onclick="save()"` | A page-owned protected native form action |
 | A component reads `data.customer` implicitly | Pass a declared prop from the caller |
 | Copy only component HTML | Copy the `.html` and `.json` pair |
@@ -106,27 +95,18 @@ Give the page loader a view model containing unique association IDs. For example
 Use a keyed invocation inside the DataXML loop:
 
 ```xml
-<section xmlns:t="urn:cococo:dataxml">
+<section xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml">
   <div t:for="data.lines" t:as="line">
-    <portal-component name="field" t:attr-key="line.key">
-      <portal-prop name="for" t:value="line.controlId"/>
-      <portal-prop name="label" value="Quantity"/>
-      <portal-prop name="description" value="Minimum 1 item"/>
-      <portal-prop name="descriptionId" t:value="line.descriptionId"/>
-      <portal-prop name="error" t:value="line.error"/>
-      <portal-prop name="errorId" t:value="line.errorId"/>
-      <portal-component name="input">
-        <portal-prop name="id" t:value="line.controlId"/>
-        <portal-prop name="name" t:value="line.controlId"/>
-        <portal-prop name="type" value="number"/>
-        <portal-prop name="min" value="1"/>
-        <portal-prop name="value" t:value="line.quantity"/>
-        <portal-prop name="invalid" t:value="line.invalid"/>
-        <portal-prop name="describedby" t:value="line.describedby"/>
-      </portal-component>
-    </portal-component>
+    <ui:field t:bind-key="line.key" t:bind-for="line.controlId" label="Quantity" description="Minimum 1 item" t:bind-descriptionId="line.descriptionId" t:bind-error="line.error" t:bind-errorId="line.errorId">
+      <ui:input t:bind-id="line.controlId" t:bind-name="line.controlId" type="number" min="1" t:bind-value="line.quantity" t:bind-invalid="line.invalid" t:bind-describedby="line.describedby">
+      </ui:input>
+    </ui:field>
   </div>
 </section>
 ```
 
 The caller slot can still read `line`; it cannot read Field's private props. Keep the `describedby` list limited to elements actually rendered: omit the error ID when there is no error. The input value remains a string even when its HTML type is number; validate/coerce native form input on the server. This example deliberately uses unique control names because repeated-name collection behavior belongs to the form handler contract, not the component library.
+
+## Migration
+
+The old `portal-component`, `portal-prop`, `portal-fill` and `portal-outlet` syntax is rejected. Rename invocations to `ui:NAME`, move literal props onto attributes, move typed props to `t:bind-PROP`, and rename fills/outlets to `ui:fill`/`ui:outlet`. Use `t:bind-key` for dynamic identity. Republish authored sites after migration; old component-bearing compiled snapshots must be rebuilt. No compatibility alias is provided.

@@ -13,7 +13,7 @@ test('all components have an exact contract and executable example', async () =>
   const catalogue=await loadCatalogue();
   assert.ok(catalogue.components.length>=24);
   for(const component of catalogue.components) {
-    assert.ok(component.usage.includes(`name="${component.name}"`));
+    assert.ok(component.usage.includes(`<ui:${component.name}`));
     assert.ok(component.accessibility.length>30);
     assert.ok(component.template.includes('xmlns:t="urn:cococo:dataxml"'));
   }

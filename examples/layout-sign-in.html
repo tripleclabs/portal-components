@@ -1,4 +1,4 @@
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-sign-in">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-sign-in">
   <header class="recipe-header">
     <a class="recipe-brand" href="#page-content">
       <span aria-hidden="true">p.</span>
@@ -38,40 +38,23 @@
         <p class="recipe-muted">Sign in to your Paper &amp; Form account.</p>
       </div>
       <div class="recipe-fields" role="group" aria-label="Example sign-in fields">
-        <portal-component name="field">
-          <portal-prop name="for" value="email"/>
-          <portal-prop name="label" value="Email address"/>
-          <portal-component name="input">
-            <portal-prop name="id" value="email"/>
-            <portal-prop name="name" value="email"/>
-            <portal-prop name="type" value="email"/>
-            <portal-prop name="value" value=""/>
-            <portal-prop name="placeholder" value="you@company.com"/>
-            <portal-prop name="autocomplete" value="off"/>
-          </portal-component>
-        </portal-component>
-        <portal-component name="field">
-          <portal-prop name="for" value="password"/>
-          <portal-prop name="label" value="Password"/>
-          <portal-component name="input">
-            <portal-prop name="id" value="password"/>
-            <portal-prop name="name" value="password"/>
-            <portal-prop name="type" value="password"/>
-            <portal-prop name="value" value=""/>
-            <portal-prop name="autocomplete" value="off"/>
-          </portal-component>
-        </portal-component>
+        <ui:field for="email" label="Email address">
+          <ui:input id="email" name="email" type="email" value="" placeholder="you@company.com" autocomplete="off">
+          </ui:input>
+        </ui:field>
+        <ui:field for="password" label="Password">
+          <ui:input id="password" name="password" type="password" value="" autocomplete="off">
+          </ui:input>
+        </ui:field>
         <p class="recipe-muted recipe-small">Demo only. Please do not enter real credentials.</p>
-        <portal-component name="button">
-          <portal-prop name="disabled" t:value="true"/>
-          <portal-prop name="size" value="lg"/>
+        <ui:button t:bind-disabled="true" size="lg">
           Sign in
-        </portal-component>
+        </ui:button>
       </div>
-      <portal-component name="disclosure">
-        <portal-fill name="summary">Need help signing in?</portal-fill>
+      <ui:disclosure>
+        <ui:fill name="summary">Need help signing in?</ui:fill>
         <p>In your portal, link this section to password recovery or your customer support team. This example has no authentication service.</p>
-      </portal-component>
+      </ui:disclosure>
       <p class="recipe-small recipe-muted">New to Paper &amp; Form? Your account contact can invite you to the customer portal.</p>
       <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>
     </section>

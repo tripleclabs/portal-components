@@ -1,9 +1,9 @@
-<section xmlns:t="urn:cococo:dataxml" class="portal-empty-state">
+<section xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-empty-state">
   <h2 t:text="props.title"/>
   <div>
-    <portal-outlet name="default"/>
+    <ui:outlet name="default"/>
   </div>
   <div t:if="slots.actions">
-    <portal-outlet name="actions"/>
+    <ui:outlet name="actions"/>
   </div>
 </section>

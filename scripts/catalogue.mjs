@@ -18,7 +18,8 @@ export async function loadCatalogue() {
     item.definition = JSON.parse(await read(item.contract));
     item.usage = await read(item.example);
     item.template = await read(item.source);
-    if (!item.usage.includes('xmlns:t="urn:cococo:dataxml"')) throw new Error(`Missing canonical namespace: ${item.name}`);
+    if (!item.usage.includes('xmlns:t="urn:cococo:dataxml"') || !item.usage.includes('xmlns:ui="urn:cococo:ui"')) throw new Error(`Missing canonical namespace: ${item.name}`);
+    if (/<portal-(component|prop|fill|outlet)\b/.test(item.usage + item.template)) throw new Error(`Legacy component authoring: ${item.name}`);
     if (!item.definition.props || !item.definition.slots) throw new Error(`Missing contract fields: ${item.name}`);
     for (const [prop, config] of Object.entries(item.definition.props)) {
       if (!['string','boolean','integer','number','array','object','any'].includes(config.type)) throw new Error(`Invalid prop type ${item.name}.${prop}`);
@@ -33,7 +34,8 @@ export async function loadCatalogue() {
     if (item.example !== `examples/${item.name}.html` || item.rendered !== `rendered/${item.name}.html`) throw new Error(`Unexpected layout path: ${item.name}`);
     if (!item.title || !item.integration || !item.components?.every(name=>names.has(name))) throw new Error(`Incomplete layout recipe: ${item.name}`);
     item.usage = await read(item.example);
-    if (!item.usage.includes('xmlns:t="urn:cococo:dataxml"')) throw new Error(`Missing layout namespace: ${item.name}`);
+    if (!item.usage.includes('xmlns:t="urn:cococo:dataxml"') || !item.usage.includes('xmlns:ui="urn:cococo:ui"')) throw new Error(`Missing layout namespace: ${item.name}`);
+    if (/<portal-(component|prop|fill|outlet)\b/.test(item.usage)) throw new Error(`Legacy layout authoring: ${item.name}`);
   }
   const files = await readdir(path.join(root, 'components'));
   const expected = [...names].flatMap(n => [`${n}.html`, `${n}.json`]).sort();

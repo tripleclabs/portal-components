@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Replace verbose component/prop elements with `ui:NAME`, literal attributes and typed `t:bind-PROP`. Named fills and template outlets use `ui:fill` and `ui:outlet`.
+- Migrate all component templates, 28 examples and authoring references. Old component syntax is rejected; migrate and republish existing sites.
+
+
 ## 0.1.1
 
 - Expanded semantic colour pairs, typography, border, focus, shadow and density tokens.

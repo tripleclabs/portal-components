@@ -1,9 +1,9 @@
-<div xmlns:t="urn:cococo:dataxml" class="portal-field">
+<div xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-field">
   <label class="portal-label" t:attr-for="props.for">
     <span t:text="props.label"/>
     <span t:if="props.required" aria-hidden="true"> *</span>
   </label>
   <p class="portal-field__description" t:attr-id="props.descriptionId" t:if="props.description" t:text="props.description"/>
-  <portal-outlet name="default"/>
+  <ui:outlet name="default"/>
   <p class="portal-field__error" t:attr-id="props.errorId" t:if="props.error" t:text="props.error"/>
 </div>

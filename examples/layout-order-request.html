@@ -1,4 +1,4 @@
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-request">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-request">
   <header class="recipe-header">
     <a class="recipe-brand" href="#page-content">
       <span aria-hidden="true">p.</span>
@@ -23,89 +23,61 @@
             <i>Made to make an impression.</i>
           </div>
         </div>
-        <portal-component name="card">
-          <portal-fill name="header">
+        <ui:card>
+          <ui:fill name="header">
             <h2>01 · The details</h2>
-          </portal-fill>
+          </ui:fill>
           <div class="recipe-fields">
             <div class="recipe-field-grid">
-              <portal-component name="field">
-                <portal-prop name="for" value="size"/>
-                <portal-prop name="label" value="Finished size"/>
-                <portal-component name="select">
-                  <portal-prop name="id" value="size"/>
-                  <portal-prop name="name" value="size"/>
+              <ui:field for="size" label="Finished size">
+                <ui:select id="size" name="size">
                   <option>85 × 55 mm · Standard</option>
                   <option>55 × 55 mm · Square</option>
-                </portal-component>
-              </portal-component>
-              <portal-component name="field">
-                <portal-prop name="for" value="paper"/>
-                <portal-prop name="label" value="Paper &amp; finish"/>
-                <portal-component name="select">
-                  <portal-prop name="id" value="paper"/>
-                  <portal-prop name="name" value="paper"/>
+                </ui:select>
+              </ui:field>
+              <ui:field for="paper" label="Paper &amp; finish">
+                <ui:select id="paper" name="paper">
                   <option>450gsm · Soft-touch</option>
                   <option>350gsm · Uncoated</option>
-                </portal-component>
-              </portal-component>
-              <portal-component name="field">
-                <portal-prop name="for" value="quantity"/>
-                <portal-prop name="label" value="Quantity"/>
-                <portal-component name="input">
-                  <portal-prop name="id" value="quantity"/>
-                  <portal-prop name="name" value="quantity"/>
-                  <portal-prop name="type" value="number"/>
-                  <portal-prop name="value" value="500"/>
-                  <portal-prop name="min" value="250"/>
-                  <portal-prop name="step" value="250"/>
-                  <portal-prop name="max" value="10000"/>
-                </portal-component>
-              </portal-component>
-              <portal-component name="field">
-                <portal-prop name="for" value="printing"/>
-                <portal-prop name="label" value="Printing"/>
-                <portal-component name="select">
-                  <portal-prop name="id" value="printing"/>
-                  <portal-prop name="name" value="printing"/>
+                </ui:select>
+              </ui:field>
+              <ui:field for="quantity" label="Quantity">
+                <ui:input id="quantity" name="quantity" type="number" value="500" min="250" step="250" max="10000">
+                </ui:input>
+              </ui:field>
+              <ui:field for="printing" label="Printing">
+                <ui:select id="printing" name="printing">
                   <option>Double-sided colour</option>
                   <option>Single-sided colour</option>
-                </portal-component>
-              </portal-component>
+                </ui:select>
+              </ui:field>
             </div>
-            <portal-component name="field">
-              <portal-prop name="for" value="reference"/>
-              <portal-prop name="label" value="Your project reference"/>
-              <portal-component name="input">
-                <portal-prop name="id" value="reference"/>
-                <portal-prop name="name" value="reference"/>
-                <portal-prop name="type" value="text"/>
-                <portal-prop name="value" value="Autumn studio collection"/>
-              </portal-component>
-            </portal-component>
+            <ui:field for="reference" label="Your project reference">
+              <ui:input id="reference" name="reference" type="text" value="Autumn studio collection">
+              </ui:input>
+            </ui:field>
           </div>
-        </portal-component>
-        <portal-component name="card">
-          <portal-fill name="header">
+        </ui:card>
+        <ui:card>
+          <ui:fill name="header">
             <h2>02 · Your artwork</h2>
-          </portal-fill>
+          </ui:fill>
           <p>Supply a print-ready PDF with 3 mm bleed. Keep important details at least 4 mm from the trim edge.</p>
-          <portal-component name="alert">
-            <portal-prop name="variant" value="info"/>
+          <ui:alert variant="info">
             This static example has no upload service. Connect your portal’s authorised Folder upload flow before accepting artwork.
-          </portal-component>
-          <portal-component name="disclosure">
-            <portal-fill name="summary">Artwork checklist</portal-fill>
+          </ui:alert>
+          <ui:disclosure>
+            <ui:fill name="summary">Artwork checklist</ui:fill>
             <ul>
               <li>CMYK colour, with images at 300 dpi.</li>
               <li>Fonts embedded or converted to outlines.</li>
               <li>Front and back supplied as separate PDF pages.</li>
             </ul>
-          </portal-component>
-        </portal-component>
+          </ui:disclosure>
+        </ui:card>
       </div>
       <aside class="recipe-stack request-summary" aria-label="Example quote">
-        <portal-component name="card">
+        <ui:card>
           <p class="recipe-kicker">YOUR PRINT, AT A GLANCE</p>
           <h2>Business cards</h2>
           <p class="recipe-muted">
@@ -113,10 +85,9 @@
             <br/>
             450gsm soft-touch · Double-sided
           </p>
-          <portal-component name="badge">
-            <portal-prop name="variant" value="neutral"/>
+          <ui:badge variant="neutral">
             Sample quote
-          </portal-component>
+          </ui:badge>
           <dl class="summary-list">
             <div>
               <dt>Printing</dt>
@@ -136,17 +107,15 @@
             </div>
           </dl>
           <p class="recipe-small recipe-muted">Estimated dispatch in 3–5 working days after artwork approval.</p>
-          <portal-component name="button">
-            <portal-prop name="disabled" t:value="true"/>
-            <portal-prop name="size" value="lg"/>
+          <ui:button t:bind-disabled="true" size="lg">
             Review your order
-          </portal-component>
+          </ui:button>
           <p class="recipe-small recipe-muted">Illustrative pricing. Changing options does not recalculate this sample quote.</p>
-        </portal-component>
-        <portal-component name="disclosure">
-          <portal-fill name="summary">What happens next?</portal-fill>
+        </ui:card>
+        <ui:disclosure>
+          <ui:fill name="summary">What happens next?</ui:fill>
           <p>In a connected portal, the server recalculates your quote and validates artwork before accepting your order. Always confirm the final price before payment.</p>
-        </portal-component>
+        </ui:disclosure>
       </aside>
     </div>
     <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>

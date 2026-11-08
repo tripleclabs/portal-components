@@ -4,10 +4,10 @@ Read `docs/authoring.md` and `docs/components.md` before generating a page. `cat
 
 ## Hard rules
 
-1. Write XML-shaped HTML with `xmlns:t="urn:cococo:dataxml"`. Close void elements in source: `<input/>`.
-2. Invoke `<portal-component name="button">`. Pass literal props with `<portal-prop name="variant" value="secondary"/>`; pass typed data with `<portal-prop name="disabled" t:value="input.disabled"/>`. Do not invent Vue bindings, JS expressions or direct prop attributes.
-3. Unnamed children fill the default slot. Named content uses `<portal-fill name="footer">`. Caller slots keep caller scope; component internals only receive `props`, slot-presence flags and `component.id`.
-4. Only use props and slots listed in the component contract. Names/enum values are exact. Use `t:value="true"` / `t:value="false"` for boolean constants and `t:value="65"` for numeric constants; `value` always supplies a string. Dynamic values must have the declared type.
+1. Write XML-shaped HTML with `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"`. Close void elements in source: `<input/>`.
+2. Invoke `<ui:button variant="secondary" t:bind-disabled="input.disabled">`. Literal attributes supply strings; `t:bind-PROP` supplies a typed DataXML expression. No JavaScript expressions, Vue bindings or prop child elements.
+3. Unnamed children fill the default slot. Named content uses `<ui:fill name="footer">`. Templates use `<ui:outlet/>`. Caller slots keep caller scope; component internals only receive `props`, slot-presence flags and `component.id`.
+4. Only use declared props and slots. Names/enum values are exact and case-sensitive, including camelCase props. Use `t:bind-disabled="true"` / `"false"` for boolean constants and `t:bind-value="65"` for a numeric prop. Literal `disabled="true"` is a string and fails a boolean contract. Use `key` or `t:bind-key` for component identity, not a prop. The old portal-component/portal-prop/portal-fill/portal-outlet syntax is rejected.
 5. Components do not fetch or mutate. Keep Lua in page/server handlers and use normal protected page forms. No `<script>`, onclick, client Lua or arbitrary networking.
 6. Use real HTML labels, control ids, names and native form semantics. Set button type=submit intentionally. Provide unique ids for repeated controls, and match `for`/`describedby` exactly.
 7. Internal URLs use the standard Portal mount-aware helpers/HTML handling. Do not hardcode a staff-preview prefix.
@@ -30,37 +30,34 @@ Use `docs/layouts.md` for sign-in, print catalogue, order tracking and order req
 
 ## Props
 
-Literal values are supplied through `portal-prop` children:
+Declare `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` on the document root. Literal attributes supply string props; `t:bind-PROP` preserves the JSON type of a DataXML expression:
 
 ```xml
-<portal-component name="button">
-  <portal-prop name="variant" value="secondary"/>
-  <portal-prop name="disabled" t:value="true"/>
+<ui:button xmlns:t="urn:cococo:dataxml" xmlns:ui="urn:cococo:ui" variant="secondary" t:bind-disabled="true">
   Save draft
-</portal-component>
+</ui:button>
 ```
 
 Dynamic values use the existing DataXML expression evaluator:
 
 ```xml
-<portal-component name="badge">
-  <portal-prop name="variant" t:value="data.statusVariant"/>
+<ui:badge xmlns:t="urn:cococo:dataxml" xmlns:ui="urn:cococo:ui" t:bind-variant="data.statusVariant">
   <span t:text="data.statusLabel"/>
-</portal-component>
+</ui:badge>
 ```
 
-A string, number or boolean stays that type; values are validated before rendering. Defaults apply when a prop is absent. Explicit null is accepted only when declared nullable. Unknown props, invalid types/enums and missing required values are errors. Do not use direct attributes such as `<portal-component variant="secondary">`.
+A string, number or boolean stays that type; values are validated before rendering. Defaults apply when a prop is absent. Explicit null is accepted only when declared nullable. Unknown props, invalid types/enums and missing required values are errors. Attribute names match declared props exactly, including camelCase names. Native HTML still uses `t:attr-*`; component props use `t:bind-*`. There is no automatic attribute fallthrough.
 
 ## Slots and isolation
 
-Unnamed children fill the default slot. `portal-fill` selects a declared named slot. Content runs in the caller's lexical scope; a child's template sees its own props, `slots.<name>` presence flags and `component.id`, not caller data or credentials. Empty supplied slots suppress fallback content. Named fills are not separate components and cannot fetch data.
+Unnamed children fill the default slot. `ui:fill` selects a declared named slot. Content runs in the caller's lexical scope; a child's template sees its own props, `slots.<name>` presence flags and `component.id`, not caller data or credentials. Empty supplied slots suppress fallback content. Named fills are not separate components and cannot fetch data.
 
-A component source has one root and uses `portal-outlet`:
+A component source has one root and uses `ui:outlet`:
 
 ```xml
-<section xmlns:t="urn:cococo:dataxml">
-  <header t:if="slots.header"><portal-outlet name="header"/></header>
-  <portal-outlet name="default"><p>No content supplied.</p></portal-outlet>
+<section xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml">
+  <header t:if="slots.header"><ui:outlet name="header"/></header>
+  <ui:outlet name="default"><p>No content supplied.</p></ui:outlet>
 </section>
 ```
 
@@ -80,22 +77,14 @@ This illustrates a local custom component, not a replacement for the richer bund
 Use a caller-owned form and page-owned action handler. The handler must be declared in the page/site contract; components do not register it implicitly.
 
 ```xml
-<form xmlns:t="urn:cococo:dataxml" data-portal-action="saveContact">
-  <portal-component name="field">
-    <portal-prop name="for" value="customer-email"/>
-    <portal-prop name="label" value="Email address"/>
-    <portal-component name="input">
-      <portal-prop name="id" value="customer-email"/>
-      <portal-prop name="name" value="email"/>
-      <portal-prop name="type" value="email"/>
-      <portal-prop name="autocomplete" value="email"/>
-      <portal-prop name="required" t:value="true"/>
-    </portal-component>
-  </portal-component>
-  <portal-component name="button">
-    <portal-prop name="type" value="submit"/>
+<form xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" data-portal-action="saveContact">
+  <ui:field for="customer-email" label="Email address">
+    <ui:input id="customer-email" name="email" type="email" autocomplete="email" t:bind-required="true">
+    </ui:input>
+  </ui:field>
+  <ui:button type="submit">
     Save contact
-  </portal-component>
+  </ui:button>
 </form>
 ```
 
@@ -111,9 +100,9 @@ To override Card, copy both `components/card.html` and `components/card.json` to
 
 | Incorrect | Correct |
 | --- | --- |
-| `<Button variant="primary">` | `<portal-component name="button"><portal-prop name="variant" value="primary"/>…</portal-component>` |
-| `:disabled="loading"` | `<portal-prop name="disabled" t:value="input.loading"/>` with a boolean |
-| `<template #footer>` | `<portal-fill name="footer">…</portal-fill>` |
+| `<Button variant="primary">` | `<ui:button variant="primary">…</ui:button>` |
+| `:disabled="loading"` | `t:bind-disabled="input.loading"` with a boolean |
+| `<template #footer>` | `<ui:fill name="footer">…</ui:fill>` |
 | `onclick="save()"` | A page-owned protected native form action |
 | A component reads `data.customer` implicitly | Pass a declared prop from the caller |
 | Copy only component HTML | Copy the `.html` and `.json` pair |
@@ -134,30 +123,21 @@ Give the page loader a view model containing unique association IDs. For example
 Use a keyed invocation inside the DataXML loop:
 
 ```xml
-<section xmlns:t="urn:cococo:dataxml">
+<section xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml">
   <div t:for="data.lines" t:as="line">
-    <portal-component name="field" t:attr-key="line.key">
-      <portal-prop name="for" t:value="line.controlId"/>
-      <portal-prop name="label" value="Quantity"/>
-      <portal-prop name="description" value="Minimum 1 item"/>
-      <portal-prop name="descriptionId" t:value="line.descriptionId"/>
-      <portal-prop name="error" t:value="line.error"/>
-      <portal-prop name="errorId" t:value="line.errorId"/>
-      <portal-component name="input">
-        <portal-prop name="id" t:value="line.controlId"/>
-        <portal-prop name="name" t:value="line.controlId"/>
-        <portal-prop name="type" value="number"/>
-        <portal-prop name="min" value="1"/>
-        <portal-prop name="value" t:value="line.quantity"/>
-        <portal-prop name="invalid" t:value="line.invalid"/>
-        <portal-prop name="describedby" t:value="line.describedby"/>
-      </portal-component>
-    </portal-component>
+    <ui:field t:bind-key="line.key" t:bind-for="line.controlId" label="Quantity" description="Minimum 1 item" t:bind-descriptionId="line.descriptionId" t:bind-error="line.error" t:bind-errorId="line.errorId">
+      <ui:input t:bind-id="line.controlId" t:bind-name="line.controlId" type="number" min="1" t:bind-value="line.quantity" t:bind-invalid="line.invalid" t:bind-describedby="line.describedby">
+      </ui:input>
+    </ui:field>
   </div>
 </section>
 ```
 
 The caller slot can still read `line`; it cannot read Field's private props. Keep the `describedby` list limited to elements actually rendered: omit the error ID when there is no error. The input value remains a string even when its HTML type is number; validate/coerce native form input on the server. This example deliberately uses unique control names because repeated-name collection behavior belongs to the form handler contract, not the component library.
+
+## Migration
+
+The old `portal-component`, `portal-prop`, `portal-fill` and `portal-outlet` syntax is rejected. Rename invocations to `ui:NAME`, move literal props onto attributes, move typed props to `t:bind-PROP`, and rename fills/outlets to `ui:fill`/`ui:outlet`. Use `t:bind-key` for dynamic identity. Republish authored sites after migration; old component-bearing compiled snapshots must be rebuilt. No compatibility alias is provided.
 
 
 # Theme tokens
@@ -326,7 +306,7 @@ Generated from styles/tokens.css. Override on the theme root or a component wrap
 
 # Component reference
 
-Generated from catalogue.json, component contracts and executable example source. Do not edit this file directly. Library 0.1.1, contract 1.
+Generated from catalogue.json, component contracts and executable example source. Do not edit this file directly. Library 0.2.0, contract 1.
 
 ## button
 
@@ -350,13 +330,12 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
   <div style="display:flex;gap:1rem;flex-wrap:wrap">
-    <portal-component name="button">Continue</portal-component>
-    <portal-component name="button">
-      <portal-prop name="variant" value="secondary"/>
+    <ui:button>Continue</ui:button>
+    <ui:button variant="secondary">
       Save draft
-    </portal-component>
+    </ui:button>
   </div>
 </main>
 ```
@@ -384,11 +363,10 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="link">
-    <portal-prop name="href" value="#details"/>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:link href="#details">
     View order
-  </portal-component>
+  </ui:link>
 </main>
 ```
 
@@ -413,11 +391,10 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="badge">
-    <portal-prop name="variant" value="success"/>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:badge variant="success">
     Ready for print
-  </portal-component>
+  </ui:badge>
 </main>
 ```
 
@@ -442,16 +419,16 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="card">
-    <portal-fill name="header">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:card>
+    <ui:fill name="header">
       <h2>Business cards</h2>
-    </portal-fill>
+    </ui:fill>
     <p>Premium stock, printed with care.</p>
-    <portal-fill name="footer">
+    <ui:fill name="footer">
       <p>From £24</p>
-    </portal-fill>
-  </portal-component>
+    </ui:fill>
+  </ui:card>
 </main>
 ```
 
@@ -478,14 +455,13 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="alert">
-    <portal-prop name="variant" value="warning"/>
-    <portal-fill name="title">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:alert variant="warning">
+    <ui:fill name="title">
       <strong>Artwork needs attention</strong>
-    </portal-fill>
+    </ui:fill>
     <p>Please upload a PDF with embedded fonts.</p>
-  </portal-component>
+  </ui:alert>
 </main>
 ```
 
@@ -508,8 +484,8 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="separator"/>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:separator />
 </main>
 ```
 
@@ -534,10 +510,10 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="container">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:container>
     <p>Readable content with comfortable page gutters.</p>
-  </portal-component>
+  </ui:container>
 </main>
 ```
 
@@ -564,13 +540,12 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="stack">
-    <portal-prop name="direction" value="horizontal"/>
-    <portal-component name="badge">Design</portal-component>
-    <portal-component name="badge">Print</portal-component>
-    <portal-component name="badge">Deliver</portal-component>
-  </portal-component>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:stack direction="horizontal">
+    <ui:badge>Design</ui:badge>
+    <ui:badge>Print</ui:badge>
+    <ui:badge>Deliver</ui:badge>
+  </ui:stack>
 </main>
 ```
 
@@ -596,12 +571,12 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="grid">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:grid>
     <div class="portal-demo-box">One</div>
     <div class="portal-demo-box">Two</div>
     <div class="portal-demo-box">Three</div>
-  </portal-component>
+  </ui:grid>
 </main>
 ```
 
@@ -632,18 +607,11 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="field">
-    <portal-prop name="for" value="contact-name"/>
-    <portal-prop name="label" value="Your name"/>
-    <portal-prop name="required" t:value="true"/>
-    <portal-component name="input">
-      <portal-prop name="id" value="contact-name"/>
-      <portal-prop name="name" value="name"/>
-      <portal-prop name="autocomplete" value="name"/>
-      <portal-prop name="required" t:value="true"/>
-    </portal-component>
-  </portal-component>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:field for="contact-name" label="Your name" t:bind-required="true">
+    <ui:input id="contact-name" name="name" autocomplete="name" t:bind-required="true">
+    </ui:input>
+  </ui:field>
 </main>
 ```
 
@@ -682,15 +650,10 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
   <label for="email-example">Email address</label>
-  <portal-component name="input">
-    <portal-prop name="id" value="email-example"/>
-    <portal-prop name="name" value="email"/>
-    <portal-prop name="type" value="email"/>
-    <portal-prop name="autocomplete" value="email"/>
-    <portal-prop name="placeholder" value="you@example.com"/>
-  </portal-component>
+  <ui:input id="email-example" name="email" type="email" autocomplete="email" placeholder="you@example.com">
+  </ui:input>
 </main>
 ```
 
@@ -725,12 +688,10 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
   <label for="notes-example">Delivery notes</label>
-  <portal-component name="textarea">
-    <portal-prop name="id" value="notes-example"/>
-    <portal-prop name="name" value="notes"/>
-  </portal-component>
+  <ui:textarea id="notes-example" name="notes">
+  </ui:textarea>
 </main>
 ```
 
@@ -761,14 +722,12 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
   <label for="paper-example">Paper finish</label>
-  <portal-component name="select">
-    <portal-prop name="id" value="paper-example"/>
-    <portal-prop name="name" value="finish"/>
+  <ui:select id="paper-example" name="finish">
     <option value="silk">Silk</option>
     <option value="uncoated">Uncoated</option>
-  </portal-component>
+  </ui:select>
 </main>
 ```
 
@@ -798,12 +757,10 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="checkbox">
-    <portal-prop name="name" value="proof"/>
-    <portal-prop name="value" value="yes"/>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:checkbox name="proof" value="yes">
     Send me a proof
-  </portal-component>
+  </ui:checkbox>
 </main>
 ```
 
@@ -833,12 +790,10 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="radio">
-    <portal-prop name="name" value="shipping"/>
-    <portal-prop name="value" value="standard"/>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:radio name="shipping" value="standard">
     Standard delivery
-  </portal-component>
+  </ui:radio>
 </main>
 ```
 
@@ -863,19 +818,13 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
   <label for="quantity-error">Quantity</label>
-  <portal-component name="input">
-    <portal-prop name="id" value="quantity-error"/>
-    <portal-prop name="name" value="quantity"/>
-    <portal-prop name="value" value="0"/>
-    <portal-prop name="invalid" t:value="true"/>
-    <portal-prop name="describedby" value="quantity-message"/>
-  </portal-component>
-  <portal-component name="field-error">
-    <portal-prop name="id" value="quantity-message"/>
+  <ui:input id="quantity-error" name="quantity" value="0" t:bind-invalid="true" describedby="quantity-message">
+  </ui:input>
+  <ui:field-error id="quantity-message">
     Enter a quantity of at least 1.
-  </portal-component>
+  </ui:field-error>
 </main>
 ```
 
@@ -901,21 +850,17 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="error-summary">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:error-summary>
     <ul>
       <li>
         <a href="#email-example">Enter a valid email address</a>
       </li>
     </ul>
-  </portal-component>
+  </ui:error-summary>
   <label for="email-example">Email address</label>
-  <portal-component name="input">
-    <portal-prop name="id" value="email-example"/>
-    <portal-prop name="name" value="email"/>
-    <portal-prop name="type" value="email"/>
-    <portal-prop name="invalid" t:value="true"/>
-  </portal-component>
+  <ui:input id="email-example" name="email" type="email" t:bind-invalid="true">
+  </ui:input>
 </main>
 ```
 
@@ -941,11 +886,11 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="disclosure">
-    <portal-fill name="summary">What file format should I upload?</portal-fill>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:disclosure>
+    <ui:fill name="summary">What file format should I upload?</ui:fill>
     <p>Use a print-ready PDF with embedded fonts.</p>
-  </portal-component>
+  </ui:disclosure>
 </main>
 ```
 
@@ -971,20 +916,19 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="table">
-    <portal-prop name="caption" value="Recent orders"/>
-    <portal-fill name="head">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:table caption="Recent orders">
+    <ui:fill name="head">
       <tr>
         <th scope="col">Order</th>
         <th scope="col">Status</th>
       </tr>
-    </portal-fill>
+    </ui:fill>
     <tr>
       <th scope="row">#1042</th>
       <td>In production</td>
     </tr>
-  </portal-component>
+  </ui:table>
 </main>
 ```
 
@@ -1009,15 +953,15 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="breadcrumbs">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:breadcrumbs>
     <li>
       <a href="#home">Home</a>
     </li>
     <li>
       <span aria-current="page">Orders</span>
     </li>
-  </portal-component>
+  </ui:breadcrumbs>
 </main>
 ```
 
@@ -1042,8 +986,8 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="pagination">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:pagination>
     <li>
       <span aria-disabled="true">Previous</span>
     </li>
@@ -1056,7 +1000,7 @@ Slots:
     <li>
       <a href="?page=2">Next</a>
     </li>
-  </portal-component>
+  </ui:pagination>
 </main>
 ```
 
@@ -1082,11 +1026,10 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="empty-state">
-    <portal-prop name="title" value="No orders yet"/>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:empty-state title="No orders yet">
     <p>Your orders will appear here after checkout.</p>
-  </portal-component>
+  </ui:empty-state>
 </main>
 ```
 
@@ -1111,13 +1054,12 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
   <div aria-busy="true">
     <p>Loading order details…</p>
-    <portal-component name="skeleton"/>
-    <portal-component name="skeleton">
-      <portal-prop name="shape" value="block"/>
-    </portal-component>
+    <ui:skeleton />
+    <ui:skeleton shape="block">
+    </ui:skeleton>
   </div>
 </main>
 ```
@@ -1145,12 +1087,9 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="progress">
-    <portal-prop name="value" t:value="65"/>
-    <portal-prop name="max" t:value="100"/>
-    <portal-prop name="label" value="Artwork processed: 65%"/>
-  </portal-component>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:progress t:bind-value="65" t:bind-max="100" label="Artwork processed: 65%">
+  </ui:progress>
 </main>
 ```
 
@@ -1177,7 +1116,7 @@ Use your Portal authentication flow; never put credentials in query strings or c
 [DataXML source](../examples/layout-sign-in.html) · [Rendered example](../rendered/layout-sign-in.html)
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-sign-in">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-sign-in">
   <header class="recipe-header">
     <a class="recipe-brand" href="#page-content">
       <span aria-hidden="true">p.</span>
@@ -1217,40 +1156,23 @@ Use your Portal authentication flow; never put credentials in query strings or c
         <p class="recipe-muted">Sign in to your Paper &amp; Form account.</p>
       </div>
       <div class="recipe-fields" role="group" aria-label="Example sign-in fields">
-        <portal-component name="field">
-          <portal-prop name="for" value="email"/>
-          <portal-prop name="label" value="Email address"/>
-          <portal-component name="input">
-            <portal-prop name="id" value="email"/>
-            <portal-prop name="name" value="email"/>
-            <portal-prop name="type" value="email"/>
-            <portal-prop name="value" value=""/>
-            <portal-prop name="placeholder" value="you@company.com"/>
-            <portal-prop name="autocomplete" value="off"/>
-          </portal-component>
-        </portal-component>
-        <portal-component name="field">
-          <portal-prop name="for" value="password"/>
-          <portal-prop name="label" value="Password"/>
-          <portal-component name="input">
-            <portal-prop name="id" value="password"/>
-            <portal-prop name="name" value="password"/>
-            <portal-prop name="type" value="password"/>
-            <portal-prop name="value" value=""/>
-            <portal-prop name="autocomplete" value="off"/>
-          </portal-component>
-        </portal-component>
+        <ui:field for="email" label="Email address">
+          <ui:input id="email" name="email" type="email" value="" placeholder="you@company.com" autocomplete="off">
+          </ui:input>
+        </ui:field>
+        <ui:field for="password" label="Password">
+          <ui:input id="password" name="password" type="password" value="" autocomplete="off">
+          </ui:input>
+        </ui:field>
         <p class="recipe-muted recipe-small">Demo only. Please do not enter real credentials.</p>
-        <portal-component name="button">
-          <portal-prop name="disabled" t:value="true"/>
-          <portal-prop name="size" value="lg"/>
+        <ui:button t:bind-disabled="true" size="lg">
           Sign in
-        </portal-component>
+        </ui:button>
       </div>
-      <portal-component name="disclosure">
-        <portal-fill name="summary">Need help signing in?</portal-fill>
+      <ui:disclosure>
+        <ui:fill name="summary">Need help signing in?</ui:fill>
         <p>In your portal, link this section to password recovery or your customer support team. This example has no authentication service.</p>
-      </portal-component>
+      </ui:disclosure>
       <p class="recipe-small recipe-muted">New to Paper &amp; Form? Your account contact can invite you to the customer portal.</p>
       <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>
     </section>
@@ -1269,7 +1191,7 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
 [DataXML source](../examples/layout-catalogue.html) · [Rendered example](../rendered/layout-catalogue.html)
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-catalogue">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-catalogue">
   <header class="recipe-header">
     <a class="recipe-brand" href="#page-content">
       <span aria-hidden="true">p.</span>
@@ -1301,64 +1223,40 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
   </section>
   <div class="catalog-controls">
     <div class="catalog-search">
-      <portal-component name="field">
-        <portal-prop name="for" value="search"/>
-        <portal-prop name="label" value="Find your next print"/>
-        <portal-component name="input">
-          <portal-prop name="id" value="search"/>
-          <portal-prop name="name" value="search"/>
-          <portal-prop name="type" value="search"/>
-          <portal-prop name="value" value=""/>
-          <portal-prop name="placeholder" value="Try business cards or booklets"/>
-        </portal-component>
-      </portal-component>
+      <ui:field for="search" label="Find your next print">
+        <ui:input id="search" name="search" type="search" value="" placeholder="Try business cards or booklets">
+        </ui:input>
+      </ui:field>
     </div>
     <div>
-      <portal-component name="field">
-        <portal-prop name="for" value="sort"/>
-        <portal-prop name="label" value="Sort by"/>
-        <portal-component name="select">
-          <portal-prop name="id" value="sort"/>
-          <portal-prop name="name" value="sort"/>
+      <ui:field for="sort" label="Sort by">
+        <ui:select id="sort" name="sort">
           <option>Recommended</option>
           <option>Price: low to high</option>
-        </portal-component>
-      </portal-component>
+        </ui:select>
+      </ui:field>
     </div>
   </div>
   <div class="catalog-layout">
     <aside class="catalog-filters" aria-labelledby="filters-title">
       <h2 id="filters-title">Made for your moment</h2>
-      <portal-component name="disclosure">
-        <portal-prop name="open" t:value="true"/>
-        <portal-fill name="summary">Product categories</portal-fill>
+      <ui:disclosure t:bind-open="true">
+        <ui:fill name="summary">Product categories</ui:fill>
         <div class="recipe-fields">
-          <portal-component name="checkbox">
-            <portal-prop name="name" value="category"/>
-            <portal-prop name="value" value="all"/>
-            <portal-prop name="checked" t:value="true"/>
+          <ui:checkbox name="category" value="all" t:bind-checked="true">
             All products
-          </portal-component>
-          <portal-component name="checkbox">
-            <portal-prop name="name" value="category"/>
-            <portal-prop name="value" value="stationery"/>
-            <portal-prop name="checked" t:value="false"/>
+          </ui:checkbox>
+          <ui:checkbox name="category" value="stationery" t:bind-checked="false">
             Business stationery
-          </portal-component>
-          <portal-component name="checkbox">
-            <portal-prop name="name" value="category"/>
-            <portal-prop name="value" value="marketing"/>
-            <portal-prop name="checked" t:value="false"/>
+          </ui:checkbox>
+          <ui:checkbox name="category" value="marketing" t:bind-checked="false">
             Marketing &amp; events
-          </portal-component>
-          <portal-component name="checkbox">
-            <portal-prop name="name" value="category"/>
-            <portal-prop name="value" value="packaging"/>
-            <portal-prop name="checked" t:value="false"/>
+          </ui:checkbox>
+          <ui:checkbox name="category" value="packaging" t:bind-checked="false">
             Packaging &amp; labels
-          </portal-component>
+          </ui:checkbox>
         </div>
-      </portal-component>
+      </ui:disclosure>
       <p class="recipe-small recipe-muted">Search, sorting and filters are shown as composition examples. This static catalogue does not filter.</p>
     </aside>
     <section aria-labelledby="products-title">
@@ -1367,7 +1265,7 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
         <span class="recipe-muted recipe-small">6 products</span>
       </div>
       <div class="product-grid">
-        <portal-component name="card">
+        <ui:card>
           <div class="print-art print-art-cards" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -1382,10 +1280,9 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
           <div class="product-copy">
             <div class="product-heading">
               <h3>Business cards</h3>
-              <portal-component name="badge">
-                <portal-prop name="variant" value="primary"/>
+              <ui:badge variant="primary">
                 Bestseller
-              </portal-component>
+              </ui:badge>
             </div>
             <p class="recipe-muted">A small introduction. A lasting impression.</p>
             <div class="product-price">
@@ -1395,14 +1292,12 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
               </span>
               <span class="recipe-small recipe-muted">250 cards</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure business cards
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-poster" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -1426,14 +1321,12 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
               </span>
               <span class="recipe-small recipe-muted">10 prints</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure art prints
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-book" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -1457,14 +1350,12 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
               </span>
               <span class="recipe-small recipe-muted">25 booklets</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure booklets
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-label" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -1488,14 +1379,12 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
               </span>
               <span class="recipe-small recipe-muted">100 labels</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure product labels
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-postcard" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -1519,14 +1408,12 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
               </span>
               <span class="recipe-small recipe-muted">100 postcards</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure postcards
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-fold" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -1550,13 +1437,11 @@ Replace the six synthetic products with Lua loader output. Keep filter controls 
               </span>
               <span class="recipe-small recipe-muted">250 leaflets</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure folded leaflets
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
+        </ui:card>
       </div>
     </section>
   </div>
@@ -1575,7 +1460,7 @@ Fetch the order through an authorised Lua read handler scoped to the current Por
 [DataXML source](../examples/layout-order-tracking.html) · [Rendered example](../rendered/layout-order-tracking.html)
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-tracking">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-tracking">
   <header class="recipe-header">
     <a class="recipe-brand" href="#page-content">
       <span aria-hidden="true">p.</span>
@@ -1590,14 +1475,13 @@ Fetch the order through an authorised Lua read handler scoped to the current Por
         <h1>Order PF–10482</h1>
         <p class="recipe-muted">Placed 04 November 2026 · Autumn studio collection</p>
       </div>
-      <portal-component name="badge">
-        <portal-prop name="variant" value="primary"/>
+      <ui:badge variant="primary">
         In production
-      </portal-component>
+      </ui:badge>
     </div>
     <div class="tracking-layout">
       <div class="recipe-stack">
-        <portal-component name="card">
+        <ui:card>
           <div class="delivery-heading">
             <div>
               <p class="recipe-kicker">ESTIMATED DELIVERY</p>
@@ -1636,18 +1520,17 @@ Fetch the order through an authorised Lua read handler scoped to the current Por
               </div>
             </li>
           </ol>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <p class="recipe-small recipe-muted">On smaller screens, scroll the table to view every column.</p>
-      <portal-component name="table">
-            <portal-prop name="caption" value="Your print order"/>
-            <portal-fill name="head">
+      <ui:table caption="Your print order">
+            <ui:fill name="head">
               <tr>
                 <th scope="col">Item</th>
                 <th scope="col">Quantity</th>
                 <th scope="col">Total</th>
               </tr>
-            </portal-fill>
+            </ui:fill>
             <tr>
               <th scope="row">
                 Business cards
@@ -1666,14 +1549,14 @@ Fetch the order through an authorised Lua read handler scoped to the current Por
               <td>250</td>
               <td>£55.00</td>
             </tr>
-          </portal-component>
-        </portal-component>
+          </ui:table>
+        </ui:card>
       </div>
       <aside class="recipe-stack" aria-label="Delivery and order details">
-        <portal-component name="card">
-          <portal-fill name="header">
+        <ui:card>
+          <ui:fill name="header">
             <h2>Delivering to</h2>
-          </portal-fill>
+          </ui:fill>
           <address>
             Alex Morgan
             <br/>
@@ -1686,11 +1569,11 @@ Fetch the order through an authorised Lua read handler scoped to the current Por
             United Kingdom
           </address>
           <p class="recipe-small recipe-muted">Standard delivery · £6.00</p>
-        </portal-component>
-        <portal-component name="card">
-          <portal-fill name="header">
+        </ui:card>
+        <ui:card>
+          <ui:fill name="header">
             <h2>Order summary</h2>
-          </portal-fill>
+          </ui:fill>
           <dl class="summary-list">
             <div>
               <dt>Print subtotal</dt>
@@ -1709,11 +1592,11 @@ Fetch the order through an authorised Lua read handler scoped to the current Por
               <dd>£130.80</dd>
             </div>
           </dl>
-        </portal-component>
-        <portal-component name="disclosure">
-          <portal-fill name="summary">Something changed?</portal-fill>
+        </ui:card>
+        <ui:disclosure>
+          <ui:fill name="summary">Something changed?</ui:fill>
           <p>Production has started. In a live portal, contact your print team to discuss changes or delivery questions.</p>
-        </portal-component>
+        </ui:disclosure>
       </aside>
     </div>
     <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>
@@ -1732,7 +1615,7 @@ Keep editable configuration outside the replaceable quote region. Calculate and 
 [DataXML source](../examples/layout-order-request.html) · [Rendered example](../rendered/layout-order-request.html)
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-request">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-request">
   <header class="recipe-header">
     <a class="recipe-brand" href="#page-content">
       <span aria-hidden="true">p.</span>
@@ -1757,89 +1640,61 @@ Keep editable configuration outside the replaceable quote region. Calculate and 
             <i>Made to make an impression.</i>
           </div>
         </div>
-        <portal-component name="card">
-          <portal-fill name="header">
+        <ui:card>
+          <ui:fill name="header">
             <h2>01 · The details</h2>
-          </portal-fill>
+          </ui:fill>
           <div class="recipe-fields">
             <div class="recipe-field-grid">
-              <portal-component name="field">
-                <portal-prop name="for" value="size"/>
-                <portal-prop name="label" value="Finished size"/>
-                <portal-component name="select">
-                  <portal-prop name="id" value="size"/>
-                  <portal-prop name="name" value="size"/>
+              <ui:field for="size" label="Finished size">
+                <ui:select id="size" name="size">
                   <option>85 × 55 mm · Standard</option>
                   <option>55 × 55 mm · Square</option>
-                </portal-component>
-              </portal-component>
-              <portal-component name="field">
-                <portal-prop name="for" value="paper"/>
-                <portal-prop name="label" value="Paper &amp; finish"/>
-                <portal-component name="select">
-                  <portal-prop name="id" value="paper"/>
-                  <portal-prop name="name" value="paper"/>
+                </ui:select>
+              </ui:field>
+              <ui:field for="paper" label="Paper &amp; finish">
+                <ui:select id="paper" name="paper">
                   <option>450gsm · Soft-touch</option>
                   <option>350gsm · Uncoated</option>
-                </portal-component>
-              </portal-component>
-              <portal-component name="field">
-                <portal-prop name="for" value="quantity"/>
-                <portal-prop name="label" value="Quantity"/>
-                <portal-component name="input">
-                  <portal-prop name="id" value="quantity"/>
-                  <portal-prop name="name" value="quantity"/>
-                  <portal-prop name="type" value="number"/>
-                  <portal-prop name="value" value="500"/>
-                  <portal-prop name="min" value="250"/>
-                  <portal-prop name="step" value="250"/>
-                  <portal-prop name="max" value="10000"/>
-                </portal-component>
-              </portal-component>
-              <portal-component name="field">
-                <portal-prop name="for" value="printing"/>
-                <portal-prop name="label" value="Printing"/>
-                <portal-component name="select">
-                  <portal-prop name="id" value="printing"/>
-                  <portal-prop name="name" value="printing"/>
+                </ui:select>
+              </ui:field>
+              <ui:field for="quantity" label="Quantity">
+                <ui:input id="quantity" name="quantity" type="number" value="500" min="250" step="250" max="10000">
+                </ui:input>
+              </ui:field>
+              <ui:field for="printing" label="Printing">
+                <ui:select id="printing" name="printing">
                   <option>Double-sided colour</option>
                   <option>Single-sided colour</option>
-                </portal-component>
-              </portal-component>
+                </ui:select>
+              </ui:field>
             </div>
-            <portal-component name="field">
-              <portal-prop name="for" value="reference"/>
-              <portal-prop name="label" value="Your project reference"/>
-              <portal-component name="input">
-                <portal-prop name="id" value="reference"/>
-                <portal-prop name="name" value="reference"/>
-                <portal-prop name="type" value="text"/>
-                <portal-prop name="value" value="Autumn studio collection"/>
-              </portal-component>
-            </portal-component>
+            <ui:field for="reference" label="Your project reference">
+              <ui:input id="reference" name="reference" type="text" value="Autumn studio collection">
+              </ui:input>
+            </ui:field>
           </div>
-        </portal-component>
-        <portal-component name="card">
-          <portal-fill name="header">
+        </ui:card>
+        <ui:card>
+          <ui:fill name="header">
             <h2>02 · Your artwork</h2>
-          </portal-fill>
+          </ui:fill>
           <p>Supply a print-ready PDF with 3 mm bleed. Keep important details at least 4 mm from the trim edge.</p>
-          <portal-component name="alert">
-            <portal-prop name="variant" value="info"/>
+          <ui:alert variant="info">
             This static example has no upload service. Connect your portal’s authorised Folder upload flow before accepting artwork.
-          </portal-component>
-          <portal-component name="disclosure">
-            <portal-fill name="summary">Artwork checklist</portal-fill>
+          </ui:alert>
+          <ui:disclosure>
+            <ui:fill name="summary">Artwork checklist</ui:fill>
             <ul>
               <li>CMYK colour, with images at 300 dpi.</li>
               <li>Fonts embedded or converted to outlines.</li>
               <li>Front and back supplied as separate PDF pages.</li>
             </ul>
-          </portal-component>
-        </portal-component>
+          </ui:disclosure>
+        </ui:card>
       </div>
       <aside class="recipe-stack request-summary" aria-label="Example quote">
-        <portal-component name="card">
+        <ui:card>
           <p class="recipe-kicker">YOUR PRINT, AT A GLANCE</p>
           <h2>Business cards</h2>
           <p class="recipe-muted">
@@ -1847,10 +1702,9 @@ Keep editable configuration outside the replaceable quote region. Calculate and 
             <br/>
             450gsm soft-touch · Double-sided
           </p>
-          <portal-component name="badge">
-            <portal-prop name="variant" value="neutral"/>
+          <ui:badge variant="neutral">
             Sample quote
-          </portal-component>
+          </ui:badge>
           <dl class="summary-list">
             <div>
               <dt>Printing</dt>
@@ -1870,17 +1724,15 @@ Keep editable configuration outside the replaceable quote region. Calculate and 
             </div>
           </dl>
           <p class="recipe-small recipe-muted">Estimated dispatch in 3–5 working days after artwork approval.</p>
-          <portal-component name="button">
-            <portal-prop name="disabled" t:value="true"/>
-            <portal-prop name="size" value="lg"/>
+          <ui:button t:bind-disabled="true" size="lg">
             Review your order
-          </portal-component>
+          </ui:button>
           <p class="recipe-small recipe-muted">Illustrative pricing. Changing options does not recalculate this sample quote.</p>
-        </portal-component>
-        <portal-component name="disclosure">
-          <portal-fill name="summary">What happens next?</portal-fill>
+        </ui:card>
+        <ui:disclosure>
+          <ui:fill name="summary">What happens next?</ui:fill>
           <p>In a connected portal, the server recalculates your quote and validates artwork before accepting your order. Always confirm the final price before payment.</p>
-        </portal-component>
+        </ui:disclosure>
       </aside>
     </div>
     <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>

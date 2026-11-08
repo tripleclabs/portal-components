@@ -1,15 +1,14 @@
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="table">
-    <portal-prop name="caption" value="Recent orders"/>
-    <portal-fill name="head">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:table caption="Recent orders">
+    <ui:fill name="head">
       <tr>
         <th scope="col">Order</th>
         <th scope="col">Status</th>
       </tr>
-    </portal-fill>
+    </ui:fill>
     <tr>
       <th scope="row">#1042</th>
       <td>In production</td>
     </tr>
-  </portal-component>
+  </ui:table>
 </main>

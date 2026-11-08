@@ -1,13 +1,6 @@
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="field">
-    <portal-prop name="for" value="contact-name"/>
-    <portal-prop name="label" value="Your name"/>
-    <portal-prop name="required" t:value="true"/>
-    <portal-component name="input">
-      <portal-prop name="id" value="contact-name"/>
-      <portal-prop name="name" value="name"/>
-      <portal-prop name="autocomplete" value="name"/>
-      <portal-prop name="required" t:value="true"/>
-    </portal-component>
-  </portal-component>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:field for="contact-name" label="Your name" t:bind-required="true">
+    <ui:input id="contact-name" name="name" autocomplete="name" t:bind-required="true">
+    </ui:input>
+  </ui:field>
 </main>

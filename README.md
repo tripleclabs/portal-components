@@ -7,17 +7,16 @@ Ownable, token-styled DataXML building blocks for server-rendered PortalSites. T
 Compatible Portal runtimes bundle a pinned library version. Use a component directly:
 
 ```xml
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme">
-  <portal-component name="card">
-    <portal-fill name="header"><h1>Your next print project</h1></portal-fill>
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme">
+  <ui:card>
+    <ui:fill name="header"><h1>Your next print project</h1></ui:fill>
     <p>Start with a print-ready PDF.</p>
-    <portal-fill name="footer">
-      <portal-component name="button">
-        <portal-prop name="type" value="submit"/>
+    <ui:fill name="footer">
+      <ui:button type="submit">
         Continue
-      </portal-component>
-    </portal-fill>
-  </portal-component>
+      </ui:button>
+    </ui:fill>
+  </ui:card>
 </main>
 ```
 

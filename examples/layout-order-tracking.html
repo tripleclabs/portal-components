@@ -1,4 +1,4 @@
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-tracking">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-tracking">
   <header class="recipe-header">
     <a class="recipe-brand" href="#page-content">
       <span aria-hidden="true">p.</span>
@@ -13,14 +13,13 @@
         <h1>Order PF–10482</h1>
         <p class="recipe-muted">Placed 04 November 2026 · Autumn studio collection</p>
       </div>
-      <portal-component name="badge">
-        <portal-prop name="variant" value="primary"/>
+      <ui:badge variant="primary">
         In production
-      </portal-component>
+      </ui:badge>
     </div>
     <div class="tracking-layout">
       <div class="recipe-stack">
-        <portal-component name="card">
+        <ui:card>
           <div class="delivery-heading">
             <div>
               <p class="recipe-kicker">ESTIMATED DELIVERY</p>
@@ -59,18 +58,17 @@
               </div>
             </li>
           </ol>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <p class="recipe-small recipe-muted">On smaller screens, scroll the table to view every column.</p>
-      <portal-component name="table">
-            <portal-prop name="caption" value="Your print order"/>
-            <portal-fill name="head">
+      <ui:table caption="Your print order">
+            <ui:fill name="head">
               <tr>
                 <th scope="col">Item</th>
                 <th scope="col">Quantity</th>
                 <th scope="col">Total</th>
               </tr>
-            </portal-fill>
+            </ui:fill>
             <tr>
               <th scope="row">
                 Business cards
@@ -89,14 +87,14 @@
               <td>250</td>
               <td>£55.00</td>
             </tr>
-          </portal-component>
-        </portal-component>
+          </ui:table>
+        </ui:card>
       </div>
       <aside class="recipe-stack" aria-label="Delivery and order details">
-        <portal-component name="card">
-          <portal-fill name="header">
+        <ui:card>
+          <ui:fill name="header">
             <h2>Delivering to</h2>
-          </portal-fill>
+          </ui:fill>
           <address>
             Alex Morgan
             <br/>
@@ -109,11 +107,11 @@
             United Kingdom
           </address>
           <p class="recipe-small recipe-muted">Standard delivery · £6.00</p>
-        </portal-component>
-        <portal-component name="card">
-          <portal-fill name="header">
+        </ui:card>
+        <ui:card>
+          <ui:fill name="header">
             <h2>Order summary</h2>
-          </portal-fill>
+          </ui:fill>
           <dl class="summary-list">
             <div>
               <dt>Print subtotal</dt>
@@ -132,11 +130,11 @@
               <dd>£130.80</dd>
             </div>
           </dl>
-        </portal-component>
-        <portal-component name="disclosure">
-          <portal-fill name="summary">Something changed?</portal-fill>
+        </ui:card>
+        <ui:disclosure>
+          <ui:fill name="summary">Something changed?</ui:fill>
           <p>Production has started. In a live portal, contact your print team to discuss changes or delivery questions.</p>
-        </portal-component>
+        </ui:disclosure>
       </aside>
     </div>
     <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>

@@ -4,10 +4,10 @@ Read `docs/authoring.md` and `docs/components.md` before generating a page. `cat
 
 ## Hard rules
 
-1. Write XML-shaped HTML with `xmlns:t="urn:cococo:dataxml"`. Close void elements in source: `<input/>`.
-2. Invoke `<portal-component name="button">`. Pass literal props with `<portal-prop name="variant" value="secondary"/>`; pass typed data with `<portal-prop name="disabled" t:value="input.disabled"/>`. Do not invent Vue bindings, JS expressions or direct prop attributes.
-3. Unnamed children fill the default slot. Named content uses `<portal-fill name="footer">`. Caller slots keep caller scope; component internals only receive `props`, slot-presence flags and `component.id`.
-4. Only use props and slots listed in the component contract. Names/enum values are exact. Use `t:value="true"` / `t:value="false"` for boolean constants and `t:value="65"` for numeric constants; `value` always supplies a string. Dynamic values must have the declared type.
+1. Write XML-shaped HTML with `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"`. Close void elements in source: `<input/>`.
+2. Invoke `<ui:button variant="secondary" t:bind-disabled="input.disabled">`. Literal attributes supply strings; `t:bind-PROP` supplies a typed DataXML expression. No JavaScript expressions, Vue bindings or prop child elements.
+3. Unnamed children fill the default slot. Named content uses `<ui:fill name="footer">`. Templates use `<ui:outlet/>`. Caller slots keep caller scope; component internals only receive `props`, slot-presence flags and `component.id`.
+4. Only use declared props and slots. Names/enum values are exact and case-sensitive, including camelCase props. Use `t:bind-disabled="true"` / `"false"` for boolean constants and `t:bind-value="65"` for a numeric prop. Literal `disabled="true"` is a string and fails a boolean contract. Use `key` or `t:bind-key` for component identity, not a prop. The old portal-component/portal-prop/portal-fill/portal-outlet syntax is rejected.
 5. Components do not fetch or mutate. Keep Lua in page/server handlers and use normal protected page forms. No `<script>`, onclick, client Lua or arbitrary networking.
 6. Use real HTML labels, control ids, names and native form semantics. Set button type=submit intentionally. Provide unique ids for repeated controls, and match `for`/`describedby` exactly.
 7. Internal URLs use the standard Portal mount-aware helpers/HTML handling. Do not hardcode a staff-preview prefix.

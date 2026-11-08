@@ -1,4 +1,4 @@
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-catalogue">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-catalogue">
   <header class="recipe-header">
     <a class="recipe-brand" href="#page-content">
       <span aria-hidden="true">p.</span>
@@ -30,64 +30,40 @@
   </section>
   <div class="catalog-controls">
     <div class="catalog-search">
-      <portal-component name="field">
-        <portal-prop name="for" value="search"/>
-        <portal-prop name="label" value="Find your next print"/>
-        <portal-component name="input">
-          <portal-prop name="id" value="search"/>
-          <portal-prop name="name" value="search"/>
-          <portal-prop name="type" value="search"/>
-          <portal-prop name="value" value=""/>
-          <portal-prop name="placeholder" value="Try business cards or booklets"/>
-        </portal-component>
-      </portal-component>
+      <ui:field for="search" label="Find your next print">
+        <ui:input id="search" name="search" type="search" value="" placeholder="Try business cards or booklets">
+        </ui:input>
+      </ui:field>
     </div>
     <div>
-      <portal-component name="field">
-        <portal-prop name="for" value="sort"/>
-        <portal-prop name="label" value="Sort by"/>
-        <portal-component name="select">
-          <portal-prop name="id" value="sort"/>
-          <portal-prop name="name" value="sort"/>
+      <ui:field for="sort" label="Sort by">
+        <ui:select id="sort" name="sort">
           <option>Recommended</option>
           <option>Price: low to high</option>
-        </portal-component>
-      </portal-component>
+        </ui:select>
+      </ui:field>
     </div>
   </div>
   <div class="catalog-layout">
     <aside class="catalog-filters" aria-labelledby="filters-title">
       <h2 id="filters-title">Made for your moment</h2>
-      <portal-component name="disclosure">
-        <portal-prop name="open" t:value="true"/>
-        <portal-fill name="summary">Product categories</portal-fill>
+      <ui:disclosure t:bind-open="true">
+        <ui:fill name="summary">Product categories</ui:fill>
         <div class="recipe-fields">
-          <portal-component name="checkbox">
-            <portal-prop name="name" value="category"/>
-            <portal-prop name="value" value="all"/>
-            <portal-prop name="checked" t:value="true"/>
+          <ui:checkbox name="category" value="all" t:bind-checked="true">
             All products
-          </portal-component>
-          <portal-component name="checkbox">
-            <portal-prop name="name" value="category"/>
-            <portal-prop name="value" value="stationery"/>
-            <portal-prop name="checked" t:value="false"/>
+          </ui:checkbox>
+          <ui:checkbox name="category" value="stationery" t:bind-checked="false">
             Business stationery
-          </portal-component>
-          <portal-component name="checkbox">
-            <portal-prop name="name" value="category"/>
-            <portal-prop name="value" value="marketing"/>
-            <portal-prop name="checked" t:value="false"/>
+          </ui:checkbox>
+          <ui:checkbox name="category" value="marketing" t:bind-checked="false">
             Marketing &amp; events
-          </portal-component>
-          <portal-component name="checkbox">
-            <portal-prop name="name" value="category"/>
-            <portal-prop name="value" value="packaging"/>
-            <portal-prop name="checked" t:value="false"/>
+          </ui:checkbox>
+          <ui:checkbox name="category" value="packaging" t:bind-checked="false">
             Packaging &amp; labels
-          </portal-component>
+          </ui:checkbox>
         </div>
-      </portal-component>
+      </ui:disclosure>
       <p class="recipe-small recipe-muted">Search, sorting and filters are shown as composition examples. This static catalogue does not filter.</p>
     </aside>
     <section aria-labelledby="products-title">
@@ -96,7 +72,7 @@
         <span class="recipe-muted recipe-small">6 products</span>
       </div>
       <div class="product-grid">
-        <portal-component name="card">
+        <ui:card>
           <div class="print-art print-art-cards" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -111,10 +87,9 @@
           <div class="product-copy">
             <div class="product-heading">
               <h3>Business cards</h3>
-              <portal-component name="badge">
-                <portal-prop name="variant" value="primary"/>
+              <ui:badge variant="primary">
                 Bestseller
-              </portal-component>
+              </ui:badge>
             </div>
             <p class="recipe-muted">A small introduction. A lasting impression.</p>
             <div class="product-price">
@@ -124,14 +99,12 @@
               </span>
               <span class="recipe-small recipe-muted">250 cards</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure business cards
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-poster" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -155,14 +128,12 @@
               </span>
               <span class="recipe-small recipe-muted">10 prints</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure art prints
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-book" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -186,14 +157,12 @@
               </span>
               <span class="recipe-small recipe-muted">25 booklets</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure booklets
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-label" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -217,14 +186,12 @@
               </span>
               <span class="recipe-small recipe-muted">100 labels</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure product labels
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-postcard" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -248,14 +215,12 @@
               </span>
               <span class="recipe-small recipe-muted">100 postcards</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure postcards
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
-        <portal-component name="card">
+        </ui:card>
+        <ui:card>
           <div class="print-art print-art-fold" aria-hidden="true">
             <div class="print-sheet">
               <span>Paper &amp; Form</span>
@@ -279,13 +244,11 @@
               </span>
               <span class="recipe-small recipe-muted">250 leaflets</span>
             </div>
-            <portal-component name="button">
-              <portal-prop name="disabled" t:value="true"/>
-              <portal-prop name="variant" value="secondary"/>
+            <ui:button t:bind-disabled="true" variant="secondary">
               Configure folded leaflets
-            </portal-component>
+            </ui:button>
           </div>
-        </portal-component>
+        </ui:card>
       </div>
     </section>
   </div>

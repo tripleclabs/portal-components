@@ -1,16 +1,12 @@
-<main xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <portal-component name="error-summary">
+<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
+  <ui:error-summary>
     <ul>
       <li>
         <a href="#email-example">Enter a valid email address</a>
       </li>
     </ul>
-  </portal-component>
+  </ui:error-summary>
   <label for="email-example">Email address</label>
-  <portal-component name="input">
-    <portal-prop name="id" value="email-example"/>
-    <portal-prop name="name" value="email"/>
-    <portal-prop name="type" value="email"/>
-    <portal-prop name="invalid" t:value="true"/>
-  </portal-component>
+  <ui:input id="email-example" name="email" type="email" t:bind-invalid="true">
+  </ui:input>
 </main>

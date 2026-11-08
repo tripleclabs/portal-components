@@ -1,11 +1,11 @@
-<section xmlns:t="urn:cococo:dataxml" class="portal-card">
+<section xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-card">
   <header class="portal-card__header" t:if="slots.header">
-    <portal-outlet name="header"/>
+    <ui:outlet name="header"/>
   </header>
   <div class="portal-card__body">
-    <portal-outlet name="default"/>
+    <ui:outlet name="default"/>
   </div>
   <footer class="portal-card__footer" t:if="slots.footer">
-    <portal-outlet name="footer"/>
+    <ui:outlet name="footer"/>
   </footer>
 </section>
