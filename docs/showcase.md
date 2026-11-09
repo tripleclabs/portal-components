@@ -1,16 +1,17 @@
 # Showcase and release pipeline
 
-The standalone repository owns component source, contracts, examples, expected HTML previews and documentation. It has no platform dependency. Clone this repository and install public npm dependencies to run all its checks and publish the site.
+The static documentation is an explorer, not an alternative Portal runtime. Each component page includes the actual Swift-rendered output in a separate-document iframe preview, exact source, props/slots and accessibility notes. The default examples contain no private customer data or Lua business calls.
 
-1. Edit components, contracts and DataXML examples here.
-2. Update the corresponding expected HTML in `rendered/`; review it alongside the source. These are static fixtures, not a second DataXML renderer.
-3. Run `npm run docs` and `npm run previews:record` to record reviewed fixture hashes. This marks the manifest as `reviewed-html-v1`, rather than claiming production renderer provenance.
-4. Run `npm run check`, `npm test`, `npm run build` and `npm run test:browser`.
-5. Review accessibility, themes, mobile layouts and source/fixture correspondence before publishing.
+1. Edit component source/contracts and examples in platform’s authoritative `packages/portal-components` directory. This public repository is a generated mirror.
+2. Run the platform's `portal-showcase-render` executable against this package. It compiles and renders with production PortalSiteKit, producing `rendered/*.html` and `rendered/manifest.json`.
+3. Run `npm run docs`, `npm run check`, `npm test`, and `npm run build`.
+4. Run browser checks against the built site; inspect normal/dark/branded themes and mobile presentation.
+5. Review the source and generated HTML diff, export the allowlisted public files and publish the mirror after validation.
+6. Update platform’s public commit/checksum pin, regenerate its runtime resources and consumer test fixtures from that pin, and run production compatibility tests. Authoring changes never silently alter the runtime bundle.
 
-Public CI checks contracts, reference generation, fixture integrity and browser behavior. It cannot prove DataXML execution matches the fixture. The consuming platform pins a public commit and archive checksum, generates its runtime resources and test fixtures from that pin, and compares every example with its production Swift renderer in **platform CI** before accepting the dependency update.
+The manifest records every render input's SHA-256 and rendered file hashes. Public validation refuses stale or missing output. Private platform CI must additionally re-render and compare: hashes establish correspondence to recorded inputs, not proof that a maliciously changed renderer output is correct.
 
-Platform can also export static HTML and a provenance manifest for maintainers to review and import into `rendered/`. That is an optional artifact transfer, not a build dependency or private-repository workflow trigger. Do not copy Swift/server code here. Existing fixtures retain their actual-renderer provenance until replaced.
+The public build needs Node only; it does not clone private Swift dependencies. A future public compiler binary can replace this split. Do not implement a JavaScript substitute renderer to bypass it.
 
 `npm run build` writes `site/`. All internal links are relative, so the site works under GitHub Pages' repository prefix. The workflow deploys that folder only. Configuring the actual GitHub repository and Pages environment is a release step, not a side effect of the build.
 
@@ -42,8 +43,8 @@ Storage-unavailable browsers can still preview and export on the current page.
 order tracking and order request. The same links are available in mobile navigation.
 Each page offers responsive/mobile preview widths, the site's active theme, full
 DataXML source, shared layout CSS and explicit integration notes. These layouts
-are included in the preview manifest and consumer integration fixtures. They add
-no second rendering implementation.
+are rendered by the same Swift pipeline as individual components and included in
+its manifest and regression fixture. They add no second rendering implementation.
 
 The sign-in layout never submits credentials. All business buttons stay disabled;
 filtering, pricing, authentication, upload and ordering require real Portal flows.

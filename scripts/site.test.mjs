@@ -53,14 +53,6 @@ test('provenance rejects changed, added, deleted inputs and tampered output',asy
     const manifest={contractVersion:1,libraryVersion:'1',rendererRevision:'test',inputFiles:inputs,examples:{card:{sourceSha256:inputs['examples/card.html'],htmlSha256:digest('<html></html>')}}};
     await writeFile(path.join(base,'rendered/manifest.json'),JSON.stringify(manifest));
     await verifyRendered(catalogue,base);
-    // Independently maintained public previews need no private renderer fingerprint.
-    const reviewed = {...manifest, previewRevision:'reviewed-html-v1'};
-    delete reviewed.rendererRevision;
-    await writeFile(path.join(base,'rendered/manifest.json'),JSON.stringify(reviewed));
-    await verifyRendered(catalogue,base);
-    await writeFile(path.join(base,'rendered/manifest.json'),JSON.stringify({...reviewed,previewRevision:undefined}));
-    await assert.rejects(verifyRendered(catalogue,base),/compatibility mismatch/);
-    await writeFile(path.join(base,'rendered/manifest.json'),JSON.stringify(reviewed));
     await writeFile(path.join(base,'components/card.html'),'<article/>');
     await assert.rejects(verifyRendered(catalogue,base),/inputs changed/);
     await writeFile(path.join(base,'components/card.html'),'<section/>');
