@@ -1,0 +1,43 @@
+<props>
+  <slot name="default" required="true"/>
+  <slot name="legal"/>
+</props>
+
+<template>
+<footer class="portal-site-footer">
+  <div class="portal-site-footer__inner">
+    <div class="portal-site-footer__content">
+      <ui:outlet name="default"/>
+    </div>
+    <div class="portal-site-footer__legal" t:if="slots.legal">
+      <ui:outlet name="legal"/>
+    </div>
+  </div>
+</footer>
+</template>
+
+<style>
+.portal-site-footer {
+  container: portal-site-footer / inline-size;
+  border-block-start: 1px solid var(--_hairline);
+  color: var(--portal-text-muted);
+  font-size: .875rem;
+}
+.portal-site-footer__inner {
+  max-inline-size: var(--portal-content-width);
+  margin-inline: auto;
+  padding-block: calc(var(--_s)*10);
+  padding-inline: calc(var(--_s)*4);
+}
+.portal-site-footer__content { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: calc(var(--_s)*4) calc(var(--_s)*8); }
+.portal-site-footer__content > * { margin: 0; min-inline-size: 0; overflow-wrap: anywhere; }
+.portal-site-footer__content nav { display: flex; flex-wrap: wrap; gap: calc(var(--_s)*1); margin-inline: calc(var(--_s)*-2.5); }
+.portal-site-footer__legal {
+  margin-block-start: calc(var(--_s)*8);
+  padding-block-start: calc(var(--_s)*6);
+  border-block-start: 1px solid var(--_hairline);
+  font-size: .8125rem;
+  overflow-wrap: anywhere;
+}
+.portal-site-footer__legal > * { margin: 0; }
+</style>

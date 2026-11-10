@@ -1,0 +1,20 @@
+<props>
+  <prop name="id" type="string" required="true"/>
+  <prop name="title" type="string" required="true"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<section class="portal-tab-panel" data-portal-panel="" t:attr-id="props.id">
+  <h3 class="portal-tab-panel__title" t:text="props.title"/>
+  <ui:outlet name="default"/>
+</section>
+</template>
+
+<style>
+.portal-tab-panel[role] > .portal-tab-panel__title { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.portal-tab-panel > :nth-child(2) { margin-block-start: 0; }
+.portal-tab-panel > :last-child { margin-block-end: 0; }
+.portal-tab-panel__title { margin-block: 0 calc(var(--_s)*3); font-size: 1.125rem; }
+.portal-tab-panel:not([role]) + .portal-tab-panel { margin-block-start: calc(var(--_s)*8); }
+</style>

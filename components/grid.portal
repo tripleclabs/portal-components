@@ -1,0 +1,21 @@
+<props>
+  <prop name="columns" type="string" default="3" enum="2 3 4"/>
+  <prop name="gap" type="string" default="md" enum="sm md lg"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<div class="portal-grid" t:attr-data-columns="props.columns" t:attr-data-gap="props.gap">
+  <ui:outlet name="default"/>
+</div>
+</template>
+
+<style>
+.portal-grid { display: grid; gap: calc(var(--_s)*4); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.portal-grid[data-columns="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.portal-grid[data-columns="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.portal-grid[data-gap="sm"] { gap: calc(var(--_s)*2); }
+.portal-grid[data-gap="lg"] { gap: calc(var(--_s)*6); }
+@media (max-width: 40rem) { .portal-grid { grid-template-columns: 1fr !important; }
+}
+</style>

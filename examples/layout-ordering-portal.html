@@ -1,0 +1,131 @@
+<div class="portal-theme portal-layout">
+  <ui:site-header>
+    <ui:fill name="brand">
+      <a href="#top">
+        <ui:icon name="layers" size="lg"/>
+        Paper &amp; Form for Northwind Clinics
+      </a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#reorder" t:bind-current="true">Reorder</ui:nav-link>
+      <ui:nav-link href="#orders">Orders</ui:nav-link>
+      <ui:nav-link href="#brand-assets">Brand assets</ui:nav-link>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:menu id="account-menu" label="Amira Hassan" triggerVariant="ghost">
+        <ui:menu-item href="#profile">
+          <ui:icon name="user" size="sm"/>
+          Profile
+        </ui:menu-item>
+        <ui:menu-item href="#addresses">
+          <ui:icon name="map-pin" size="sm"/>
+          Clinic addresses
+        </ui:menu-item>
+        <ui:menu-item href="#sign-out">
+          <ui:icon name="log-out" size="sm"/>
+          Sign out
+        </ui:menu-item>
+      </ui:menu>
+    </ui:fill>
+  </ui:site-header>
+  <main id="top">
+    <ui:container>
+      <ui:page-header title="Reorder approved print" description="Every item uses Northwind's approved artwork and contract prices. Orders over £500 go to your practice manager for approval.">
+        <ui:fill name="actions">
+          <ui:link href="#orders">
+            <ui:icon name="package" size="sm"/>
+            Order history
+          </ui:link>
+        </ui:fill>
+      </ui:page-header>
+    </ui:container>
+    <ui:section title="Your clinic's print">
+      <div class="layout-split">
+        <div>
+          <ui:basket-line title="Appointment cards" detail="85 × 55 mm, 400gsm matt · Last ordered 14 October" quantity="Usually 1,000" total="£38.00">
+            <ui:fill name="media">
+              <ui:media src="/examples/images/business-cards.svg" alt="" ratio="1/1"/>
+            </ui:fill>
+            <ui:fill name="actions">
+              <ui:button variant="secondary" size="sm" t:bind-disabled="true">
+                <ui:icon name="plus" size="sm"/>
+                Add to basket
+              </ui:button>
+            </ui:fill>
+          </ui:basket-line>
+          <ui:basket-line title="Clinic letterheads" detail="A4, 120gsm uncoated · Last ordered 2 September" quantity="Usually 2,500" total="£96.00">
+            <ui:fill name="media">
+              <ui:media src="/examples/images/letterheads.svg" alt="" ratio="1/1"/>
+            </ui:fill>
+            <ui:fill name="actions">
+              <ui:button variant="secondary" size="sm" t:bind-disabled="true">
+                <ui:icon name="plus" size="sm"/>
+                Add to basket
+              </ui:button>
+            </ui:fill>
+          </ui:basket-line>
+          <ui:basket-line title="Aftercare leaflets" detail="A5 folded to A6, 170gsm silk · Last ordered 30 July" quantity="Usually 500" total="£64.00">
+            <ui:fill name="media">
+              <ui:media src="/examples/images/folded-leaflet.svg" alt="" ratio="1/1"/>
+            </ui:fill>
+            <ui:fill name="actions">
+              <ui:button variant="secondary" size="sm" t:bind-disabled="true">
+                <ui:icon name="plus" size="sm"/>
+                Add to basket
+              </ui:button>
+            </ui:fill>
+          </ui:basket-line>
+        </div>
+        <div class="layout-sticky">
+          <ui:order-summary title="Basket" total="£165.60">
+            <ui:basket-line title="Appointment cards" quantity="1,000 cards" total="£38.00"/>
+            <ui:basket-line title="Clinic letterheads" quantity="2,500 sheets" total="£96.00"/>
+            <ui:description-list layout="inline">
+              <ui:description-item term="Delivery to Leeds clinic">£4.00</ui:description-item>
+              <ui:description-item term="VAT (20%)">£27.60</ui:description-item>
+            </ui:description-list>
+            <ui:fill name="actions">
+              <ui:button t:bind-disabled="true">Send for approval</ui:button>
+              <ui:link href="#basket">Edit basket</ui:link>
+            </ui:fill>
+          </ui:order-summary>
+        </div>
+      </div>
+    </ui:section>
+    <ui:section title="The sign-in page" tone="muted">
+      <div class="layout-narrow">
+        <p>Signed-out visitors see only this card. Accounts are created by Northwind's practice managers.</p>
+        <ui:card>
+          <ui:fill name="header">
+            <h3>Sign in to Northwind Clinics</h3>
+          </ui:fill>
+          <ui:stack>
+            <ui:field for="portal-email" label="Work email">
+              <ui:input id="portal-email" name="email" type="email" autocomplete="email" placeholder="amira@northwind.example"/>
+            </ui:field>
+            <ui:field for="portal-password" label="Password">
+              <ui:input id="portal-password" name="password" type="password" autocomplete="current-password"/>
+            </ui:field>
+            <ui:button t:bind-disabled="true">Sign in</ui:button>
+          </ui:stack>
+          <ui:fill name="footer">
+            <p>
+              New to the portal?
+              <ui:link href="#request-access">Ask your practice manager for access</ui:link>
+            </p>
+          </ui:fill>
+        </ui:card>
+      </div>
+    </ui:section>
+  </main>
+  <ui:site-footer>
+    <p>A private ordering portal by Paper &amp; Form for Northwind Clinics.</p>
+    <nav aria-label="Footer">
+      <ui:nav-link href="#help">Help</ui:nav-link>
+      <ui:nav-link href="#contract">Contract prices</ui:nav-link>
+    </nav>
+    <ui:fill name="legal">
+      <p>Sample layout · Fictional data · Business actions are disabled</p>
+    </ui:fill>
+  </ui:site-footer>
+</div>

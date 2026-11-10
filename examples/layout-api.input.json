@@ -1,0 +1,17 @@
+{
+  "tabs": [
+    {
+      "id": "example-shell",
+      "title": "Shell",
+      "selected": true
+    },
+    {
+      "id": "example-javascript",
+      "title": "JavaScript"
+    },
+    {
+      "id": "example-response",
+      "title": "Response"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+<props>
+  <prop name="shape" type="string" default="line" enum="line block circle"/>
+</props>
+
+<template>
+<span class="portal-skeleton" aria-hidden="true" t:attr-data-shape="props.shape"/>
+</template>
+
+<style>
+/* Skeleton */
+.portal-skeleton {
+  display: block;
+  block-size: 1rem;
+  inline-size: 100%;
+  margin-block: calc(var(--_s)*2);
+  border-radius: calc(var(--portal-radius)*.6);
+  background: var(--portal-surface-muted);
+  animation: portal-skeleton-pulse 2s ease-in-out infinite;
+}
+.portal-skeleton[data-shape="block"] { block-size: 6rem; border-radius: var(--portal-radius); }
+.portal-skeleton[data-shape="circle"] { inline-size: 3rem; block-size: 3rem; border-radius: 50%; }
+@keyframes portal-skeleton-pulse { 50% { opacity: .55; } }
+@media (forced-colors: active) {
+  .portal-skeleton { border: 1px solid GrayText; }
+}
+</style>

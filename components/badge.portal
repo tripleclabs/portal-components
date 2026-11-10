@@ -1,0 +1,47 @@
+<props>
+  <prop name="variant" type="string" default="neutral" enum="neutral primary success warning danger"/>
+  <prop name="dot" type="boolean" default="false"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<span class="portal-badge" t:attr-data-variant="props.variant" t:attr-data-dot="props.dot ? 'true' : null">
+  <ui:outlet name="default"/>
+</span>
+</template>
+
+<style>
+/* Badge: a quiet pill; status variants add a coloured dot and faint tint. */
+.portal-badge {
+  --_dot: var(--portal-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  padding-block: .0625rem;
+  padding-inline: .5rem;
+  border: 1px solid var(--_hairline);
+  border-radius: 999px;
+  background: var(--portal-surface);
+  color: var(--portal-text);
+  font-size: .75rem;
+  font-weight: var(--_portal-weight-medium);
+  line-height: 1.25rem;
+  white-space: nowrap;
+}
+.portal-badge[data-dot]::before {
+  content: "";
+  flex: none;
+  inline-size: .375rem;
+  block-size: .375rem;
+  border-radius: 50%;
+  background: var(--_dot);
+}
+.portal-badge[data-variant="primary"] { --_dot: var(--_primary); background: color-mix(in oklab, var(--_primary) 6%, var(--portal-surface)); }
+.portal-badge[data-variant="success"] { --_dot: var(--portal-success); background: color-mix(in oklab, var(--portal-success) 6%, var(--portal-surface)); }
+.portal-badge[data-variant="warning"] { --_dot: var(--portal-warning); background: color-mix(in oklab, var(--portal-warning) 6%, var(--portal-surface)); }
+.portal-badge[data-variant="danger"] { --_dot: var(--portal-danger); background: color-mix(in oklab, var(--portal-danger) 6%, var(--portal-surface)); }
+@media (forced-colors: active) {
+  .portal-badge { border: 1px solid ButtonText; }
+  .portal-badge::before { background: CanvasText; }
+}
+</style>

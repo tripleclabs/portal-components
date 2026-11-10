@@ -1,0 +1,15 @@
+<main class="portal-theme portal-example">
+  <div>
+    <ui:basket-line title="Business cards" detail="85 × 55 mm, 400gsm matt, double-sided" total="£42.00" t:bind-line="input.line">
+      <ui:fill name="media">
+        <ui:media src="/examples/images/business-cards.svg" alt="" ratio="1/1"/>
+      </ui:fill>
+    </ui:basket-line>
+    <ui:basket-line title="Letterheads" detail="A4, 120gsm uncoated" quantity="Quantity: 2,500" total="£96.00">
+      <ui:fill name="actions">
+        <ui:link href="#edit-letterheads">Edit</ui:link>
+      </ui:fill>
+    </ui:basket-line>
+    <ui:basket-line title="Hochglanzveredelte Premiumgeschäftsausstattungsmappen" detail="A4, 350gsm silk" quantity="Menge: 25.000" total="€123.456.789,00"/>
+  </div>
+</main>

@@ -1,0 +1,17 @@
+<main class="portal-theme portal-example">
+  <p>
+    Delivery takes two working days.
+    <a href="#delivery-information">Delivery information</a>
+  </p>
+  <ui:dialog id="delivery-details" title="Delivery details">
+    <ui:fill name="trigger">
+      <ui:icon name="truck" size="sm"/>
+      Delivery details
+    </ui:fill>
+    <p>Orders approved before 2 pm are printed the same day and leave our studio by courier the next morning.</p>
+    <p>Tracking links are emailed as soon as your parcel is collected.</p>
+    <ui:fill name="footer">
+      <ui:link href="#delivery-information">Full delivery terms</ui:link>
+    </ui:fill>
+  </ui:dialog>
+</main>

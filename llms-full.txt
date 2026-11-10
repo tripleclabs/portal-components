@@ -4,36 +4,61 @@ Read `docs/authoring.md` and `docs/components.md` before generating a page. `cat
 
 ## Hard rules
 
-1. Write XML-shaped HTML with `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"`. Close void elements in source: `<input/>`.
+1. Write XML-shaped HTML. In a `.portal` file `ui:` and `t:` are implicit; a plain `.html` page declares `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` on its root. Close void elements in source: `<input/>`.
 2. Invoke `<ui:button variant="secondary" t:bind-disabled="input.disabled">`. Literal attributes supply strings; `t:bind-PROP` supplies a typed DataXML expression. No JavaScript expressions, Vue bindings or prop child elements.
 3. Unnamed children fill the default slot. Named content uses `<ui:fill name="footer">`. Templates use `<ui:outlet/>`. Caller slots keep caller scope; component internals only receive `props`, slot-presence flags and `component.id`.
 4. Only use declared props and slots. Names/enum values are exact and case-sensitive, including camelCase props. Use `t:bind-disabled="true"` / `"false"` for boolean constants and `t:bind-value="65"` for a numeric prop. Literal `disabled="true"` is a string and fails a boolean contract. Use `key` or `t:bind-key` for component identity, not a prop. The old portal-component/portal-prop/portal-fill/portal-outlet syntax is rejected.
-5. Components do not fetch or mutate. Keep Lua in page/server handlers and use normal protected page forms. No `<script>`, onclick, client Lua or arbitrary networking.
+5. Components render purely: they never fetch while rendering. Keep page data in page Lua and page forms. A component may handle its own events with `t:click` (on a `<button>`), `<form t:submit>` or `t:change` plus `t:live`, bound to typed exports in its `<server>` block; see "Component events" in `docs/authoring.md`. No `<script>`, onclick, client Lua or arbitrary networking.
 6. Use real HTML labels, control ids, names and native form semantics. Set button type=submit intentionally. Provide unique ids for repeated controls, and match `for`/`describedby` exactly.
 7. Internal URLs use the standard Portal mount-aware helpers/HTML handling. Do not hardcode a staff-preview prefix.
-8. Brand with documented `--portal-*` variables. To change markup copy the complete `.html` and `.json` pair locally; do not edit the host bundle.
-9. Do not infer upload, sorting, payment, dialog, tabs, client state or combobox functionality from visual markup. Read each component's limits.
-10. Compile the result with the real Portal compiler. A plausible-looking snippet is not evidence it compiles.
+8. Brand with documented `--portal-*` variables (see "Theming" below). To change a component copy its whole `components/<name>.portal` file locally (props, template and style); do not edit the host bundle. Every selector in a component's `<style>` starts with its root class.
+9. Do not infer upload, sorting, client state or combobox functionality from visual markup. Dialog, tabs, quantity and copy work only through the runtime behaviours their components emit; menu and popover use native popovers. Read each component's limits.
+10. `t:if` and ternary conditions are truthiness only: there is no `==`. Branch on booleans or present/absent values, or use the `remove`/`replace` filters to turn a known enum value into an empty string. `data-portal-*` attributes must be static: wrap a component in a page-owned element to make it a region.
+11. Use one h1 per page: `hero` and `page-header` each render an h1, so a page uses one or the other, once.
+12. Compile the result with the real Portal compiler. A plausible-looking snippet is not evidence it compiles.
+13. An export is `function exports.name(props: Props, input: { … }): ComponentResult` and returns `{ render = … }` (the template sees `result`), `{ errors = { { path, message } } }` (the template sees `errors`, status 422) or `{ redirect = "/path" }`; only `security="privileged"` components may redirect to an `https://` URL. `result` and `errors` are nil before any event.
+14. Props are trusted (sealed in a visitor-bound token); controls are visitor input checked against the export's input type. Signed call values prove which button was pressed, not that the visitor may act: check ownership in the export or the module it calls. `t:change` exports run on every edit: they should only read.
+15. Declaration `type="integer"` describes a value; HTML `<input type="number">` is only a control whose text the export's input type reads. Use `integer` for counts, `number` for prices.
+16. Checkout and ordering work through privileged component exports. For buy-it-now use `buy-now` with the site's own `lib/checkout.lua` (its `create({ productId, quantity })` returns `{ url }`, and `submit` redirects there); for basket rows use `basket-line` with `lib/basket.lua`. Recommend Stripe hosted Checkout so card details never reach the portal, price on the server, and confirm payment from the provider's webhook. See "Component events" in `docs/authoring.md`.
 
 ## Recommended workflow
 
-Choose components from the catalogue, build the semantic native page first, then connect page Lua and progressive regions. Include complete namespaces and contracts in standalone examples. Keep fetched view models serializable and keep repeated presentation components free of loaders. Verify native no-JavaScript behavior, errors, empty results, mobile layout and keyboard use.
+Choose components from the catalogue, build the semantic native page first, then connect page Lua and progressive regions. Give a standalone component its `<props>` declaration in the same `.portal` file. Keep fetched view models serializable and keep repeated presentation components free of loaders. Verify native no-JavaScript behavior, errors, empty results, mobile layout and keyboard use.
 
 If an API is missing from this documentation, say so instead of inventing it. Components are not a general Vue-compatible environment.
 
+## Theming
+
+Put `class="portal-theme"` on the page root. Five knobs cover most brands: `--portal-brand` (the only interactive colour; hover, pressed, tint, focus ring and button text are derived from it), `--portal-radius`, `--portal-font`, `--portal-font-heading` and `--portal-density`. Presets set everything else: Neutral (default), `data-preset="editorial"` or `data-preset="studio"`, each with `data-theme="dark"`. `--portal-brand`, `--portal-radius` and `--portal-density` also work on a nested wrapper; the two font knobs take effect on the theme root only. Never invent token names: `docs/tokens.md` lists them all.
+
+```html
+<div class="portal-theme" data-preset="studio" style="--portal-brand:#0f766e">…</div>
+```
+
+## One example per experience
+
+Start from the page example closest to the request and keep its structure:
+
+| Experience | Example | Built from |
+| --- | --- | --- |
+| Public print shop | `examples/layout-shop.html` | hero, product-card grid, option-cards, quantity-input, estimate-panel |
+| Private B2B ordering portal | `examples/layout-ordering-portal.html` | menu, basket-line reorder list, order-summary, sign-in card |
+| Job tracking | `examples/layout-tracking.html` | page-header, timeline, description-list, file-list, table with badges |
+| API reference | `examples/layout-api.html` | endpoint, property-table, code-block, tabs, key-display |
+
 ## Complete page compositions
 
-Use `docs/layouts.md` for sign-in, print catalogue, order tracking and order request recipes. Each includes full DataXML source and integration notes. Copy `styles/layouts.css` after bundled styles; theme tokens remain inherited. These are static layouts with fictional content and disabled business actions, not working authentication, filtering, uploading or checkout. Do not remove disabled actions without wiring the appropriate protected Portal flow. Reuse components and native HTML; do not invent client scripts or handler capabilities from a screenshot.
+Use `docs/layouts.md` for the four page examples above. Each includes full DataXML source and integration notes. The layout CSS ships in the host's bundled stylesheet; theme tokens remain inherited. The showcase layouts are static: fictional content, disabled business actions and no connected sign-in, live estimate or checkout, because the showcase has no Portal behind it. In a real portal wire those actions to protected flows (page actions, or component events such as `estimate-panel`'s live total and `buy-now`'s checkout); never activate them by simply removing `disabled`. Reuse components and native HTML; do not invent client scripts or handler capabilities from a screenshot.
 
 
 # Authoring contract
 
 ## Props
 
-Declare `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` on the document root. Literal attributes supply string props; `t:bind-PROP` preserves the JSON type of a DataXML expression:
+In a `.portal` file (a page or a component) the `ui:` and `t:` prefixes are implicit. A plain `.html` page declares `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` once, on its root. The samples below assume either. Literal attributes supply string props; `t:bind-PROP` preserves the JSON type of a DataXML expression:
 
 ```xml
-<ui:button xmlns:t="urn:cococo:dataxml" xmlns:ui="urn:cococo:ui" variant="secondary" t:bind-disabled="true">
+<ui:button variant="secondary" t:bind-disabled="true">
   Save draft
 </ui:button>
 ```
@@ -41,7 +66,7 @@ Declare `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` on the doc
 Dynamic values use the existing DataXML expression evaluator:
 
 ```xml
-<ui:badge xmlns:t="urn:cococo:dataxml" xmlns:ui="urn:cococo:ui" t:bind-variant="data.statusVariant">
+<ui:badge t:bind-variant="data.statusVariant">
   <span t:text="data.statusLabel"/>
 </ui:badge>
 ```
@@ -52,32 +77,38 @@ A string, number or boolean stays that type; values are validated before renderi
 
 Unnamed children fill the default slot. `ui:fill` selects a declared named slot. Content runs in the caller's lexical scope; a child's template sees its own props, `slots.<name>` presence flags and `component.id`, not caller data or credentials. Empty supplied slots suppress fallback content. Named fills are not separate components and cannot fetch data.
 
-A component source has one root and uses `ui:outlet`:
+A component is one file, `components/<name>.portal`, with up to four top-level blocks: `<props>` declares its props and slots, `<template>` holds its markup (exactly one root, using `ui:outlet`), `<style>` its CSS and `<server>` its event handlers (see Component events). Only `<template>` is required.
 
 ```xml
-<section xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml">
-  <header t:if="slots.header"><ui:outlet name="header"/></header>
-  <ui:outlet name="default"><p>No content supplied.</p></ui:outlet>
-</section>
+<props>
+  <prop name="tone" type="string" default="info" enum="info warning"/>
+  <slot name="header"/>
+  <slot name="default"/>
+</props>
+
+<template>
+  <section class="site-note" t:attr-data-tone="props.tone">
+    <header t:if="slots.header"><ui:outlet name="header"/></header>
+    <ui:outlet name="default"><p>No content supplied.</p></ui:outlet>
+  </section>
+</template>
+
+<style>
+  .site-note { padding: 1rem; }
+  .site-note[data-tone="warning"] { border-inline-start: 3px solid var(--portal-warning); }
+</style>
 ```
 
-The corresponding contract is a separate JSON file:
+This illustrates a local custom component, not a replacement for the richer bundled Card. A `<prop>` takes `name`, `type` (`string`, `boolean`, `integer`, `number`, `array`, `object` or `any`), and optionally `required`, `default` (written as text, read by the type), a space-separated `enum`, `nullable` and `description`. An object prop may describe its fields with nested `<prop>` elements, an array its elements with one `<items>`. A required prop has no default. `<slot>` takes `name` and optionally `required`. Unknown slots and duplicate named fills fail validation.
 
-```json
-{
-  "props": {},
-  "slots": { "header": { "required": false }, "default": { "required": false } }
-}
-```
-
-This illustrates a local custom component, not a replacement for the richer bundled Card. Unknown slots, duplicate named fills and incomplete local file pairs fail validation.
+Every selector in `<style>` starts with the component's root class, the first class on its template root (`.site-note`, `.site-note__part`, `.site-note:hover`, `.site-note .child`); `@media`, `@supports` and `@container` may wrap such rules, and a `@keyframes` is named after the root class. The CSS is not rewritten or scoped: the root class is the scope. A page inlines the CSS of the components it uses, after the bundled base and before your own stylesheet, so your CSS wins.
 
 ## Native forms
 
 Use a caller-owned form and page-owned action handler. The handler must be declared in the page/site contract; components do not register it implicitly.
 
 ```xml
-<form xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" data-portal-action="saveContact">
+<form data-portal-action="saveContact">
   <ui:field for="customer-email" label="Email address">
     <ui:input id="customer-email" name="email" type="email" autocomplete="email" t:bind-required="true">
     </ui:input>
@@ -90,11 +121,95 @@ Use a caller-owned form and page-owned action handler. The handler must be decla
 
 The Portal host adds protected action routing and form fences. Server-side authorization and validation remain required. Use a native GET form with an ordinary action for filtering. The showcase can demonstrate native controls but cannot execute an instance's business APIs.
 
+## Component events
+
+A component can handle its own buttons and forms. Bind an event in the template to a function exported from the same file's `<server>` block; the author never writes a form. Exports run only when a visitor triggers the event, never while the component renders: rendering is always pure.
+
+```xml
+<props>
+  <prop name="line" type="object" required="true">
+    <prop name="id" type="string" required="true"/>
+  </prop>
+</props>
+
+<template>
+  <div class="site-line">
+    <input type="number" name="quantity" min="1" value="1"/>
+    <button t:click="update({ lineId = props.line.id })">Update</button>
+    <button t:click="remove({ lineId = props.line.id })">Remove</button>
+  </div>
+</template>
+
+<server security="privileged"><![CDATA[
+function exports.update(props: Props, input: { lineId: string, quantity: integer }): ComponentResult
+  if input.quantity < 1 then
+    return { errors = { { path = "quantity", message = "Enter at least 1" } } }
+  end
+  ctx.script.load("basket").update(input.lineId, input.quantity)
+  return {}
+end
+
+function exports.remove(props: Props, input: { lineId: string }): ComponentResult
+  ctx.script.load("basket").remove(input.lineId)
+  return {}
+end
+]]></server>
+```
+
+- `t:click="name"` goes on a `<button>` (anything else is a compile error: use a button, for keyboard access and no-JavaScript use). It calls that export with the instance's named controls as `input`. The whole instance behaves as one form.
+- `t:click="name({ key = expr, … })"` adds values evaluated at render, for example a row's id inside `t:for`. They are signed into the page, so a visitor cannot swap them; the controls the visitor fills in are added beside them. A call key may not share a control's name, and must be a field of the export's input.
+- `<form t:submit="name">` posts a form you write yourself, with Enter-to-submit and native validation. Give it no `action` or `method`.
+- `t:change="name"` on the root or a container re-runs that export as the visitor edits a control inside it, and re-renders only the parts marked `t:live="part"` (each part a name, never containing the controls being edited). Without JavaScript there is no live update; a click still posts and the live parts render with the result.
+- Event names are static and must be exports of the same file. A page cannot use `t:click`, `t:submit`, `t:change` or `t:live`; they belong to components.
+
+**The server block.** `<server>` holds Lua (wrap it in CDATA when it contains `<` or `&`). Each export is typed: `function exports.name(props: Props, input: { … }): ComponentResult`. `Props` comes from `<props>`; the input type lists the visitor fields the export accepts (strings, numbers, integers, booleans, literal unions, optional fields and arrays of those). Posted values are checked against it before the export runs and undeclared fields are dropped. By default a component is pure: no `ctx`, no modules, just the language. `security="privileged"` gives its exports `ctx` under the visitor's Portal access, as a page handler has, so they can load your site's own modules (`ctx.script.load("checkout")`, a `lib/checkout.lua`). That attribute is the whole consent; read a privileged component before you ship it.
+
+**Results.** An export returns a table:
+
+| Return | Effect |
+| --- | --- |
+| `{ render = { … } }` | Re-renders the component; its template sees the table as `result` |
+| `{ errors = { { path = "quantity", message = "…" } } }` | Re-renders with status 422; the template sees the list as `errors` |
+| `{ redirect = "/orders" }` | 303 to a published page of the site |
+| `{ redirect = "https://checkout.stripe.com/…" }` | Privileged only: 303 to an absolute `https://` URL, such as a payment provider's hosted checkout. Pure components stay on the site; any other scheme is refused |
+| `{}` | Re-renders the page as it now is |
+
+Before any event `result` and `errors` are nil, so guard with `t:if="result"`. Components keep no state between events: a later event sees only its props and its own input, so anything that must persist is a control value or a prop. With JavaScript the runtime swaps just the instance (or, for `t:change`, its live parts); without it the page re-renders whole.
+
+**Trust.** Props are trusted, controls are not. The props a component rendered with travel in a sealed instance token: encrypted, so they are not readable in the page, and bound to the visitor's session, the site version and the Portal, so it cannot be replayed by someone else or after a republish (the visitor reloads instead). An export receives those props, never values posted by the browser. Signing proves which button was pressed, not that the visitor may act on it: an export still checks, for example, that the basket line belongs to this visitor. A host with no token secret, and the static showcase, renders event buttons disabled.
+
+**`t:change` exports should only read.** They run on every edit, with the component's one security level (a privileged component's change export could write). Nothing enforces read-only; keep writes behind `t:click` or `t:submit`.
+
+**Buy now and checkout.** The bundled `buy-now` is privileged: its `submit` export checks the quantity, then calls `ctx.script.load("checkout").create({ productId = …, quantity = … })` and redirects to the `url` it returns. The library is not a shop; `lib/checkout.lua` is yours. We recommend Stripe hosted Checkout, so card details are entered on Stripe's page and never reach your portal:
+
+```lua
+-- lib/checkout.lua: the site's checkout, which buy-now calls.
+local checkout = {}
+
+function checkout.create(order)
+  -- Price on the server from the product id; never trust a price from the page.
+  -- Then create a Stripe Checkout Session through the tenant's Stripe
+  -- integration, which holds the secret key (Portal Lua never does), with
+  --   mode = "payment",
+  --   line_items = { { price = <the product's Stripe price>, quantity = order.quantity } },
+  --   success_url = "https://shop.example/thanks?session_id={CHECKOUT_SESSION_ID}",
+  --   cancel_url = "https://shop.example/basket"
+  local session = createStripeCheckoutSession(order) -- your integration's call
+  return { url = session.url } -- https://checkout.stripe.com/c/pay/cs_…
+end
+
+return checkout
+```
+
+Confirm payment from Stripe's webhook, not from the visitor arriving at `success_url`. `basket-line` follows the same pattern with `lib/basket.lua` (`update(lineId, quantity)` and `remove(lineId)`), and must check that the line is the visitor's.
+
+**`integer` is not `type="number"`.** `type="integer"` in a `<prop>` and `integer` in an input type describe the value. `<input type="number">` is only the HTML control, whose value is posted as text; the export's input type decides how it is read, so `2.5` posted to an `integer` field fails validation (422) rather than being rounded.
+
 ## IDs, keys and overrides
 
 Pass stable, unique IDs for form controls and association references. A component's internal generated identity does not leak into caller slot scope. Prefer page view models containing precomputed IDs when rendering repeated fields; never reuse one literal id in a loop. Component invocation keys identify repeated siblings; they do not authorize access or replace explicit HTML form IDs.
 
-To override Card, copy both `components/card.html` and `components/card.json` to your site's same paths. Local resolution takes precedence. Keep all required slots/props expected by existing callers or change those callers. There is no automatic update merge or CLI installer in v1.
+To override Card, copy `components/card.portal` to your site's same path: its props, markup and style come with it. Local resolution takes precedence. Keep all required slots/props expected by existing callers or change those callers. Rules for classes several components share (choice, table, panel and the like) and the theme foundations stay in the bundled base stylesheet. There is no automatic update merge or CLI installer in v1.
 
 ## Frequent errors
 
@@ -104,11 +219,13 @@ To override Card, copy both `components/card.html` and `components/card.json` to
 | `:disabled="loading"` | `t:bind-disabled="input.loading"` with a boolean |
 | `<template #footer>` | `<ui:fill name="footer">…</ui:fill>` |
 | `onclick="save()"` | A page-owned protected native form action |
+| `@click="save"` or `v-on:click` in a component | `t:click="save"` on a `<button>`, with `exports.save` in its `<server>` |
+| `{{ props.title }}` | `t:text="props.title"` |
 | A component reads `data.customer` implicitly | Pass a declared prop from the caller |
-| Copy only component HTML | Copy the `.html` and `.json` pair |
+| Copy only part of a component | Copy its whole `.portal` file |
 | A placeholder used instead of a label | A visible label associated with the input id |
 
-Scoped slots, automatic client hydration and component-owned Lua loaders are not v1 features. The source/contract model leaves room for later extensions without inventing them today.
+Scoped slots, automatic client hydration and component-owned Lua loaders are not v1 features: a component never fetches while it renders, and its exports run only on its own events. The single-file model leaves room for later extensions without inventing them today.
 
 ## Repeated fields with descriptions and errors
 
@@ -123,7 +240,7 @@ Give the page loader a view model containing unique association IDs. For example
 Use a keyed invocation inside the DataXML loop:
 
 ```xml
-<section xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml">
+<section>
   <div t:for="data.lines" t:as="line">
     <ui:field t:bind-key="line.key" t:bind-for="line.controlId" label="Quantity" description="Minimum 1 item" t:bind-descriptionId="line.descriptionId" t:bind-error="line.error" t:bind-errorId="line.errorId">
       <ui:input t:bind-id="line.controlId" t:bind-name="line.controlId" type="number" min="1" t:bind-value="line.quantity" t:bind-invalid="line.invalid" t:bind-describedby="line.describedby">
@@ -135,6 +252,16 @@ Use a keyed invocation inside the DataXML loop:
 
 The caller slot can still read `line`; it cannot read Field's private props. Keep the `describedby` list limited to elements actually rendered: omit the error ID when there is no error. The input value remains a string even when its HTML type is number; validate/coerce native form input on the server. This example deliberately uses unique control names because repeated-name collection behavior belongs to the form handler contract, not the component library.
 
+## Conditions are truthiness only
+
+`t:if`, `t:elseif` and the condition of a `t:attr-*` ternary test truthiness; DataXML has no `==`. Branch on a boolean or on whether a value is present. To branch on a known enum value, filter the others away: `props.state | remove:'done' | remove:'upcoming'` is non-empty only for `current`. Boolean props bound to non-native attributes need a ternary (`props.sticky ? 'true' : null`), because a plain binding renders the string `false`.
+
+## Interactive components
+
+`dialog`, `tabs`, `quantity-input`, `code-block` and `key-display` emit the runtime's trusted behaviours (`data-portal-behavior="dialog|tabs|quantity|copy"`). Their enhancement-only buttons are hidden until the runtime starts, so without JavaScript the native content remains: number inputs stay typeable, tab panels show stacked under their headings, code stays selectable. A dialog's content is hidden without JavaScript, so link to the same content from the page. `menu` and `popover` use native popovers and work without JavaScript.
+
+`data-portal-*` attributes are static markup; templates cannot bind them. To make a component refreshable, wrap it in a page-owned element with `data-portal-region` (outside any component slot) and target that region from a form.
+
 ## Migration
 
 The old `portal-component`, `portal-prop`, `portal-fill` and `portal-outlet` syntax is rejected. Rename invocations to `ui:NAME`, move literal props onto attributes, move typed props to `t:bind-PROP`, and rename fills/outlets to `ui:fill`/`ui:outlet`. Use `t:bind-key` for dynamic identity. Republish authored sites after migration; old component-bearing compiled snapshots must be rebuilt. No compatibility alias is provided.
@@ -142,177 +269,162 @@ The old `portal-component`, `portal-prop`, `portal-fill` and `portal-outlet` syn
 
 # Theme tokens
 
-Add `portal-theme` to the site content root. The supplied stylesheet has no global reset, remote fonts or mandatory CSS framework. Tokens inherit through components. The default theme is light; `data-theme="dark"` and `data-theme="atelier"` select bundled examples.
+Add `portal-theme` to the site content root. The supplied stylesheet has no global reset, no remote fonts and no mandatory CSS framework. Tokens inherit through components.
 
-```css
-/* Place after the bundled styles. */
-.portal-theme.my-brand {
-  --portal-primary: #145744;
-  --portal-primary-content: #ffffff;
-  --portal-focus: #145744;
-  --portal-radius-md: .25rem;
-  --portal-font-family: Georgia, serif;
-}
+## Presets and modes
+
+Three presets share one set of markup; only tokens change.
+
+| Preset | Select with | Character |
+| --- | --- | --- |
+| Neutral (default) | no attribute | Zinc greys, Inter, small radii, hairline borders, near-invisible shadow. Your brand colour is the only colour. |
+| Editorial | `data-preset="editorial"` | Warm paper tones, Fraunces display headings, crisp corners, no shadows. |
+| Studio | `data-preset="studio"` | Lavender canvas, vivid brand, Plus Jakarta Sans, pill buttons, soft lift. |
+
+`data-theme="dark"` selects dark mode and combines with any preset. `data-density="compact"` or `"roomy"` scales spacing and control heights together.
+
+```html
+<main class="portal-theme" data-preset="studio" data-theme="dark">…</main>
 ```
 
-For a local override, set a token on a wrapper around a component. Do not add a second `portal-theme` class on every nested element: that resets the defaults at each new theme root. Copy a component when you need different structure or selectors.
+## Knobs
 
-Colour pairs must be checked together. The default themes supply text/background pairs; a custom token can break contrast or focus visibility. Preserve native semantics and test high contrast/forced-colour mode. `prefers-reduced-motion` sets the motion-duration token to zero. V1 components do not rely on animation.
-
-See [the generated token reference](tokens.md) for all exact names/defaults. Typography, spacing, border, radius and content-width tokens are site-wide defaults; the library deliberately avoids an undocumented variable for every declaration.
-
-## Branding contract
-
-Set tokens on the theme root after the bundled stylesheet. The same rules work
-with a named theme: `.portal-theme.my-brand` has the same specificity as a bundled
-`data-theme` selector, so the later author stylesheet wins. Inline custom
-properties also work. Existing published sites retain their captured library CSS.
-
-| Area | Main controls |
-| --- | --- |
-| Surfaces and text | `--portal-canvas`, `--portal-surface`, `--portal-surface-muted`, `--portal-text`, `--portal-text-muted` |
-| Semantic colours | `primary`, `secondary`, `accent`, `info`, `success`, `warning`, `danger`, with matching `-content` foreground tokens (all prefixed `--portal-`) |
-| Body typography | `--portal-font-family`, `--portal-font-mono`, `--portal-font-size`, `--portal-font-size-xs/sm/lg/xl`, `--portal-line-height`, `--portal-letter-spacing`, `--portal-font-weight-normal/medium/bold` |
-| Headings | `--portal-heading-font-family`, `--portal-heading-font-weight`, `--portal-heading-line-height`, `--portal-heading-letter-spacing`, `--portal-heading-size-1` through `-6` |
-| Form controls | `--portal-control-font-family`, `--portal-control-font-size`, `--portal-control-font-weight`, `--portal-control-line-height`, `--portal-control-height` and `-sm/-lg`, `--portal-choice-size` |
-| Borders and shape | `--portal-border`, `--portal-border-width`, `--portal-border-style`, `--portal-border-width-strong/accent`, `--portal-radius-sm/md/lg/pill` |
-| Elevation | `--portal-shadow` (cards), `--portal-shadow-control`, `--portal-shadow-button`, `--portal-shadow-overlay` (available for authored compositions) |
-| Focus and disabled state | `--portal-focus`, `--portal-focus-width`, `--portal-focus-offset`, `--portal-disabled-opacity` |
-| Layout | `--portal-space-*`, `--portal-content-width`, `--portal-reading-width` |
-
-Semantic tokens are available for authored content as well as library components;
-not every colour role has a built-in component variant. For example, `accent` and
-its content pair can style a branded callout without introducing new markup APIs.
-Heading font defaults to inheritance; heading size tokens apply to ordinary h1–h6
-inside the theme. Component-specific small headings use the size scale (`lg`/`xl`).
-Controls inherit body typography unless their control tokens are changed.
+Most sites only need the five knobs. Place overrides after the bundled styles.
 
 ```css
 .portal-theme.my-brand {
-  --portal-primary: #145744;
-  --portal-primary-content: #ffffff;
-  --portal-font-family: Georgia, serif;
-  --portal-font-size: 1.125rem;
-  --portal-line-height: 1.6;
-  --portal-heading-font-family: system-ui, sans-serif;
-  --portal-heading-font-weight: 700;
-  --portal-heading-letter-spacing: -.02em;
-  --portal-heading-size-1: 2.5rem;
-  --portal-control-font-family: system-ui, sans-serif;
-  --portal-border-width: 2px;
-  --portal-border-style: solid;
-  --portal-radius-md: .25rem;
-  --portal-radius-lg: .5rem;
-  --portal-shadow: 0 6px 20px rgb(20 87 68 / 12%);
-  --portal-shadow-control: inset 0 1px 2px rgb(0 0 0 / 8%);
-  --portal-focus-width: 3px;
-  --portal-focus-offset: 4px;
+  --portal-brand: #145744;
+  --portal-radius: .375rem;
+  --portal-font: "Source Sans 3", system-ui, sans-serif;
+  --portal-font-heading: Georgia, serif;
+  --portal-density: 1;
 }
 ```
 
-Optional per-component overrides are resolved where used, so they also work on a
-wrapper inside an existing theme: `--portal-button-background`/`--portal-button-color`
-(primary buttons), `--portal-input-background`/`--portal-input-color`, and
-`--portal-card-shadow`. They fall back to the semantic tokens; they are not required
-root declarations. A wrapper can also override the shared tokens directly.
-Forced-colour mode deliberately retains system-colour borders rather than allowing
-brand borders to remove essential affordances. Custom themes remain responsible for
-contrast; full shadow strings can be set to `none` for a flat design. No font is
-fetched automatically: use available system fonts or provide an allowed font asset.
+`--portal-brand`, `--portal-radius` and `--portal-density` work on any element, including a nested wrapper. `--portal-font` and `--portal-font-heading` take effect on the theme root only: the root sets `font-family` from them and everything inherits that computed font, so set them on the `portal-theme` element (or in a rule that matches it), not on a wrapper inside it.
+
+Every bundled preset and mode selector is written `.portal-theme:where(…)`, so each is exactly as specific as `.portal-theme` alone. `.portal-theme.my-brand` is more specific, so it wins in every preset and in light and dark mode, whichever stylesheet loads first. The theme builder's `.portal-theme.my-theme` export works the same way. Inline custom properties also work. A brand set this way applies in light and dark mode; scope it with `[data-theme="dark"]` to choose a separate dark brand.
+
+The brand is the only input for interactive colour. Hover and pressed shift the brand's OKLCH lightness toward mid-lightness (so near-black and near-white brands still respond); subtle tints, the focus ring and the text on primary buttons are derived too. All of it happens inside each component rule (CSS relative colour and `color-mix()`), so a brand change never produces mismatched states. Button text is black or white, whichever suits the lightness of the current state's background.
+
+Supported browsers: the derived colours need CSS relative colour syntax, `color-mix()`, `pow()`, `:has()` and container queries, which means Chrome and Edge 120+, Firefox 128+ and Safari 18+. In an older browser that has `color-mix()` but no relative colour, button text falls back to `--portal-primary-content`, or white when that is unset, and hover and pressed mix the background toward the canvas. Set `--portal-primary-content` if your brand is light and you need those browsers. Because the derivation happens where the colour is used, a brand override on a nested wrapper re-derives everything inside it:
+
+```html
+<div style="--portal-brand:#e11d48">…buttons here hover and focus in rose…</div>
+```
+
+## Semantic tokens
+
+Presets set the semantic tokens: canvas, surface, surface-muted, text, text-muted and border; secondary, accent, success, warning, danger and info, each with a `-content` partner; three shadows; the mono font; content and reading widths; the type-scale ratio; and the motion duration. Override any of them the same way as a knob.
+
+`--portal-border` is the boundary of form controls and meets 3:1 against the surface. Cards, separators and table rules use a lighter hairline derived from it.
+
+Headings h1–h4 follow `--portal-type-ratio` (h1 is the ratio to the fourth power, in rem); h5 and h6 are `1rem`. Spacing is a quarter-rem step multiplied by `--portal-density`, recomputed on every library element so a wrapper can change density for its contents. Radii derive from `--portal-radius`: small is 0.6×, medium 1×, large 1.5×, and pills are fully rounded.
+
+`--portal-primary`, `--portal-primary-content` and `--portal-focus` default to the brand (and to a derived black or white) and are resolved where used. Set them only to decouple a role from the brand. The optional component overrides `--portal-button-background`, `--portal-button-color`, `--portal-input-background`, `--portal-input-color` and `--portal-card-shadow` also fall back to the semantic tokens and work on a wrapper.
+
+See [the generated token reference](tokens.md) for every name and default.
+
+## Fonts
+
+Neutral uses Inter, Editorial adds Fraunces for headings and Studio uses Plus Jakarta Sans. Their Latin and Latin Extended subsets ship in `fonts/` under the SIL Open Font License (see `fonts/NOTICE.md`). The stylesheet points at the Portal host's versioned `/_portal/fonts/<library-version>/` route (for this release `/_portal/fonts/0.4.0/`), which serves them. The version in the URL changes with every library release, so the host can let browsers cache fonts indefinitely. They are deliberately not part of a site's file map, which is text-only. The static showcase serves the same files from its own `fonts/` folder. Management previews in the platform console are isolated from every host route, so they always render with the system fallbacks; the published site uses the bundled fonts. Each stack ends in a system fallback and uses `font-display: swap`. A face downloads only when text uses it, so setting `--portal-font` and `--portal-font-heading` to a system stack opts out entirely. No font is fetched from a third party.
+
+## Accessibility
+
+The supplied presets keep body and muted text at 4.5:1 or better on every surface, each `-content` colour at 4.5:1 on its partner, and control borders at 3:1. A custom brand keeps legible button text automatically, but other custom colours can reduce contrast: check text/background pairs together. Focus outlines are drawn in the focus colour pulled toward the text colour, so they stay visible with very pale or very dark brands.
+
+Transitions use `--portal-motion`. Under `prefers-reduced-motion` component transitions and animations stop regardless of that token, so a theme that sets it cannot re-enable motion. Forced-colours mode keeps system-colour borders rather than letting brand borders remove essential affordances. Component CSS uses logical properties only, so pages with `dir="rtl"` mirror correctly. Headings and paragraphs inside the theme use `overflow-wrap: anywhere`, so a long unbroken word, URL or number wraps instead of widening the page.
+
+Do not add a second `portal-theme` class to nested elements: that resets the defaults at each new theme root. Copy a component when you need different structure or selectors.
+
+## Headings
+
+`hero` and `page-header` each render the page's h1. Use one of them, once per page. `section` titles, `order-summary` and `estimate-panel` render h2; `product-card`, `basket-line`, `endpoint` and `tab-panel` render h3. `card` does not force a heading: choose the level you put in its header fill.
 
 
 # Token reference
 
-Generated from styles/tokens.css. Override on the theme root or a component wrapper.
+Generated from styles/tokens.css. Set tokens on the theme root or on a wrapper around components. Presets (`data-preset="editorial"` or `"studio"`, absent for Neutral) and dark mode (`data-theme="dark"`) change the semantic values; the names stay the same.
 
-| Token | Light default |
+## Knobs
+
+The five everyday controls. Changing the brand re-derives hover and pressed (an OKLCH lightness shift toward mid-lightness), tint, focus ring and button text inside each component, so it also works on a nested wrapper. `--portal-density` is a unitless multiplier for spacing and control heights (`data-density="compact"` is .875, `"roomy"` is 1.125).
+
+| Token | Neutral light default |
 | --- | --- |
-| `--portal-canvas` | `#f7f8fa` |
+| `--portal-brand` | `#18181b` |
+| `--portal-radius` | `.5rem` |
+| `--portal-font` | `Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` |
+| `--portal-font-heading` | `var(--portal-font)` |
+| `--portal-density` | `1` |
+
+## Semantic tokens
+
+Set by presets. Each `-content` colour is the text colour used on its partner.
+
+| Token | Neutral light default |
+| --- | --- |
+| `--portal-canvas` | `#fafafa` |
 | `--portal-surface` | `#ffffff` |
-| `--portal-surface-muted` | `#eef1f5` |
-| `--portal-text` | `#17212f` |
-| `--portal-text-muted` | `#536171` |
-| `--portal-border` | `#8491a1` |
-| `--portal-primary` | `#1657c0` |
-| `--portal-primary-content` | `#ffffff` |
-| `--portal-danger` | `#a51d2d` |
-| `--portal-danger-content` | `#ffffff` |
-| `--portal-success` | `#17603b` |
-| `--portal-warning` | `#795300` |
-| `--portal-info` | `#1657c0` |
-| `--portal-info-content` | `#ffffff` |
+| `--portal-surface-muted` | `#f4f4f5` |
+| `--portal-text` | `#09090b` |
+| `--portal-text-muted` | `#66666e` |
+| `--portal-border` | `#8a8a93` |
+| `--portal-secondary` | `#f4f4f5` |
+| `--portal-secondary-content` | `#18181b` |
+| `--portal-accent` | `#e4e4e7` |
+| `--portal-accent-content` | `#18181b` |
+| `--portal-success` | `#15803d` |
 | `--portal-success-content` | `#ffffff` |
+| `--portal-warning` | `#b45309` |
 | `--portal-warning-content` | `#ffffff` |
-| `--portal-secondary` | `#eef1f5` |
-| `--portal-secondary-content` | `#17212f` |
-| `--portal-accent` | `#6e3db4` |
-| `--portal-accent-content` | `#ffffff` |
-| `--portal-focus` | `#1657c0` |
-| `--portal-font-family` | `ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif` |
-| `--portal-font-mono` | `ui-monospace, SFMono-Regular, Consolas, monospace` |
-| `--portal-font-size` | `1rem` |
-| `--portal-line-height` | `1.55` |
-| `--portal-font-size-xs` | `.8125rem` |
-| `--portal-font-size-sm` | `.875rem` |
-| `--portal-font-size-lg` | `1.125rem` |
-| `--portal-font-size-xl` | `1.25rem` |
-| `--portal-font-weight-normal` | `400` |
-| `--portal-font-weight-medium` | `650` |
-| `--portal-font-weight-bold` | `700` |
-| `--portal-letter-spacing` | `normal` |
-| `--portal-heading-font-family` | `inherit` |
-| `--portal-heading-font-weight` | `700` |
-| `--portal-heading-line-height` | `1.2` |
-| `--portal-heading-letter-spacing` | `normal` |
-| `--portal-heading-size-1` | `2rem` |
-| `--portal-heading-size-2` | `1.5rem` |
-| `--portal-heading-size-3` | `1.25rem` |
-| `--portal-heading-size-4` | `1rem` |
-| `--portal-heading-size-5` | `.875rem` |
-| `--portal-heading-size-6` | `.8125rem` |
-| `--portal-control-font-family` | `inherit` |
-| `--portal-control-font-size` | `1em` |
-| `--portal-control-font-weight` | `400` |
-| `--portal-control-line-height` | `inherit` |
-| `--portal-space-1` | `.25rem` |
-| `--portal-space-2` | `.5rem` |
-| `--portal-space-3` | `.75rem` |
-| `--portal-space-4` | `1rem` |
-| `--portal-space-6` | `1.5rem` |
-| `--portal-space-8` | `2rem` |
-| `--portal-radius-sm` | `.35rem` |
-| `--portal-radius-md` | `.65rem` |
-| `--portal-radius-lg` | `1rem` |
-| `--portal-border-width` | `1px` |
-| `--portal-border-style` | `solid` |
-| `--portal-border-width-strong` | `2px` |
-| `--portal-border-width-accent` | `4px` |
-| `--portal-radius-pill` | `999px` |
-| `--portal-focus-width` | `3px` |
-| `--portal-focus-offset` | `3px` |
-| `--portal-disabled-opacity` | `.55` |
-| `--portal-control-height` | `2.75rem` |
-| `--portal-control-height-sm` | `2.25rem` |
-| `--portal-control-height-lg` | `3.25rem` |
-| `--portal-choice-size` | `1.2rem` |
+| `--portal-danger` | `#dc2626` |
+| `--portal-danger-content` | `#ffffff` |
+| `--portal-info` | `#2563eb` |
+| `--portal-info-content` | `#ffffff` |
+| `--portal-shadow-sm` | `0 1px 2px rgb(9 9 11 / .05)` |
+| `--portal-shadow-md` | `0 1px 3px rgb(9 9 11 / .08), 0 1px 2px -1px rgb(9 9 11 / .06)` |
+| `--portal-shadow-lg` | `0 16px 40px -16px rgb(9 9 11 / .24), 0 4px 10px -4px rgb(9 9 11 / .08)` |
+| `--portal-font-mono` | `ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace` |
 | `--portal-content-width` | `72rem` |
-| `--portal-reading-width` | `48rem` |
-| `--portal-shadow` | `0 2px 8px #17212f0a` |
-| `--portal-shadow-control` | `none` |
-| `--portal-shadow-button` | `none` |
-| `--portal-shadow-overlay` | `0 12px 32px #17212f26` |
-| `--portal-motion-duration` | `120ms` |
+| `--portal-reading-width` | `42rem` |
+| `--portal-type-ratio` | `1.2` |
+| `--portal-motion` | `140ms` |
+
+## Resolved where used
+
+These roles are never declared on the theme root, so a nested `--portal-brand` override reaches them. Set them explicitly to decouple from the brand.
+
+| Token | When unset |
+| --- | --- |
+| `--portal-primary` | `var(--portal-brand)` |
+| `--portal-primary-content` | Black or white, whichever suits the primary's OKLCH lightness (threshold 0.62) |
+| `--portal-focus` | `var(--portal-brand)` |
+
+## Component overrides
+
+Optional and undeclared; each falls back to the semantic tokens.
+
+| Token | Falls back to |
+| --- | --- |
+| `--portal-button-background` | primary |
+| `--portal-button-color` | primary content (derived from the button background when unset) |
+| `--portal-input-background` | `--portal-surface` |
+| `--portal-input-color` | `--portal-text` |
+| `--portal-card-shadow` | `--portal-shadow-sm` |
 
 
 # Component reference
 
-Generated from catalogue.json, component contracts and executable example source. Do not edit this file directly. Library 0.2.0, contract 1.
+Generated from catalogue.json, the component files (components/<name>.portal) and executable example source. Do not edit this file directly. Library 0.4.0, contract 1.
+
+Usage snippets go inside a page template. In a `.portal` file the `ui:` and `t:` prefixes are implicit; a plain `.html` page declares `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` on its root.
 
 ## button
 
 A native button with explicit type and visual emphasis.
 
-Source: [template](../components/button.html) · [contract](../components/button.json)
+Source: [components/button.portal](../components/button.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -330,14 +442,12 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <div style="display:flex;gap:1rem;flex-wrap:wrap">
-    <ui:button>Continue</ui:button>
-    <ui:button variant="secondary">
-      Save draft
-    </ui:button>
-  </div>
-</main>
+<div style="display:flex;gap:1rem;flex-wrap:wrap">
+  <ui:button>Continue</ui:button>
+  <ui:button variant="secondary">
+    Save draft
+  </ui:button>
+</div>
 ```
 
 ### Accessibility and limits
@@ -348,7 +458,7 @@ Uses a real button. Choose type="submit" inside a form; the default button never
 
 A native navigation link with optional visual emphasis.
 
-Source: [template](../components/link.html) · [contract](../components/link.json)
+Source: [components/link.portal](../components/link.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -363,11 +473,9 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:link href="#details">
-    View order
-  </ui:link>
-</main>
+<ui:link href="#details">
+  View order
+</ui:link>
 ```
 
 ### Accessibility and limits
@@ -378,11 +486,12 @@ Use meaningful link text. Internal hrefs receive ordinary Portal mount resolutio
 
 A compact textual status marker.
 
-Source: [template](../components/badge.html) · [contract](../components/badge.json)
+Source: [components/badge.portal](../components/badge.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
 | `variant` | string | `"neutral"` | `neutral`, `primary`, `success`, `warning`, `danger` |
+| `dot` | boolean | `false` | — |
 
 Slots:
 
@@ -391,22 +500,24 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:badge variant="success">
-    Ready for print
-  </ui:badge>
-</main>
+<ui:stack direction="horizontal" gap="sm">
+  <ui:badge>Draft</ui:badge>
+  <ui:badge variant="success" t:bind-dot="true">Ready for print</ui:badge>
+  <ui:badge variant="warning" t:bind-dot="true">In production</ui:badge>
+  <ui:badge variant="danger">Proof rejected</ui:badge>
+  <ui:badge variant="primary" t:bind-dot="true">New</ui:badge>
+</ui:stack>
 ```
 
 ### Accessibility and limits
 
-Text communicates status; colour is supplementary. This component does not announce changes as a live region.
+Text communicates status; colour and the optional dot are supplementary. This component does not announce changes as a live region.
 
 ## card
 
 A panel with optional header and footer.
 
-Source: [template](../components/card.html) · [contract](../components/card.json)
+Source: [components/card.portal](../components/card.portal)
 
 No props.
 
@@ -419,17 +530,15 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:card>
-    <ui:fill name="header">
-      <h2>Business cards</h2>
-    </ui:fill>
-    <p>Premium stock, printed with care.</p>
-    <ui:fill name="footer">
-      <p>From £24</p>
-    </ui:fill>
-  </ui:card>
-</main>
+<ui:card>
+  <ui:fill name="header">
+    <h2>Business cards</h2>
+  </ui:fill>
+  <p>Premium stock, printed with care.</p>
+  <ui:fill name="footer">
+    <p>From £24</p>
+  </ui:fill>
+</ui:card>
 ```
 
 ### Accessibility and limits
@@ -440,7 +549,7 @@ Choose heading levels in caller content to match the page hierarchy; Card does n
 
 A static notice with optional heading and actions.
 
-Source: [template](../components/alert.html) · [contract](../components/alert.json)
+Source: [components/alert.portal](../components/alert.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -455,14 +564,12 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:alert variant="warning">
-    <ui:fill name="title">
-      <strong>Artwork needs attention</strong>
-    </ui:fill>
-    <p>Please upload a PDF with embedded fonts.</p>
-  </ui:alert>
-</main>
+<ui:alert variant="warning">
+  <ui:fill name="title">
+    <strong>Artwork needs attention</strong>
+  </ui:fill>
+  <p>Please upload a PDF with embedded fonts.</p>
+</ui:alert>
 ```
 
 ### Accessibility and limits
@@ -473,7 +580,7 @@ Static notices do not use role=alert, avoiding unsolicited announcements on page
 
 A semantic horizontal thematic break.
 
-Source: [template](../components/separator.html) · [contract](../components/separator.json)
+Source: [components/separator.portal](../components/separator.portal)
 
 No props.
 
@@ -484,9 +591,7 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:separator />
-</main>
+<ui:separator />
 ```
 
 ### Accessibility and limits
@@ -497,7 +602,7 @@ Preserve semantic HTML and visible focus styles when customizing.
 
 A centered content-width container.
 
-Source: [template](../components/container.html) · [contract](../components/container.json)
+Source: [components/container.portal](../components/container.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -510,11 +615,9 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:container>
-    <p>Readable content with comfortable page gutters.</p>
-  </ui:container>
-</main>
+<ui:container>
+  <p>Readable content with comfortable page gutters.</p>
+</ui:container>
 ```
 
 ### Accessibility and limits
@@ -525,7 +628,7 @@ Preserve semantic HTML and visible focus styles when customizing.
 
 A vertical or horizontal flex layout with token spacing.
 
-Source: [template](../components/stack.html) · [contract](../components/stack.json)
+Source: [components/stack.portal](../components/stack.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -540,13 +643,11 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:stack direction="horizontal">
-    <ui:badge>Design</ui:badge>
-    <ui:badge>Print</ui:badge>
-    <ui:badge>Deliver</ui:badge>
-  </ui:stack>
-</main>
+<ui:stack direction="horizontal">
+  <ui:badge>Design</ui:badge>
+  <ui:badge>Print</ui:badge>
+  <ui:badge>Deliver</ui:badge>
+</ui:stack>
 ```
 
 ### Accessibility and limits
@@ -557,7 +658,7 @@ Preserve semantic HTML and visible focus styles when customizing.
 
 A responsive grid that collapses on narrow screens.
 
-Source: [template](../components/grid.html) · [contract](../components/grid.json)
+Source: [components/grid.portal](../components/grid.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -571,13 +672,11 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:grid>
-    <div class="portal-demo-box">One</div>
-    <div class="portal-demo-box">Two</div>
-    <div class="portal-demo-box">Three</div>
-  </ui:grid>
-</main>
+<ui:grid>
+  <div class="portal-demo-box">One</div>
+  <div class="portal-demo-box">Two</div>
+  <div class="portal-demo-box">Three</div>
+</ui:grid>
 ```
 
 ### Accessibility and limits
@@ -588,7 +687,7 @@ DOM order remains reading and keyboard order. Do not use CSS to change meaningfu
 
 A label, description and error wrapper for an explicitly identified control.
 
-Source: [template](../components/field.html) · [contract](../components/field.json)
+Source: [components/field.portal](../components/field.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -607,12 +706,10 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:field for="contact-name" label="Your name" t:bind-required="true">
-    <ui:input id="contact-name" name="name" autocomplete="name" t:bind-required="true">
-    </ui:input>
-  </ui:field>
-</main>
+<ui:field for="contact-name" label="Your name" t:bind-required="true">
+  <ui:input id="contact-name" name="name" autocomplete="name" t:bind-required="true">
+  </ui:input>
+</ui:field>
 ```
 
 ### Accessibility and limits
@@ -623,7 +720,7 @@ The for prop must equal the nested control id. Also set required on the control.
 
 A native single-line input with label/error association.
 
-Source: [template](../components/input.html) · [contract](../components/input.json)
+Source: [components/input.portal](../components/input.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -650,11 +747,9 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <label for="email-example">Email address</label>
-  <ui:input id="email-example" name="email" type="email" autocomplete="email" placeholder="you@example.com">
-  </ui:input>
-</main>
+<label for="email-example">Email address</label>
+<ui:input id="email-example" name="email" type="email" autocomplete="email" placeholder="you@example.com">
+</ui:input>
 ```
 
 ### Accessibility and limits
@@ -665,7 +760,7 @@ Always provide a visible associated label. Placeholder is not a label. Pass a un
 
 A native multiline control.
 
-Source: [template](../components/textarea.html) · [contract](../components/textarea.json)
+Source: [components/textarea.portal](../components/textarea.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -688,11 +783,9 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <label for="notes-example">Delivery notes</label>
-  <ui:textarea id="notes-example" name="notes">
-  </ui:textarea>
-</main>
+<label for="notes-example">Delivery notes</label>
+<ui:textarea id="notes-example" name="notes">
+</ui:textarea>
 ```
 
 ### Accessibility and limits
@@ -703,7 +796,7 @@ Always provide a visible associated label. The value is text content, not an HTM
 
 A native select with caller-owned option elements.
 
-Source: [template](../components/select.html) · [contract](../components/select.json)
+Source: [components/select.portal](../components/select.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -722,13 +815,11 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <label for="paper-example">Paper finish</label>
-  <ui:select id="paper-example" name="finish">
-    <option value="silk">Silk</option>
-    <option value="uncoated">Uncoated</option>
-  </ui:select>
-</main>
+<label for="paper-example">Paper finish</label>
+<ui:select id="paper-example" name="finish">
+  <option value="silk">Silk</option>
+  <option value="uncoated">Uncoated</option>
+</ui:select>
 ```
 
 ### Accessibility and limits
@@ -739,7 +830,7 @@ Use option/optgroup elements in the default slot. Set selected on the desired op
 
 A native checkbox with an enclosing text label.
 
-Source: [template](../components/checkbox.html) · [contract](../components/checkbox.json)
+Source: [components/checkbox.portal](../components/checkbox.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -757,11 +848,9 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:checkbox name="proof" value="yes">
-    Send me a proof
-  </ui:checkbox>
-</main>
+<ui:checkbox name="proof" value="yes">
+  Send me a proof
+</ui:checkbox>
 ```
 
 ### Accessibility and limits
@@ -772,7 +861,7 @@ The enclosing label associates text without an id. Group related choices in a ca
 
 A native radio with an enclosing text label.
 
-Source: [template](../components/radio.html) · [contract](../components/radio.json)
+Source: [components/radio.portal](../components/radio.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -790,11 +879,9 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:radio name="shipping" value="standard">
-    Standard delivery
-  </ui:radio>
-</main>
+<ui:radio name="shipping" value="standard">
+  Standard delivery
+</ui:radio>
 ```
 
 ### Accessibility and limits
@@ -805,7 +892,7 @@ The enclosing label associates text without an id. Group related choices in a ca
 
 An explicitly identified error message for aria-describedby.
 
-Source: [template](../components/field-error.html) · [contract](../components/field-error.json)
+Source: [components/field-error.portal](../components/field-error.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -818,14 +905,12 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <label for="quantity-error">Quantity</label>
-  <ui:input id="quantity-error" name="quantity" value="0" t:bind-invalid="true" describedby="quantity-message">
-  </ui:input>
-  <ui:field-error id="quantity-message">
-    Enter a quantity of at least 1.
-  </ui:field-error>
-</main>
+<label for="quantity-error">Quantity</label>
+<ui:input id="quantity-error" name="quantity" value="0" t:bind-invalid="true" describedby="quantity-message">
+</ui:input>
+<ui:field-error id="quantity-message">
+  Enter a quantity of at least 1.
+</ui:field-error>
 ```
 
 ### Accessibility and limits
@@ -836,7 +921,7 @@ Reference this id in the control describedby prop and mark invalid=true. The err
 
 A focusable validation summary with caller-owned field links.
 
-Source: [template](../components/error-summary.html) · [contract](../components/error-summary.json)
+Source: [components/error-summary.portal](../components/error-summary.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -850,18 +935,16 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:error-summary>
-    <ul>
-      <li>
-        <a href="#email-example">Enter a valid email address</a>
-      </li>
-    </ul>
-  </ui:error-summary>
-  <label for="email-example">Email address</label>
-  <ui:input id="email-example" name="email" type="email" t:bind-invalid="true">
-  </ui:input>
-</main>
+<ui:error-summary>
+  <ul>
+    <li>
+      <a href="#email-example">Enter a valid email address</a>
+    </li>
+  </ul>
+</ui:error-summary>
+<label for="email-example">Email address</label>
+<ui:input id="email-example" name="email" type="email" t:bind-invalid="true">
+</ui:input>
 ```
 
 ### Accessibility and limits
@@ -872,7 +955,7 @@ Give each summary a unique id if more than one is rendered. Link errors to actua
 
 Native details/summary disclosure without JavaScript.
 
-Source: [template](../components/disclosure.html) · [contract](../components/disclosure.json)
+Source: [components/disclosure.portal](../components/disclosure.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -886,12 +969,10 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:disclosure>
-    <ui:fill name="summary">What file format should I upload?</ui:fill>
-    <p>Use a print-ready PDF with embedded fonts.</p>
-  </ui:disclosure>
-</main>
+<ui:disclosure>
+  <ui:fill name="summary">What file format should I upload?</ui:fill>
+  <p>Use a print-ready PDF with embedded fonts.</p>
+</ui:disclosure>
 ```
 
 ### Accessibility and limits
@@ -902,7 +983,7 @@ Summary is the native keyboard-operable trigger. Do not place other interactive 
 
 A semantic table with caption and caller-owned header/body rows.
 
-Source: [template](../components/table.html) · [contract](../components/table.json)
+Source: [components/table.portal](../components/table.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -916,20 +997,18 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:table caption="Recent orders">
-    <ui:fill name="head">
-      <tr>
-        <th scope="col">Order</th>
-        <th scope="col">Status</th>
-      </tr>
-    </ui:fill>
+<ui:table caption="Recent orders">
+  <ui:fill name="head">
     <tr>
-      <th scope="row">#1042</th>
-      <td>In production</td>
+      <th scope="col">Order</th>
+      <th scope="col">Status</th>
     </tr>
-  </ui:table>
-</main>
+  </ui:fill>
+  <tr>
+    <th scope="row">#1042</th>
+    <td>In production</td>
+  </tr>
+</ui:table>
 ```
 
 ### Accessibility and limits
@@ -940,7 +1019,7 @@ Use tr elements in slots and appropriate th scope attributes. The caption is vis
 
 A labelled breadcrumb navigation list.
 
-Source: [template](../components/breadcrumbs.html) · [contract](../components/breadcrumbs.json)
+Source: [components/breadcrumbs.portal](../components/breadcrumbs.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -953,16 +1032,14 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:breadcrumbs>
-    <li>
-      <a href="#home">Home</a>
-    </li>
-    <li>
-      <span aria-current="page">Orders</span>
-    </li>
-  </ui:breadcrumbs>
-</main>
+<ui:breadcrumbs>
+  <li>
+    <a href="#home">Home</a>
+  </li>
+  <li>
+    <span aria-current="page">Orders</span>
+  </li>
+</ui:breadcrumbs>
 ```
 
 ### Accessibility and limits
@@ -973,7 +1050,7 @@ Supply li items. Mark the current page with aria-current=page and use text rathe
 
 A labelled container for page navigation.
 
-Source: [template](../components/pagination.html) · [contract](../components/pagination.json)
+Source: [components/pagination.portal](../components/pagination.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -986,22 +1063,20 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:pagination>
-    <li>
-      <span aria-disabled="true">Previous</span>
-    </li>
-    <li>
-      <a href="?page=1" aria-current="page" aria-label="Page 1">1</a>
-    </li>
-    <li>
-      <a href="?page=2" aria-label="Page 2">2</a>
-    </li>
-    <li>
-      <a href="?page=2">Next</a>
-    </li>
-  </ui:pagination>
-</main>
+<ui:pagination>
+  <li>
+    <span aria-disabled="true">Previous</span>
+  </li>
+  <li>
+    <a href="?page=1" aria-current="page" aria-label="Page 1">1</a>
+  </li>
+  <li>
+    <a href="?page=2" aria-label="Page 2">2</a>
+  </li>
+  <li>
+    <a href="?page=2">Next</a>
+  </li>
+</ui:pagination>
 ```
 
 ### Accessibility and limits
@@ -1012,7 +1087,7 @@ Supply li items and real hrefs. Use non-links for unavailable actions and aria-c
 
 A centered empty result explanation and optional action.
 
-Source: [template](../components/empty-state.html) · [contract](../components/empty-state.json)
+Source: [components/empty-state.portal](../components/empty-state.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -1026,11 +1101,9 @@ Slots:
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:empty-state title="No orders yet">
-    <p>Your orders will appear here after checkout.</p>
-  </ui:empty-state>
-</main>
+<ui:empty-state title="No orders yet">
+  <p>Your orders will appear here after checkout.</p>
+</ui:empty-state>
 ```
 
 ### Accessibility and limits
@@ -1041,7 +1114,7 @@ Use this for a real empty result, not as an error/loading substitute. The h2 ass
 
 A decorative placeholder for an explicitly labelled loading region.
 
-Source: [template](../components/skeleton.html) · [contract](../components/skeleton.json)
+Source: [components/skeleton.portal](../components/skeleton.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -1054,14 +1127,12 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <div aria-busy="true">
-    <p>Loading order details…</p>
-    <ui:skeleton />
-    <ui:skeleton shape="block">
-    </ui:skeleton>
-  </div>
-</main>
+<div aria-busy="true">
+  <p>Loading order details…</p>
+  <ui:skeleton />
+  <ui:skeleton shape="block">
+  </ui:skeleton>
+</div>
 ```
 
 ### Accessibility and limits
@@ -1072,7 +1143,7 @@ This is hidden from assistive technology. The caller must supply meaningful load
 
 A labelled native determinate progress indicator.
 
-Source: [template](../components/progress.html) · [contract](../components/progress.json)
+Source: [components/progress.portal](../components/progress.portal)
 
 | Prop | Type | Default | Allowed values |
 | --- | --- | --- | --- |
@@ -1087,15 +1158,1302 @@ None.
 ### Usage
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:progress t:bind-value="65" t:bind-max="100" label="Artwork processed: 65%">
-  </ui:progress>
-</main>
+<ui:progress t:bind-value="65" t:bind-max="100" label="Artwork processed: 65%">
+</ui:progress>
 ```
 
 ### Accessibility and limits
 
 Provide a meaningful label including progress if needed. Value and maximum must describe a real operation; this does not implement upload or polling.
+
+## icon
+
+A bundled Lucide icon drawn in the current text colour.
+
+Source: [components/icon.portal](../components/icon.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `name` | string | required | `arrow-left`, `arrow-right`, `arrow-up-right`, `check`, `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`, `circle-alert`, `circle-check`, `circle-help`, `clock`, `copy`, `credit-card`, `download`, `external-link`, `eye`, `eye-off`, `file`, `file-text`, `info`, `key-round`, `layers`, `log-out`, `mail`, `map-pin`, `menu`, `minus`, `package`, `plus`, `printer`, `receipt`, `search`, `settings`, `shopping-cart`, `truck`, `upload`, `user`, `x`, `zap` |
+| `label` | string or null | omitted | — |
+| `size` | string | `"md"` | `sm`, `md`, `lg` |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:stack gap="sm">
+  <p>
+    <ui:icon name="truck"/>
+    Ships in two working days
+  </p>
+  <div>
+    <ui:button variant="secondary">
+      <ui:icon name="download" size="sm"/>
+      Download invoice
+    </ui:button>
+  </div>
+  <p>
+    Proof status
+    <ui:icon name="circle-check" label="Approved" size="lg"/>
+  </p>
+</ui:stack>
+```
+
+### Accessibility and limits
+
+Decorative by default: without a label the icon is aria-hidden and the adjacent text carries the meaning. Give a label only when the icon stands alone and conveys information; it then becomes role="img" with that accessible name. Icons follow currentColor, mirror their direction on right-to-left pages and stay visible in forced-colours mode.
+
+## site-header
+
+The site's top bar: brand, main navigation and actions, optionally sticky.
+
+Source: [components/site-header.portal](../components/site-header.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `sticky` | boolean | `false` | — |
+| `navLabel` | string | `"Main"` | — |
+
+Slots:
+
+- `brand`: required
+- `nav`: optional
+- `actions`: optional
+
+### Usage
+
+```xml
+<ui:stack gap="lg">
+  <ui:site-header>
+    <ui:fill name="brand">
+      <a href="#home">
+        <ui:icon name="layers" size="lg"/>
+        Paper &amp; Form
+      </a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#shop" t:bind-current="true">Shop</ui:nav-link>
+      <ui:nav-link href="#orders">Orders</ui:nav-link>
+      <ui:nav-link href="#help">Help</ui:nav-link>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:link href="#basket" variant="button">
+        <ui:icon name="shopping-cart" size="sm"/>
+        Basket · 2
+      </ui:link>
+    </ui:fill>
+  </ui:site-header>
+  <ui:site-header navLabel="Shop sections">
+    <ui:fill name="brand">
+      <a href="#home">Druckerei Müller-Lüdenscheidt Geschäftsdrucksachen</a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#visitenkarten" t:bind-current="true">Visitenkarten</ui:nav-link>
+      <ui:nav-link href="#sonderanfertigungen">Sonderanfertigungen</ui:nav-link>
+      <ui:nav-link href="#auftragsverfolgung">Auftragsverfolgung</ui:nav-link>
+      <ui:nav-link href="#kundendienst">Kundendienst</ui:nav-link>
+    </ui:fill>
+  </ui:site-header>
+</ui:stack>
+```
+
+### Accessibility and limits
+
+Renders a header element (the banner landmark when it sits outside main) and wraps the nav slot in a nav labelled by navLabel. Give every nav on a page a distinct label. Below 48rem the navigation wraps under the brand instead of collapsing; use the menu component for an opt-in collapse. A sticky header can hide focused content: keep it short.
+
+## nav-link
+
+A navigation link with a current-page state.
+
+Source: [components/nav-link.portal](../components/nav-link.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `href` | string | required | — |
+| `current` | boolean | `false` | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<nav aria-label="Account">
+  <ui:nav-link href="#orders" t:bind-current="true">Orders</ui:nav-link>
+  <ui:nav-link href="#addresses">Addresses</ui:nav-link>
+  <ui:nav-link href="#invoices">
+    <ui:icon name="receipt" size="sm"/>
+    Invoices
+  </ui:nav-link>
+  <ui:nav-link href="#lieferadressen">Rechnungs- und Lieferadressenverwaltung</ui:nav-link>
+</nav>
+```
+
+### Accessibility and limits
+
+Marks the current page with aria-current="page" as well as a visual state, so the location is not conveyed by colour alone. Use inside a labelled nav, such as the site header's nav slot.
+
+## site-footer
+
+The site footer with an optional legal line.
+
+Source: [components/site-footer.portal](../components/site-footer.portal)
+
+No props.
+
+Slots:
+
+- `default`: required
+- `legal`: optional
+
+### Usage
+
+```xml
+<ui:site-footer>
+  <p>Paper &amp; Form · Business print, made well and delivered fast.</p>
+  <nav aria-label="Footer">
+    <ui:nav-link href="#delivery">Delivery</ui:nav-link>
+    <ui:nav-link href="#returns">Returns</ui:nav-link>
+    <ui:nav-link href="#contact">Contact</ui:nav-link>
+    <ui:nav-link href="#datenschutz">Datenschutzerklärung und Verbraucherinformationen</ui:nav-link>
+  </nav>
+  <ui:fill name="legal">
+    <p>© 2026 Paper &amp; Form Ltd · Registered in England and Wales, company number 01234567 · VAT GB123456789</p>
+  </ui:fill>
+</ui:site-footer>
+```
+
+### Accessibility and limits
+
+Renders a footer element (the contentinfo landmark when it sits outside main). Label any nav placed in it, for example aria-label="Footer", so it is distinguishable from the main navigation.
+
+## page-header
+
+A page title with optional description, breadcrumbs and actions.
+
+Source: [components/page-header.portal](../components/page-header.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `title` | string | required | — |
+| `description` | string or null | omitted | — |
+
+Slots:
+
+- `breadcrumbs`: optional
+- `actions`: optional
+
+### Usage
+
+```xml
+<ui:page-header title="Order PF-1042" description="Placed on 3 November by Amira Hassan. Proof approved, now in production.">
+  <ui:fill name="breadcrumbs">
+    <ui:breadcrumbs>
+      <li>
+        <a href="#orders">Orders</a>
+      </li>
+      <li>
+        <span aria-current="page">PF-1042</span>
+      </li>
+    </ui:breadcrumbs>
+  </ui:fill>
+  <ui:fill name="actions">
+    <ui:button variant="secondary">
+      <ui:icon name="download" size="sm"/>
+      Invoice
+    </ui:button>
+    <ui:button>Reorder</ui:button>
+  </ui:fill>
+</ui:page-header>
+<ui:page-header title="Hochglanzveredelte Premiumvisitenkartenbestellung 400gsm" description="Ein sehr langer Titel bricht sauber um, ohne die Seite seitlich zu verschieben."/>
+```
+
+### Accessibility and limits
+
+Emits the page's h1: use one per page. Breadcrumbs come first in reading order, then the title, so screen-reader users hear where they are before what the page is.
+
+## section
+
+A full-width page band with an optional h2 title and a centred content width.
+
+Source: [components/section.portal](../components/section.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `title` | string or null | omitted | — |
+| `width` | string | `"content"` | `content`, `reading`, `full` |
+| `tone` | string | `"default"` | `default`, `muted` |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:section title="Popular this week">
+  <ui:grid>
+    <ui:card>
+      <h3>Business cards</h3>
+      <p>From £24 for 250.</p>
+    </ui:card>
+    <ui:card>
+      <h3>Letterheads</h3>
+      <p>From £38 for 500.</p>
+    </ui:card>
+    <ui:card>
+      <h3>Folded leaflets</h3>
+      <p>From £61 for 1,000.</p>
+    </ui:card>
+  </ui:grid>
+</ui:section>
+<ui:section title="Questions before you order" tone="muted" width="reading">
+  <p>Every order includes a free digital proof. Nothing is printed until you approve it.</p>
+</ui:section>
+<ui:section title="Umweltfreundliche Recyclingpapierveredelungsmöglichkeiten" width="reading">
+  <p>Long section titles wrap inside the reading width instead of widening the page.</p>
+</ui:section>
+```
+
+### Accessibility and limits
+
+The title renders as an h2; nest deeper headings inside. A muted tone is decorative and never the only way content is grouped.
+
+## hero
+
+A landing-page introduction with title, lead, actions and optional media.
+
+Source: [components/hero.portal](../components/hero.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `eyebrow` | string or null | omitted | — |
+| `title` | string | required | — |
+| `lead` | string or null | omitted | — |
+
+Slots:
+
+- `actions`: optional
+- `media`: optional
+
+### Usage
+
+```xml
+<ui:hero eyebrow="Business print" title="Ideas deserve a little paper." lead="Cards, letterheads and leaflets, printed with care and delivered in two working days.">
+  <ui:fill name="actions">
+    <ui:link href="#shop" variant="button">
+      Start an order
+      <ui:icon name="arrow-right" size="sm"/>
+    </ui:link>
+    <ui:link href="#samples">Request free samples</ui:link>
+  </ui:fill>
+  <ui:fill name="media">
+    <ui:card>
+      <ui:fill name="header">
+        <ui:badge variant="success">Next day</ui:badge>
+      </ui:fill>
+      <h2>Business cards</h2>
+      <p>250 cards, 400gsm matt, from £24.</p>
+    </ui:card>
+  </ui:fill>
+</ui:hero>
+<ui:hero title="Maßgeschneiderte Großformatdrucklösungen für anspruchsvolle Unternehmenskommunikation" lead="A long title with no media stays one comfortable column."/>
+```
+
+### Accessibility and limits
+
+Emits an h1, so use it instead of a page header, not alongside one. The eyebrow is a plain paragraph before the heading. Media is presentation: give images real alt text, or alt="" when decorative.
+
+## media
+
+A responsive image in a fixed aspect-ratio frame.
+
+Source: [components/media.portal](../components/media.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `src` | string | required | — |
+| `alt` | string | required | — |
+| `ratio` | string | `"4/3"` | `1/1`, `4/3`, `3/2`, `16/9` |
+| `fit` | string | `"cover"` | `cover`, `contain` |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:grid columns="2">
+  <ui:media src="/examples/images/business-cards.svg" alt="A stack of black business cards printed with the Paper &amp; Form wordmark"/>
+  <ui:media src="/examples/images/folded-leaflet.svg" alt="" ratio="1/1" fit="contain"/>
+</ui:grid>
+```
+
+### Accessibility and limits
+
+alt is required: describe what the image shows, or pass alt="" when it is decorative or repeats adjacent text. The frame reserves its space before the image loads, so the page does not shift. Images load lazily and never carry information that is absent from the text.
+
+## price
+
+A server-formatted price with an optional unit and previous price.
+
+Source: [components/price.portal](../components/price.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `amount` | string | required | — |
+| `unit` | string or null | omitted | — |
+| `compareAt` | string or null | omitted | — |
+| `compareAtLabel` | string | `"Was"` | — |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:stack gap="sm">
+  <ui:price amount="£24.00" unit="/ 250"/>
+  <ui:price amount="£18.00" unit="/ 250" compareAt="£24.00"/>
+  <ui:price amount="€123.456.789,00"/>
+</ui:stack>
+```
+
+### Accessibility and limits
+
+The amount is shown exactly as the server formatted it: format currency and locale in Lua, never in the template. A previous price is struck through and preceded by visually hidden compareAtLabel text ("Was"), so it is not conveyed by the strike-through alone. Long numbers wrap instead of overflowing.
+
+## product-card
+
+A catalogue tile that links to a product, with media, badges, price and actions.
+
+Source: [components/product-card.portal](../components/product-card.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `href` | string | required | — |
+| `title` | string | required | — |
+
+Slots:
+
+- `media`: optional
+- `meta`: optional
+- `price`: optional
+- `actions`: optional
+
+### Usage
+
+```xml
+<ui:grid columns="2">
+  <ui:product-card href="#business-cards" title="Business cards">
+    <ui:fill name="media">
+      <ui:media src="/examples/images/business-cards.svg" alt=""/>
+    </ui:fill>
+    <ui:fill name="meta">
+      <ui:badge variant="success" t:bind-dot="true">Next day</ui:badge>
+    </ui:fill>
+    <ui:fill name="price">
+      <ui:price amount="£24.00" unit="/ 250"/>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:button variant="secondary" size="sm">
+        <ui:icon name="plus" size="sm"/>
+        Quick add
+      </ui:button>
+    </ui:fill>
+  </ui:product-card>
+  <ui:product-card href="#leaflets" title="Dreifach gefaltete Hochglanzproduktbroschüren">
+    <ui:fill name="media">
+      <ui:media src="/examples/images/folded-leaflet.svg" alt=""/>
+    </ui:fill>
+    <ui:fill name="price">
+      <ui:price amount="€123.456.789,00" unit="/ 500"/>
+    </ui:fill>
+  </ui:product-card>
+</ui:grid>
+```
+
+### Accessibility and limits
+
+The title is an h3 link and the whole card is clickable through it: the link stretches over the card, so the card announces once, as its title. The focus ring is drawn around the card. Controls in the actions slot sit above the stretched link and stay separately clickable and focusable. Keep media decorative (alt="") when the title already names the product.
+
+## option-cards
+
+A fieldset of large, selectable option cards backed by native radios.
+
+Source: [components/option-cards.portal](../components/option-cards.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `legend` | string | required | — |
+| `columns` | string | `"3"` | `2`, `3`, `4` |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:option-cards legend="Paper stock">
+  <ui:option-card name="stock" value="matt-400" label="400gsm matt" description="Soft, writable finish" aside="Included" t:bind-checked="true"/>
+  <ui:option-card name="stock" value="silk-450" label="450gsm silk" description="Smooth with a gentle sheen" aside="+ £4.00"/>
+  <ui:option-card name="stock" value="cotton-600" label="600gsm cotton" description="Out of stock" aside="+ £12.00" t:bind-disabled="true"/>
+</ui:option-cards>
+```
+
+### Accessibility and limits
+
+A real fieldset and legend group the choices, and each card is a native radio inside its label: arrow keys move between options and the form submits without JavaScript. The selected card adds a border and an inset ring as well as a tint. Give every option-card in the group the same name.
+
+## option-card
+
+One selectable option inside option-cards: a native radio with a label, description and aside.
+
+Source: [components/option-card.portal](../components/option-card.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `name` | string | required | — |
+| `value` | string | required | — |
+| `label` | string | required | — |
+| `description` | string or null | omitted | — |
+| `aside` | string or null | omitted | — |
+| `checked` | boolean | `false` | — |
+| `disabled` | boolean | `false` | — |
+| `required` | boolean | `false` | — |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:option-cards legend="Delivery" columns="2">
+  <ui:option-card name="delivery" value="standard" label="Standard" description="3–4 working days" aside="Free" t:bind-checked="true"/>
+  <ui:option-card name="delivery" value="express" label="Express" description="Next working day" aside="£9.50"/>
+</ui:option-cards>
+```
+
+### Accessibility and limits
+
+The radio stays a native input inside its label, so the whole card is the click target and the name, description and aside are read together. A component cannot read its parent's props, so pass the shared name on every card. Disabled options stay visible and are skipped by the keyboard.
+
+## quantity-input
+
+A native number input with enhancement-only − and + buttons.
+
+Source: [components/quantity-input.portal](../components/quantity-input.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `id` | string or null | omitted | — |
+| `name` | string | required | — |
+| `label` | string | required | — |
+| `value` | integer | `1` | — |
+| `min` | integer | `1` | — |
+| `max` | integer or null | omitted | — |
+| `step` | integer | `1` | — |
+| `disabled` | boolean | `false` | — |
+| `decreaseLabel` | string | `"Decrease quantity"` | — |
+| `increaseLabel` | string | `"Increase quantity"` | — |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:quantity-input id="card-quantity" name="quantity" label="Boxes of 250" t:bind-value="1" t:bind-max="10"/>
+```
+
+### Accessibility and limits
+
+The number input is the control: it is labelled, typeable, honours min, max and step and submits without JavaScript. The runtime quantity behaviour reveals the − and + buttons, which carry translatable aria-labels and fire native input and change events. Validate the quantity again on the server.
+
+## basket-line
+
+One basket or order line with media, details, actions and a line total; with a line it updates or removes itself.
+
+Source: [components/basket-line.portal](../components/basket-line.portal) · privileged: its server exports run with the visitor's Portal access
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `title` | string | required | — |
+| `detail` | string or null | omitted | — |
+| `quantity` | string or null | omitted | — |
+| `total` | string | required | — |
+| `line` | object or null | omitted | — |
+| `quantityLabel` | string | `"Quantity"` | — |
+| `updateLabel` | string | `"Update"` | — |
+| `removeLabel` | string | `"Remove"` | — |
+
+Slots:
+
+- `media`: optional
+- `actions`: optional
+
+### Usage
+
+```xml
+<div>
+  <ui:basket-line title="Business cards" detail="85 × 55 mm, 400gsm matt, double-sided" total="£42.00" t:bind-line="input.line">
+    <ui:fill name="media">
+      <ui:media src="/examples/images/business-cards.svg" alt="" ratio="1/1"/>
+    </ui:fill>
+  </ui:basket-line>
+  <ui:basket-line title="Letterheads" detail="A4, 120gsm uncoated" quantity="Quantity: 2,500" total="£96.00">
+    <ui:fill name="actions">
+      <ui:link href="#edit-letterheads">Edit</ui:link>
+    </ui:fill>
+  </ui:basket-line>
+  <ui:basket-line title="Hochglanzveredelte Premiumgeschäftsausstattungsmappen" detail="A4, 350gsm silk" quantity="Menge: 25.000" total="€123.456.789,00"/>
+</div>
+```
+
+### Accessibility and limits
+
+Each line is an article headed by an h3 with the product name, so screen-reader users can move line by line. Totals are preformatted by the server. With line, the row shows a labelled quantity input and Update and Remove buttons whose accessible names include the product name (visually hidden), so repeated rows stay distinct. Privileged: those buttons run the site's lib/basket.lua, which must check that the line belongs to the visitor. Without line, put edit and remove actions in the actions slot, with the same context.
+
+## buy-now
+
+A buy-it-now button with a quantity, handing the visitor to the site's checkout.
+
+Source: [components/buy-now.portal](../components/buy-now.portal) · privileged: its server exports run with the visitor's Portal access
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `product` | object | required | — |
+| `price` | string or null | omitted | — |
+| `label` | string | `"Buy now"` | — |
+| `quantityLabel` | string | `"Quantity"` | — |
+| `max` | integer | `99` | — |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:buy-now t:bind-product="input.product" price="£42.00 for 500 cards"/>
+```
+
+### Accessibility and limits
+
+The quantity is a labelled native number input and the button a real submit button, so it works without JavaScript and from the keyboard; Enter in the quantity submits. The button's accessible name includes the product name (visually hidden), so several on one page stay distinct. Errors render in a role="alert" region. Privileged: its server export runs the site's lib/checkout.lua with the visitor's Portal access and may redirect to an https checkout page.
+
+## order-summary
+
+A summary panel of order rows, a prominent total and checkout actions.
+
+Source: [components/order-summary.portal](../components/order-summary.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `title` | string or null | `"Order summary"` | — |
+| `totalLabel` | string | `"Total"` | — |
+| `total` | string | required | — |
+
+Slots:
+
+- `default`: required
+- `actions`: optional
+
+### Usage
+
+```xml
+<ui:order-summary total="£58.80">
+  <ui:description-list layout="inline">
+    <ui:description-item term="Subtotal">£42.00</ui:description-item>
+    <ui:description-item term="Delivery">£7.00</ui:description-item>
+    <ui:description-item term="VAT (20%)">£9.80</ui:description-item>
+  </ui:description-list>
+  <ui:fill name="actions">
+    <ui:button t:bind-disabled="true">Place order</ui:button>
+    <ui:link href="#basket">Back to basket</ui:link>
+  </ui:fill>
+</ui:order-summary>
+```
+
+### Accessibility and limits
+
+Renders a section with an h2 title (pass title=null to supply your own heading). The total is a dt/dd pair, so it is read as "Total, £58.80". Build rows with description-list so terms and values stay associated. Totals are calculated on the server; never present a client-side estimate as the payable amount.
+
+## dialog
+
+A native modal dialog with a trigger, title, body and footer.
+
+Source: [components/dialog.portal](../components/dialog.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `id` | string | required | — |
+| `title` | string | required | — |
+| `triggerVariant` | string | `"secondary"` | `primary`, `secondary`, `ghost` |
+| `closeLabel` | string | `"Close"` | — |
+
+Slots:
+
+- `trigger`: required
+- `default`: required
+- `footer`: optional
+
+### Usage
+
+```xml
+<p>
+  Delivery takes two working days.
+  <a href="#delivery-information">Delivery information</a>
+</p>
+<ui:dialog id="delivery-details" title="Delivery details">
+  <ui:fill name="trigger">
+    <ui:icon name="truck" size="sm"/>
+    Delivery details
+  </ui:fill>
+  <p>Orders approved before 2 pm are printed the same day and leave our studio by courier the next morning.</p>
+  <p>Tracking links are emailed as soon as your parcel is collected.</p>
+  <ui:fill name="footer">
+    <ui:link href="#delivery-information">Full delivery terms</ui:link>
+  </ui:fill>
+</ui:dialog>
+```
+
+### Accessibility and limits
+
+Uses a native dialog opened with showModal, so focus moves into it, the page behind is inert, Escape closes it and focus returns to the trigger. Supporting browsers handle the trigger and close button through invoker commands; the runtime dialog behaviour covers the rest. The trigger is enhancement-only: without JavaScript it stays hidden, so keep an ordinary page link to the same content. The trigger slot is the label inside the component's own button; the close button is labelled by closeLabel.
+
+## menu
+
+A button that opens a native popover list of navigation links.
+
+Source: [components/menu.portal](../components/menu.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `id` | string or null | omitted | — |
+| `label` | string | required | — |
+| `triggerVariant` | string | `"secondary"` | `primary`, `secondary`, `ghost` |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:menu id="account-menu" label="Account">
+  <ui:menu-item href="#orders" t:bind-current="true">
+    <ui:icon name="package" size="sm"/>
+    Orders
+  </ui:menu-item>
+  <ui:menu-item href="#addresses">
+    <ui:icon name="map-pin" size="sm"/>
+    Addresses
+  </ui:menu-item>
+  <ui:menu-item href="#sign-out">
+    <ui:icon name="log-out" size="sm"/>
+    Sign out
+  </ui:menu-item>
+</ui:menu>
+```
+
+### Accessibility and limits
+
+A navigation menu, not an application menu: the trigger is a button with popovertarget and the panel is a native popover holding a list of links, so Tab moves through the links, Escape and clicking outside close it and it works without JavaScript. Where CSS anchor positioning is unsupported the panel opens centred in the viewport.
+
+## menu-item
+
+One link inside a menu, with a current-page state.
+
+Source: [components/menu-item.portal](../components/menu-item.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `href` | string | required | — |
+| `current` | boolean | `false` | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:menu label="Help">
+  <ui:menu-item href="#artwork-guide">Artwork guide</ui:menu-item>
+  <ui:menu-item href="#paper-samples" t:bind-current="true">Paper samples</ui:menu-item>
+  <ui:menu-item href="#contact">Contact us</ui:menu-item>
+</ui:menu>
+```
+
+### Accessibility and limits
+
+Renders a list item and an ordinary link. current marks it with aria-current="page" and a bolder weight, not colour alone. Use only inside menu.
+
+## popover
+
+A help button that opens a short native popover.
+
+Source: [components/popover.portal](../components/popover.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `id` | string or null | omitted | — |
+| `label` | string | required | — |
+| `iconOnly` | boolean | `false` | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<p>
+  Bleed: 3 mm
+  <ui:popover id="bleed-help" label="What is bleed?" t:bind-iconOnly="true">
+    Extend background colours and images 3 mm past the trim line, so no white edge shows after cutting.
+  </ui:popover>
+</p>
+<ui:popover label="Which paper should I choose?">
+  Matt is easy to write on. Silk makes photographs richer. Both are FSC certified.
+</ui:popover>
+```
+
+### Accessibility and limits
+
+A button with popovertarget opens a native popover: Enter or Space toggles it, Escape and clicking outside close it, and it works without JavaScript. With iconOnly the label becomes visually hidden text, so the button keeps its name. Use it for supplementary help only; anything required to complete a task belongs on the page. The component is inline (span) so it can sit inside a sentence: put phrasing content in it, not paragraphs or lists.
+
+## tabs
+
+Tabbed panels that read as stacked, headed sections without JavaScript.
+
+Source: [components/tabs.portal](../components/tabs.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `label` | string | required | — |
+| `tabs` | array | required | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:tabs label="Product information" t:bind-tabs="input.tabs">
+  <ui:tab-panel id="product-details" title="Details">
+    <p>Printed on 400gsm matt board with a soft, writable finish.</p>
+  </ui:tab-panel>
+  <ui:tab-panel id="product-delivery" title="Delivery">
+    <p>Approved before 2 pm, dispatched the next working day.</p>
+  </ui:tab-panel>
+  <ui:tab-panel id="product-artwork" title="Artwork">
+    <p>Send a print-ready PDF with 3 mm bleed.</p>
+  </ui:tab-panel>
+</ui:tabs>
+```
+
+### Accessibility and limits
+
+Without JavaScript every panel shows in order under its own heading. The runtime tabs behaviour reveals the tab buttons and adds tab, tablist and tabpanel roles, roving focus and arrow, Home and End keys. Pass tabs from loader data (object literals are not supported in bindings): one {id, title} per tab-panel, in the same order, with selected: true on the initially selected one. Mismatched sets stay unenhanced.
+
+## tab-panel
+
+One panel inside tabs, headed by its title.
+
+Source: [components/tab-panel.portal](../components/tab-panel.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `id` | string | required | — |
+| `title` | string | required | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:tabs label="Order documents" t:bind-tabs="input.tabs">
+  <ui:tab-panel id="order-invoice" title="Invoice">
+    <p>Invoice PF-1042 was issued on 3 November.</p>
+  </ui:tab-panel>
+  <ui:tab-panel id="order-proof" title="Proof">
+    <p>Your approved proof is kept for twelve months.</p>
+  </ui:tab-panel>
+</ui:tabs>
+```
+
+### Accessibility and limits
+
+Each panel is a section with an h3 title, so without JavaScript the panels read as ordinary headed sections. Once enhanced the title is visually hidden because the selected tab names the panel. The id must equal the matching tabs entry id.
+
+## description-list
+
+Term and value pairs, stacked in a responsive grid or inline as rows.
+
+Source: [components/description-list.portal](../components/description-list.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `layout` | string | `"stacked"` | `stacked`, `inline` |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:stack gap="lg">
+  <ui:description-list>
+    <ui:description-item term="Order">PF-1042</ui:description-item>
+    <ui:description-item term="Placed">3 November, 09:12</ui:description-item>
+    <ui:description-item term="Deliver to">Amira Hassan, 14 Canal Street, Manchester</ui:description-item>
+  </ui:description-list>
+  <ui:description-list layout="inline">
+    <ui:description-item term="Subtotal">£42.00</ui:description-item>
+    <ui:description-item term="Delivery">£7.00</ui:description-item>
+  </ui:description-list>
+</ui:stack>
+```
+
+### Accessibility and limits
+
+A native dl: each description-item is a div holding one dt and one dd, so assistive technology reads term and value together. Inline rows place the value at the end of the line; both layouts wrap long values instead of overflowing.
+
+## description-item
+
+One term and its value inside description-list.
+
+Source: [components/description-item.portal](../components/description-item.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `term` | string | required | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:description-list>
+  <ui:description-item term="Paper">400gsm matt</ui:description-item>
+  <ui:description-item term="Finish">
+    <ui:badge t:bind-dot="true" variant="primary">Soft-touch laminate</ui:badge>
+  </ui:description-item>
+</ui:description-list>
+```
+
+### Accessibility and limits
+
+Renders a div wrapping a dt and a dd, which HTML allows inside a dl. The value may be rich content such as a badge or link. Use only inside description-list.
+
+## timeline
+
+An ordered progress timeline of done, current and upcoming steps.
+
+Source: [components/timeline.portal](../components/timeline.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `label` | string | required | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:timeline label="Order PF-1042 progress">
+  <ui:timeline-step title="Order received" state="done" time="Mon 09:12"/>
+  <ui:timeline-step title="Proof approved" state="done" time="Mon 14:40">
+    Approved by Amira Hassan.
+  </ui:timeline-step>
+  <ui:timeline-step title="Printing" state="current" time="Today">
+    On press 2, 400gsm matt.
+  </ui:timeline-step>
+  <ui:timeline-step title="Dispatched" time="Est. Thu"/>
+</ui:timeline>
+```
+
+### Accessibility and limits
+
+An ordered list labelled by label, so its length and position are announced. The current step carries aria-current="step", and every step starts with visually hidden state text (Completed, Current step, Upcoming), so state never relies on the marker colour or icon. Markers are decorative and mirror on right-to-left pages.
+
+## timeline-step
+
+One step in a timeline: a title, an optional time and detail.
+
+Source: [components/timeline-step.portal](../components/timeline-step.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `title` | string | required | — |
+| `state` | string | `"upcoming"` | `done`, `current`, `upcoming` |
+| `time` | string or null | omitted | — |
+| `stateLabel` | string or null | omitted | — |
+
+Slots:
+
+- `default`: optional
+
+### Usage
+
+```xml
+<ui:timeline label="Reprint progress">
+  <ui:timeline-step title="Artwork checked" state="done" time="09:30" stateLabel="Erledigt:"/>
+  <ui:timeline-step title="Druckplattenbelichtung und Farbabstimmung" state="current" time="Heute"/>
+  <ui:timeline-step title="Ready for collection"/>
+</ui:timeline>
+```
+
+### Accessibility and limits
+
+Renders a list item. state=current adds aria-current="step". The state is spelled out as visually hidden text before the title; pass stateLabel to translate it (for example "Erledigt:"). Use only inside timeline.
+
+## stat
+
+A labelled key figure with an optional change and trend.
+
+Source: [components/stat.portal](../components/stat.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `label` | string | required | — |
+| `value` | string | required | — |
+| `change` | string or null | omitted | — |
+| `trend` | string or null | omitted | `up`, `down`, `flat` |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:grid columns="3">
+  <ui:stat label="Open orders" value="12" change="+3 this week" trend="up"/>
+  <ui:stat label="Average turnaround" value="2.4 days" change="−0.3 days" trend="down"/>
+  <ui:stat label="Spend this year" value="£184.250.000,00" change="Same as last year" trend="flat"/>
+</ui:grid>
+```
+
+### Accessibility and limits
+
+The label precedes the value in reading order. The trend arrow is decorative and coloured as a supplement: the change text must say the direction and amount itself (for example "+3 this week"). Values are preformatted by the server.
+
+## estimate-panel
+
+A price estimate with line rows, a total that can follow a quantity live, delivery and actions.
+
+Source: [components/estimate-panel.portal](../components/estimate-panel.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `title` | string | `"Estimate"` | — |
+| `totalLabel` | string | `"Total"` | — |
+| `total` | string | required | — |
+| `delivery` | string or null | omitted | — |
+| `unitPrice` | number or null | omitted | — |
+| `currency` | string | `""` | — |
+
+Slots:
+
+- `default`: optional
+- `status`: optional
+- `actions`: optional
+
+### Usage
+
+```xml
+<ui:estimate-panel total="£42.00" t:bind-unitPrice="0.084" currency="£" delivery="Arrives Thursday 13 November">
+  <ui:fill name="status">
+    <ui:badge variant="success" t:bind-dot="true">In stock</ui:badge>
+  </ui:fill>
+  <ui:quantity-input id="estimate-quantity" name="quantity" label="Business cards" t:bind-value="500" t:bind-step="50" t:bind-min="50"/>
+  <ui:description-list layout="inline">
+    <ui:description-item term="Price per card">8.4p</ui:description-item>
+  </ui:description-list>
+  <ui:fill name="actions">
+    <ui:button t:bind-disabled="true">Add to basket</ui:button>
+  </ui:fill>
+</ui:estimate-panel>
+```
+
+### Accessibility and limits
+
+Renders a section with an h2 title and the total as a dt/dd pair. With unitPrice, a control named quantity inside the panel re-estimates the total as the visitor edits it: only the total is replaced, never the control being edited, and without JavaScript the total stays as rendered. Announce updates from a data-portal-status outlet outside the panel. The estimate is not a quote: the server recalculates the payable price.
+
+## file-list
+
+A list of downloadable files.
+
+Source: [components/file-list.portal](../components/file-list.portal)
+
+No props.
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:file-list>
+  <ui:file-item href="#invoice-pf-1042" name="Invoice PF-1042.pdf" type="PDF" size="84 KB"/>
+  <ui:file-item href="#proof-pf-1042" name="Approved proof, business cards, version 3.pdf" type="PDF" size="2.4 MB"/>
+  <ui:file-item href="#delivery-note" name="Delivery note"/>
+</ui:file-list>
+```
+
+### Accessibility and limits
+
+A list of ordinary links. Each link names the file, then its type and size, so the accessible name says what will download and how big it is. Serve files through an authorised page or Folder route; the link grants no access by itself.
+
+## file-item
+
+One downloadable file inside file-list: name, type and size.
+
+Source: [components/file-item.portal](../components/file-item.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `href` | string | required | — |
+| `name` | string | required | — |
+| `size` | string or null | omitted | — |
+| `type` | string or null | omitted | — |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:file-list>
+  <ui:file-item href="#artwork-guide" name="Artwork guide.pdf" type="PDF" size="1.2 MB"/>
+</ui:file-list>
+```
+
+### Accessibility and limits
+
+An ordinary link with the download attribute; the icons are decorative. Use only inside file-list.
+
+## code-block
+
+Preformatted code with a language label and a copy button.
+
+Source: [components/code-block.portal](../components/code-block.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `language` | string or null | omitted | — |
+| `copy` | boolean | `true` | — |
+| `copyLabel` | string | `"Copy"` | — |
+| `copiedMessage` | string | `"Copied"` | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:code-block language="Shell">curl https://print.example/api/v1/orders/PF-1042 \
+-H "Authorization: Bearer $PAPER_AND_FORM_KEY"</ui:code-block>
+```
+
+### Accessibility and limits
+
+The code sits in a pre that is keyboard-focusable, so long lines can be scrolled with the arrow keys, and stays left-to-right on right-to-left pages. language is a visible label only: there is no client-side highlighting. With copy (the default) the runtime copy behaviour reveals the button, copies the text and announces copiedMessage (default "Copied"; set it alongside copyLabel to localise the control); without JavaScript the button stays hidden and the text stays selectable. Write the code flush to the start of the line: whitespace in the slot is preserved.
+
+## endpoint
+
+An API operation heading: method, path, summary and documentation content.
+
+Source: [components/endpoint.portal](../components/endpoint.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `method` | string | required | `GET`, `POST`, `PUT`, `PATCH`, `DELETE` |
+| `path` | string | required | — |
+| `summary` | string or null | omitted | — |
+
+Slots:
+
+- `default`: optional
+
+### Usage
+
+```xml
+<ui:endpoint method="GET" path="/v1/orders/{reference}" summary="Retrieve one order with its line items and production status."/>
+<ui:endpoint method="POST" path="/v1/orders" summary="Place an order from an accepted estimate."/>
+<ui:endpoint method="DELETE" path="/v1/customers/{customerReference}/delivery-addresses/{addressReference}/default-preferences"/>
+```
+
+### Accessibility and limits
+
+Renders a section headed by an h3 that reads as method then path, for example "GET /v1/orders/{reference}". The method colour comes from the status tokens and is never the only cue: the method is always written out. Paths stay left-to-right and wrap at any character instead of overflowing.
+
+## property-table
+
+A table of API or schema properties: name, type, required and description.
+
+Source: [components/property-table.portal](../components/property-table.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `caption` | string | required | — |
+| `nameLabel` | string | `"Name"` | — |
+| `typeLabel` | string | `"Type"` | — |
+| `requiredLabel` | string | `"Required"` | — |
+| `descriptionLabel` | string | `"Description"` | — |
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<ui:property-table caption="Order fields">
+  <tr>
+    <td>
+      <code>reference</code>
+    </td>
+    <td>string</td>
+    <td>Yes</td>
+    <td>Your order reference, for example PF-1042.</td>
+  </tr>
+  <tr>
+    <td>
+      <code>status</code>
+    </td>
+    <td>string</td>
+    <td>Yes</td>
+    <td>One of received, proofing, printing, dispatched or delivered.</td>
+  </tr>
+  <tr>
+    <td>
+      <code>deliveryNote</code>
+    </td>
+    <td>string or null</td>
+    <td>No</td>
+    <td>Instructions for the courier.</td>
+  </tr>
+</ui:property-table>
+```
+
+### Accessibility and limits
+
+A captioned table with real column headers (translatable through the *Label props). Supply one tr per property with four td cells; write "Yes" or "No" for Required rather than a symbol. The labelled wrapper is keyboard-focusable so a wide table can be scrolled.
+
+## key-display
+
+A labelled secret that shows only its masked form and copies the full value. The full value is delivered in the page source as a hidden copy source, so use it only on authenticated pages shown to the key's owner.
+
+Source: [components/key-display.portal](../components/key-display.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `label` | string | required | — |
+| `value` | string | required | — |
+| `masked` | string | required | — |
+| `copyLabel` | string | `"Copy"` | — |
+| `copiedMessage` | string | `"Copied"` | — |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:key-display label="Live API key" value="pf_live_7Hq2Lx9VtR4mZcW8nKpD3sYb" masked="pf_live_••••••••••••••••3sYb"/>
+<div lang="de">
+  <ui:key-display label="Test-API-Schlüssel" value="pf_test_2Nc8Rw5YbK1qTz7Hm4Lx9Va6" masked="pf_test_••••••••••••••••9Va6" copyLabel="Kopieren" copiedMessage="Schlüssel kopiert"/>
+</div>
+```
+
+### Accessibility and limits
+
+Only masked is displayed or announced: the full value sits in a hidden copy source, so it never appears on screen or in the accessibility tree, and the copy button (revealed by the runtime copy behaviour) puts it on the clipboard and announces copiedMessage (default "Copied"; set it alongside copyLabel to localise the control). The full value is delivered in the page source (the hidden copy source), so anyone who can view the source of the page has the key: use it only on authenticated, uncached pages shown to the key's owner, mask on the server, and prefer showing a new secret once.
+
+## avatar
+
+A round image or initials standing for a person or organisation.
+
+Source: [components/avatar.portal](../components/avatar.portal)
+
+| Prop | Type | Default | Allowed values |
+| --- | --- | --- | --- |
+| `name` | string | required | — |
+| `initials` | string | required | — |
+| `src` | string or null | omitted | — |
+| `size` | string | `"md"` | `sm`, `md`, `lg` |
+
+Slots:
+
+None.
+
+### Usage
+
+```xml
+<ui:stack direction="horizontal" align="center">
+  <ui:avatar name="Amira Hassan" initials="AH" size="sm"/>
+  <ui:avatar name="Jonas Müller-Lüdenscheidt" initials="JM"/>
+  <ui:avatar name="Paper &amp; Form studio" initials="P&amp;F" size="lg"/>
+</ui:stack>
+```
+
+### Accessibility and limits
+
+The avatar is an image named by name; initials and any photo inside it are hidden from assistive technology. DataXML cannot derive initials, so the caller passes them. When the name is already written next to the avatar, prefer leaving the avatar out of the reading order in your own markup.
+
+## kbd
+
+A keyboard key or shortcut, styled as a keycap.
+
+Source: [components/kbd.portal](../components/kbd.portal)
+
+No props.
+
+Slots:
+
+- `default`: required
+
+### Usage
+
+```xml
+<p>
+  Press
+  <ui:kbd>Ctrl</ui:kbd>
+  +
+  <ui:kbd>K</ui:kbd>
+  to search orders.
+</p>
+```
+
+### Accessibility and limits
+
+Uses the native kbd element. Write key names out in full where they are ambiguous (for example "Ctrl"), and never make a shortcut the only way to do something.
 
 
 
@@ -1103,639 +2461,606 @@ Provide a meaningful label including progress if needed. Value and maximum must 
 
 Complete, themeable compositions rendered by the production Portal renderer. These are documentation recipes, not connected starter portals. All people, addresses, orders and prices are fictional. No login, filtering, upload or business mutation is connected.
 
-Copy the DataXML and [layout CSS](../styles/layouts.css), loading it after the bundled component styles. Keep the `portal-theme portal-layout` wrapper. The CSS uses inherited semantic tokens, so the same theme applies to components and layout. Replace illustrative actions with protected Portal flows; never activate them by simply removing `disabled`.
+Copy the DataXML into a page template. The [layout CSS](../styles/layouts.css) is part of the host's bundled stylesheet, so a Portal page needs nothing else. Keep the `portal-theme portal-layout` wrapper. The CSS uses inherited semantic tokens, so the same theme applies to components and layout. Replace illustrative actions with protected Portal flows; never activate them by simply removing `disabled`.
 
-## Sign in
+## Print shop
 
-A welcoming account entry point with a branded panel, labelled fields and recovery guidance.
+A public storefront: a branded hero, a bestseller grid and a product page with paper options, quantity and a live estimate.
 
-Components: `card`, `field`, `input`, `button`, `disclosure`.
+Components: `site-header`, `nav-link`, `hero`, `section`, `grid`, `product-card`, `media`, `badge`, `price`, `option-cards`, `option-card`, `quantity-input`, `estimate-panel`, `description-list`, `site-footer`.
 
-Use your Portal authentication flow; never put credentials in query strings or client storage. The demo has no form or authentication endpoint. Fields are illustrative and the action is disabled.
+Load products and prices with a read loader and pass server-formatted amounts to price. Put the options and quantity in a GET form targeting the estimate region (data-portal-region on the wrapper, data-portal-live on the form) with a status outlet outside it; recalculate the estimate in Lua on every change. Adding to the basket is a protected Lua action. The product band is plain section markup rather than the section component because a region cannot sit inside a component slot. This static example has no form, so nothing is calculated or submitted. The product illustrations under /examples/images/ exist only in this showcase: replace them with your own asset URLs.
 
-[DataXML source](../examples/layout-sign-in.html) · [Rendered example](../rendered/layout-sign-in.html)
+[DataXML source](../examples/layout-shop.html) · [Rendered example](../rendered/layout-shop.html)
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-sign-in">
-  <header class="recipe-header">
-    <a class="recipe-brand" href="#page-content">
-      <span aria-hidden="true">p.</span>
-       Paper &amp; Form
-    </a>
-    <span class="recipe-header-label">Customer portal</span>
-  </header>
-  <div class="login-layout" id="page-content">
-    <section class="login-story">
-      <p class="recipe-kicker">YOUR NEXT GREAT IMPRESSION</p>
-      <h1>
-        Good ideas.
-        <br/>
-        Beautifully printed.
-      </h1>
-      <p>One place for your print projects, proofs and deliveries. A little less admin. A lot more possibility.</p>
-      <div class="print-art print-art-cards" aria-hidden="true">
-        <div class="print-sheet">
-          <span>Paper &amp; Form</span>
-          <strong>
-            Make
-            <br/>
-            your mark.
-          </strong>
-          <i>Made to make an impression.</i>
+<div class="portal-theme portal-layout">
+  <ui:site-header t:bind-sticky="true">
+    <ui:fill name="brand">
+      <a href="#top">
+        <ui:icon name="layers" size="lg"/>
+        Paper &amp; Form
+      </a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#shop" t:bind-current="true">Shop</ui:nav-link>
+      <ui:nav-link href="#business-cards">Business cards</ui:nav-link>
+      <ui:nav-link href="#stationery">Stationery</ui:nav-link>
+      <ui:nav-link href="#help">Help</ui:nav-link>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:link href="#basket" variant="button">
+        <ui:icon name="shopping-cart" size="sm"/>
+        Basket · 2
+      </ui:link>
+    </ui:fill>
+  </ui:site-header>
+  <main id="top">
+    <ui:hero eyebrow="Business print, made well" title="Ideas deserve a little paper." lead="Cards, letterheads and leaflets on beautiful stock, proofed by a person and delivered in two working days.">
+      <ui:fill name="actions">
+        <ui:link href="#business-cards" variant="button">
+          Design your cards
+          <ui:icon name="arrow-right" size="sm"/>
+        </ui:link>
+        <ui:link href="#samples">Request free paper samples</ui:link>
+      </ui:fill>
+      <ui:fill name="media">
+        <ui:media src="/examples/images/business-cards.svg" alt="A stack of black business cards printed with the Paper &amp; Form wordmark"/>
+      </ui:fill>
+    </ui:hero>
+    <ui:section title="Bestsellers">
+      <ui:grid columns="4">
+        <ui:product-card href="#business-cards" title="Business cards">
+          <ui:fill name="media">
+            <ui:media src="/examples/images/business-cards.svg" alt=""/>
+          </ui:fill>
+          <ui:fill name="meta">
+            <ui:badge variant="success" t:bind-dot="true">Next day</ui:badge>
+          </ui:fill>
+          <ui:fill name="price">
+            <ui:price amount="£24.00" unit="/ 250"/>
+          </ui:fill>
+        </ui:product-card>
+        <ui:product-card href="#leaflets" title="Folded leaflets">
+          <ui:fill name="media">
+            <ui:media src="/examples/images/folded-leaflet.svg" alt=""/>
+          </ui:fill>
+          <ui:fill name="price">
+            <ui:price amount="£68.00" unit="/ 500"/>
+          </ui:fill>
+        </ui:product-card>
+        <ui:product-card href="#letterheads" title="Letterheads">
+          <ui:fill name="media">
+            <ui:media src="/examples/images/letterheads.svg" alt=""/>
+          </ui:fill>
+          <ui:fill name="meta">
+            <ui:badge>FSC paper</ui:badge>
+          </ui:fill>
+          <ui:fill name="price">
+            <ui:price amount="£52.00" unit="/ 500"/>
+          </ui:fill>
+        </ui:product-card>
+        <ui:product-card href="#stickers" title="Round stickers">
+          <ui:fill name="media">
+            <ui:media src="/examples/images/stickers.svg" alt=""/>
+          </ui:fill>
+          <ui:fill name="meta">
+            <ui:badge variant="primary" t:bind-dot="true">New</ui:badge>
+          </ui:fill>
+          <ui:fill name="price">
+            <ui:price amount="£18.00" unit="/ 100" compareAt="£22.00"/>
+          </ui:fill>
+        </ui:product-card>
+      </ui:grid>
+    </ui:section>
+    <section class="portal-section" data-tone="muted" aria-labelledby="business-cards-title">
+      <div class="portal-section__inner">
+        <h2 class="portal-section__title" id="business-cards-title">Business cards</h2>
+          <div class="layout-product" id="business-cards">
+          <ui:stack>
+            <ui:media src="/examples/images/business-cards.svg" alt="Business cards, front and back, on 400gsm matt board" ratio="1/1"/>
+            <ui:description-list>
+              <ui:description-item term="Size">85 × 55 mm</ui:description-item>
+              <ui:description-item term="Printing">Full colour, both sides</ui:description-item>
+            </ui:description-list>
+          </ui:stack>
+          <ui:stack gap="lg">
+            <ui:option-cards legend="Paper stock" columns="2">
+              <ui:option-card name="stock" value="matt-400" label="400gsm matt" description="Soft, writable finish" aside="Included" t:bind-checked="true"/>
+              <ui:option-card name="stock" value="silk-450" label="450gsm silk" description="Smooth, with a gentle sheen" aside="+ £4.00"/>
+              <ui:option-card name="stock" value="cotton-600" label="600gsm cotton" description="Thick and tactile" aside="+ £12.00"/>
+              <ui:option-card name="stock" value="kraft-350" label="350gsm kraft" description="Back in stock on 20 November" aside="+ £3.00" t:bind-disabled="true"/>
+            </ui:option-cards>
+            <ui:option-cards legend="Finish" columns="2">
+              <ui:option-card name="finish" value="none" label="No finish" t:bind-checked="true"/>
+              <ui:option-card name="finish" value="soft-touch" label="Soft-touch laminate" aside="+ £6.00"/>
+            </ui:option-cards>
+            <ui:quantity-input id="shop-quantity" name="quantity" label="Boxes of 250" t:bind-value="2" t:bind-max="40"/>
+          </ui:stack>
+          <div class="layout-sticky" data-portal-region="estimate">
+            <ui:estimate-panel total="£48.00" delivery="Arrives Thursday 13 November">
+              <ui:fill name="status">
+                <ui:badge variant="success" t:bind-dot="true">In stock</ui:badge>
+              </ui:fill>
+              <ui:description-list layout="inline">
+                <ui:description-item term="500 cards, 400gsm matt">£42.00</ui:description-item>
+                <ui:description-item term="Proof check">Free</ui:description-item>
+                <ui:description-item term="Delivery">£6.00</ui:description-item>
+              </ui:description-list>
+              <ui:fill name="actions">
+                <ui:button t:bind-disabled="true">Add to basket</ui:button>
+              </ui:fill>
+            </ui:estimate-panel>
+          </div>
         </div>
       </div>
-      <div class="story-facts">
-        <span>Thoughtfully made</span>
-        <span>From first proof to final print</span>
-      </div>
     </section>
-    <section class="login-panel" aria-labelledby="login-title">
-      <div>
-        <p class="recipe-kicker">WELCOME BACK</p>
-        <h2 id="login-title">Your projects start here.</h2>
-        <p class="recipe-muted">Sign in to your Paper &amp; Form account.</p>
-      </div>
-      <div class="recipe-fields" role="group" aria-label="Example sign-in fields">
-        <ui:field for="email" label="Email address">
-          <ui:input id="email" name="email" type="email" value="" placeholder="you@company.com" autocomplete="off">
-          </ui:input>
-        </ui:field>
-        <ui:field for="password" label="Password">
-          <ui:input id="password" name="password" type="password" value="" autocomplete="off">
-          </ui:input>
-        </ui:field>
-        <p class="recipe-muted recipe-small">Demo only. Please do not enter real credentials.</p>
-        <ui:button t:bind-disabled="true" size="lg">
-          Sign in
-        </ui:button>
-      </div>
-      <ui:disclosure>
-        <ui:fill name="summary">Need help signing in?</ui:fill>
-        <p>In your portal, link this section to password recovery or your customer support team. This example has no authentication service.</p>
-      </ui:disclosure>
-      <p class="recipe-small recipe-muted">New to Paper &amp; Form? Your account contact can invite you to the customer portal.</p>
-      <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>
-    </section>
-  </div>
-</main>
+  </main>
+  <ui:site-footer>
+    <p>Paper &amp; Form · Business print, made well and delivered fast.</p>
+    <nav aria-label="Footer">
+      <ui:nav-link href="#delivery">Delivery</ui:nav-link>
+      <ui:nav-link href="#returns">Returns</ui:nav-link>
+      <ui:nav-link href="#contact">Contact</ui:nav-link>
+    </nav>
+    <ui:fill name="legal">
+      <p>Sample layout · Fictional data · Business actions are disabled</p>
+    </ui:fill>
+  </ui:site-footer>
+</div>
 ```
 
-## Print catalogue
+## Private ordering portal
 
-A responsive product collection with filters, sorting and a distinctive editorial product grid.
+A signed-in B2B portal: approved items to reorder, a basket summary with an approval step, and the sign-in card visitors see first.
 
-Components: `card`, `field`, `input`, `select`, `checkbox`, `badge`, `button`.
+Components: `site-header`, `menu`, `menu-item`, `page-header`, `section`, `basket-line`, `media`, `order-summary`, `description-list`, `card`, `field`, `input`, `button`, `site-footer`.
 
-Replace the six synthetic products with Lua loader output. Keep filter controls outside the results region; use a native GET form and a targeted live region when connecting search. This static example does not filter or navigate products.
+Use your Portal authentication flow for the sign-in page; never put credentials in query strings or client storage. Scope the reorder list to the signed-in PortalUser's customer and read contract prices on the server. Basket changes and "send for approval" are protected Lua actions; group related writes in the platform transaction capability. The demo has no form or endpoint and every action is disabled. The product illustrations under /examples/images/ exist only in this showcase: replace them with your own asset URLs.
 
-[DataXML source](../examples/layout-catalogue.html) · [Rendered example](../rendered/layout-catalogue.html)
+[DataXML source](../examples/layout-ordering-portal.html) · [Rendered example](../rendered/layout-ordering-portal.html)
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-catalogue">
-  <header class="recipe-header">
-    <a class="recipe-brand" href="#page-content">
-      <span aria-hidden="true">p.</span>
-       Paper &amp; Form
-    </a>
-    <span class="recipe-header-label">Print shop</span>
-  </header>
-  <section class="catalog-hero" id="page-content">
-    <div>
-      <p class="recipe-kicker">PRINT SOMETHING GREAT</p>
-      <h1>
-        Ideas deserve
-        <br/>
-        a little paper.
-      </h1>
-      <p class="recipe-muted">
-        Everyday essentials and unexpected favourites.
-        <br/>
-        Made to feel as good as they look.
-      </p>
-    </div>
-    <div class="hero-stamp" aria-hidden="true">
-      MAKE
-      <br/>
-      <em>it</em>
-      <br/>
-      TANGIBLE
-    </div>
-  </section>
-  <div class="catalog-controls">
-    <div class="catalog-search">
-      <ui:field for="search" label="Find your next print">
-        <ui:input id="search" name="search" type="search" value="" placeholder="Try business cards or booklets">
-        </ui:input>
-      </ui:field>
-    </div>
-    <div>
-      <ui:field for="sort" label="Sort by">
-        <ui:select id="sort" name="sort">
-          <option>Recommended</option>
-          <option>Price: low to high</option>
-        </ui:select>
-      </ui:field>
-    </div>
-  </div>
-  <div class="catalog-layout">
-    <aside class="catalog-filters" aria-labelledby="filters-title">
-      <h2 id="filters-title">Made for your moment</h2>
-      <ui:disclosure t:bind-open="true">
-        <ui:fill name="summary">Product categories</ui:fill>
-        <div class="recipe-fields">
-          <ui:checkbox name="category" value="all" t:bind-checked="true">
-            All products
-          </ui:checkbox>
-          <ui:checkbox name="category" value="stationery" t:bind-checked="false">
-            Business stationery
-          </ui:checkbox>
-          <ui:checkbox name="category" value="marketing" t:bind-checked="false">
-            Marketing &amp; events
-          </ui:checkbox>
-          <ui:checkbox name="category" value="packaging" t:bind-checked="false">
-            Packaging &amp; labels
-          </ui:checkbox>
+<div class="portal-theme portal-layout">
+  <ui:site-header>
+    <ui:fill name="brand">
+      <a href="#top">
+        <ui:icon name="layers" size="lg"/>
+        Paper &amp; Form for Northwind Clinics
+      </a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#reorder" t:bind-current="true">Reorder</ui:nav-link>
+      <ui:nav-link href="#orders">Orders</ui:nav-link>
+      <ui:nav-link href="#brand-assets">Brand assets</ui:nav-link>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:menu id="account-menu" label="Amira Hassan" triggerVariant="ghost">
+        <ui:menu-item href="#profile">
+          <ui:icon name="user" size="sm"/>
+          Profile
+        </ui:menu-item>
+        <ui:menu-item href="#addresses">
+          <ui:icon name="map-pin" size="sm"/>
+          Clinic addresses
+        </ui:menu-item>
+        <ui:menu-item href="#sign-out">
+          <ui:icon name="log-out" size="sm"/>
+          Sign out
+        </ui:menu-item>
+      </ui:menu>
+    </ui:fill>
+  </ui:site-header>
+  <main id="top">
+    <ui:container>
+      <ui:page-header title="Reorder approved print" description="Every item uses Northwind's approved artwork and contract prices. Orders over £500 go to your practice manager for approval.">
+        <ui:fill name="actions">
+          <ui:link href="#orders">
+            <ui:icon name="package" size="sm"/>
+            Order history
+          </ui:link>
+        </ui:fill>
+      </ui:page-header>
+    </ui:container>
+    <ui:section title="Your clinic's print">
+      <div class="layout-split">
+        <div>
+          <ui:basket-line title="Appointment cards" detail="85 × 55 mm, 400gsm matt · Last ordered 14 October" quantity="Usually 1,000" total="£38.00">
+            <ui:fill name="media">
+              <ui:media src="/examples/images/business-cards.svg" alt="" ratio="1/1"/>
+            </ui:fill>
+            <ui:fill name="actions">
+              <ui:button variant="secondary" size="sm" t:bind-disabled="true">
+                <ui:icon name="plus" size="sm"/>
+                Add to basket
+              </ui:button>
+            </ui:fill>
+          </ui:basket-line>
+          <ui:basket-line title="Clinic letterheads" detail="A4, 120gsm uncoated · Last ordered 2 September" quantity="Usually 2,500" total="£96.00">
+            <ui:fill name="media">
+              <ui:media src="/examples/images/letterheads.svg" alt="" ratio="1/1"/>
+            </ui:fill>
+            <ui:fill name="actions">
+              <ui:button variant="secondary" size="sm" t:bind-disabled="true">
+                <ui:icon name="plus" size="sm"/>
+                Add to basket
+              </ui:button>
+            </ui:fill>
+          </ui:basket-line>
+          <ui:basket-line title="Aftercare leaflets" detail="A5 folded to A6, 170gsm silk · Last ordered 30 July" quantity="Usually 500" total="£64.00">
+            <ui:fill name="media">
+              <ui:media src="/examples/images/folded-leaflet.svg" alt="" ratio="1/1"/>
+            </ui:fill>
+            <ui:fill name="actions">
+              <ui:button variant="secondary" size="sm" t:bind-disabled="true">
+                <ui:icon name="plus" size="sm"/>
+                Add to basket
+              </ui:button>
+            </ui:fill>
+          </ui:basket-line>
         </div>
-      </ui:disclosure>
-      <p class="recipe-small recipe-muted">Search, sorting and filters are shown as composition examples. This static catalogue does not filter.</p>
-    </aside>
-    <section aria-labelledby="products-title">
-      <div class="recipe-section-heading">
-        <h2 id="products-title">The print collection</h2>
-        <span class="recipe-muted recipe-small">6 products</span>
+        <div class="layout-sticky">
+          <ui:order-summary title="Basket" total="£165.60">
+            <ui:basket-line title="Appointment cards" quantity="1,000 cards" total="£38.00"/>
+            <ui:basket-line title="Clinic letterheads" quantity="2,500 sheets" total="£96.00"/>
+            <ui:description-list layout="inline">
+              <ui:description-item term="Delivery to Leeds clinic">£4.00</ui:description-item>
+              <ui:description-item term="VAT (20%)">£27.60</ui:description-item>
+            </ui:description-list>
+            <ui:fill name="actions">
+              <ui:button t:bind-disabled="true">Send for approval</ui:button>
+              <ui:link href="#basket">Edit basket</ui:link>
+            </ui:fill>
+          </ui:order-summary>
+        </div>
       </div>
-      <div class="product-grid">
+    </ui:section>
+    <ui:section title="The sign-in page" tone="muted">
+      <div class="layout-narrow">
+        <p>Signed-out visitors see only this card. Accounts are created by Northwind's practice managers.</p>
         <ui:card>
-          <div class="print-art print-art-cards" aria-hidden="true">
-            <div class="print-sheet">
-              <span>Paper &amp; Form</span>
-              <strong>
-                Hello.
-                <br/>
-                Again.
-              </strong>
-              <i>Made to make an impression.</i>
-            </div>
-          </div>
-          <div class="product-copy">
-            <div class="product-heading">
-              <h3>Business cards</h3>
-              <ui:badge variant="primary">
-                Bestseller
-              </ui:badge>
-            </div>
-            <p class="recipe-muted">A small introduction. A lasting impression.</p>
-            <div class="product-price">
-              <span>
-                From 
-                <strong>£24</strong>
-              </span>
-              <span class="recipe-small recipe-muted">250 cards</span>
-            </div>
-            <ui:button t:bind-disabled="true" variant="secondary">
-              Configure business cards
-            </ui:button>
-          </div>
-        </ui:card>
-        <ui:card>
-          <div class="print-art print-art-poster" aria-hidden="true">
-            <div class="print-sheet">
-              <span>Paper &amp; Form</span>
-              <strong>
-                Something
-                <br/>
-                worth seeing.
-              </strong>
-              <i>Made to make an impression.</i>
-            </div>
-          </div>
-          <div class="product-copy">
-            <div class="product-heading">
-              <h3>Art prints</h3>
-            </div>
-            <p class="recipe-muted">Big ideas, beautifully reproduced.</p>
-            <div class="product-price">
-              <span>
-                From 
-                <strong>£18</strong>
-              </span>
-              <span class="recipe-small recipe-muted">10 prints</span>
-            </div>
-            <ui:button t:bind-disabled="true" variant="secondary">
-              Configure art prints
-            </ui:button>
-          </div>
-        </ui:card>
-        <ui:card>
-          <div class="print-art print-art-book" aria-hidden="true">
-            <div class="print-sheet">
-              <span>Paper &amp; Form</span>
-              <strong>
-                A story
-                <br/>
-                to keep.
-              </strong>
-              <i>Made to make an impression.</i>
-            </div>
-          </div>
-          <div class="product-copy">
-            <div class="product-heading">
-              <h3>Booklets</h3>
-            </div>
-            <p class="recipe-muted">Give your next chapter a proper home.</p>
-            <div class="product-price">
-              <span>
-                From 
-                <strong>£65</strong>
-              </span>
-              <span class="recipe-small recipe-muted">25 booklets</span>
-            </div>
-            <ui:button t:bind-disabled="true" variant="secondary">
-              Configure booklets
-            </ui:button>
-          </div>
-        </ui:card>
-        <ui:card>
-          <div class="print-art print-art-label" aria-hidden="true">
-            <div class="print-sheet">
-              <span>Paper &amp; Form</span>
-              <strong>
-                Good
-                <br/>
-                things.
-              </strong>
-              <i>Made to make an impression.</i>
-            </div>
-          </div>
-          <div class="product-copy">
-            <div class="product-heading">
-              <h3>Product labels</h3>
-            </div>
-            <p class="recipe-muted">The finishing touch for something special.</p>
-            <div class="product-price">
-              <span>
-                From 
-                <strong>£32</strong>
-              </span>
-              <span class="recipe-small recipe-muted">100 labels</span>
-            </div>
-            <ui:button t:bind-disabled="true" variant="secondary">
-              Configure product labels
-            </ui:button>
-          </div>
-        </ui:card>
-        <ui:card>
-          <div class="print-art print-art-postcard" aria-hidden="true">
-            <div class="print-sheet">
-              <span>Paper &amp; Form</span>
-              <strong>
-                Wish you
-                <br/>
-                were here.
-              </strong>
-              <i>Made to make an impression.</i>
-            </div>
-          </div>
-          <div class="product-copy">
-            <div class="product-heading">
-              <h3>Postcards</h3>
-            </div>
-            <p class="recipe-muted">A thoughtful note, delivered in colour.</p>
-            <div class="product-price">
-              <span>
-                From 
-                <strong>£29</strong>
-              </span>
-              <span class="recipe-small recipe-muted">100 postcards</span>
-            </div>
-            <ui:button t:bind-disabled="true" variant="secondary">
-              Configure postcards
-            </ui:button>
-          </div>
-        </ui:card>
-        <ui:card>
-          <div class="print-art print-art-fold" aria-hidden="true">
-            <div class="print-sheet">
-              <span>Paper &amp; Form</span>
-              <strong>
-                Meet your
-                <br/>
-                next idea.
-              </strong>
-              <i>Made to make an impression.</i>
-            </div>
-          </div>
-          <div class="product-copy">
-            <div class="product-heading">
-              <h3>Folded leaflets</h3>
-            </div>
-            <p class="recipe-muted">More room for the details that matter.</p>
-            <div class="product-price">
-              <span>
-                From 
-                <strong>£42</strong>
-              </span>
-              <span class="recipe-small recipe-muted">250 leaflets</span>
-            </div>
-            <ui:button t:bind-disabled="true" variant="secondary">
-              Configure folded leaflets
-            </ui:button>
-          </div>
+          <ui:fill name="header">
+            <h3>Sign in to Northwind Clinics</h3>
+          </ui:fill>
+          <ui:stack>
+            <ui:field for="portal-email" label="Work email">
+              <ui:input id="portal-email" name="email" type="email" autocomplete="email" placeholder="amira@northwind.example"/>
+            </ui:field>
+            <ui:field for="portal-password" label="Password">
+              <ui:input id="portal-password" name="password" type="password" autocomplete="current-password"/>
+            </ui:field>
+            <ui:button t:bind-disabled="true">Sign in</ui:button>
+          </ui:stack>
+          <ui:fill name="footer">
+            <p>
+              New to the portal?
+              <ui:link href="#request-access">Ask your practice manager for access</ui:link>
+            </p>
+          </ui:fill>
         </ui:card>
       </div>
-    </section>
-  </div>
-  <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>
-</main>
+    </ui:section>
+  </main>
+  <ui:site-footer>
+    <p>A private ordering portal by Paper &amp; Form for Northwind Clinics.</p>
+    <nav aria-label="Footer">
+      <ui:nav-link href="#help">Help</ui:nav-link>
+      <ui:nav-link href="#contract">Contract prices</ui:nav-link>
+    </nav>
+    <ui:fill name="legal">
+      <p>Sample layout · Fictional data · Business actions are disabled</p>
+    </ui:fill>
+  </ui:site-footer>
+</div>
 ```
 
-## Order tracking
+## Job tracking
 
-A clear production timeline, delivery details and an itemised order summary.
+An order page with a production timeline, order details, downloadable documents and a list of recent orders with status badges.
 
-Components: `card`, `badge`, `table`, `disclosure`.
+Components: `site-header`, `avatar`, `page-header`, `breadcrumbs`, `card`, `timeline`, `timeline-step`, `description-list`, `stat`, `file-list`, `file-item`, `alert`, `table`, `badge`, `site-footer`.
 
-Fetch the order through an authorised Lua read handler scoped to the current PortalUser and customer membership. Treat the order reference as an identifier, not permission to view an order. Tracking and totals here are fictional.
+Fetch the order through an authorised Lua read handler scoped to the current PortalUser and customer membership; an order reference is an identifier, not permission to view it. Map production events to timeline steps on the server. Serve documents through an authorised route or Folder binding. Tracking, totals and files here are fictional.
 
-[DataXML source](../examples/layout-order-tracking.html) · [Rendered example](../rendered/layout-order-tracking.html)
+[DataXML source](../examples/layout-tracking.html) · [Rendered example](../rendered/layout-tracking.html)
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-tracking">
-  <header class="recipe-header">
-    <a class="recipe-brand" href="#page-content">
-      <span aria-hidden="true">p.</span>
-       Paper &amp; Form
-    </a>
-    <span class="recipe-header-label">Your orders</span>
-  </header>
-  <div class="recipe-content" id="page-content">
-    <p class="recipe-kicker">GOOD THINGS ARE ON THEIR WAY</p>
-    <div class="recipe-page-heading">
-      <div>
-        <h1>Order PF–10482</h1>
-        <p class="recipe-muted">Placed 04 November 2026 · Autumn studio collection</p>
-      </div>
-      <ui:badge variant="primary">
-        In production
-      </ui:badge>
-    </div>
-    <div class="tracking-layout">
-      <div class="recipe-stack">
-        <ui:card>
-          <div class="delivery-heading">
-            <div>
-              <p class="recipe-kicker">ESTIMATED DELIVERY</p>
-              <h2>Wednesday, 11 November</h2>
-              <p class="recipe-muted">Your artwork is approved. We’re bringing it to life.</p>
-            </div>
-            <span class="delivery-symbol" aria-hidden="true">↗</span>
-          </div>
-          <ol class="order-timeline">
-            <li class="is-complete">
-              <span class="timeline-dot" aria-hidden="true">✓</span>
-              <div>
-                <h3>Order received</h3>
-                <p>04 Nov · Your project is in safe hands.</p>
-              </div>
-            </li>
-            <li class="is-complete">
-              <span class="timeline-dot" aria-hidden="true">✓</span>
-              <div>
-                <h3>Artwork approved</h3>
-                <p>05 Nov · Proof confirmed by Alex Morgan.</p>
-              </div>
-            </li>
-            <li aria-current="step">
-              <span class="timeline-dot" aria-hidden="true">3</span>
-              <div>
-                <h3>In production</h3>
-                <p>06 Nov · Printing, finishing and checking every detail.</p>
-              </div>
+<div class="portal-theme portal-layout">
+  <ui:site-header>
+    <ui:fill name="brand">
+      <a href="#top">
+        <ui:icon name="layers" size="lg"/>
+        Paper &amp; Form
+      </a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#shop">Shop</ui:nav-link>
+      <ui:nav-link href="#orders" t:bind-current="true">Orders</ui:nav-link>
+      <ui:nav-link href="#help">Help</ui:nav-link>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:avatar name="Amira Hassan" initials="AH" size="sm"/>
+    </ui:fill>
+  </ui:site-header>
+  <main id="top">
+    <ui:container>
+      <ui:page-header title="Order PF-1042" description="Placed on Monday 3 November by Amira Hassan. Your proof is approved and the cards are on press.">
+        <ui:fill name="breadcrumbs">
+          <ui:breadcrumbs>
+            <li>
+              <a href="#orders">Orders</a>
             </li>
             <li>
-              <span class="timeline-dot" aria-hidden="true">4</span>
-              <div>
-                <h3>Dispatched</h3>
-                <p>Tracking will appear here when your order ships.</p>
-              </div>
+              <span aria-current="page">PF-1042</span>
             </li>
-          </ol>
-        </ui:card>
-        <ui:card>
-          <p class="recipe-small recipe-muted">On smaller screens, scroll the table to view every column.</p>
-      <ui:table caption="Your print order">
-            <ui:fill name="head">
-              <tr>
-                <th scope="col">Item</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">Total</th>
-              </tr>
-            </ui:fill>
+          </ui:breadcrumbs>
+        </ui:fill>
+        <ui:fill name="actions">
+          <ui:link href="#invoice-pf-1042">
+            <ui:icon name="receipt" size="sm"/>
+            Invoice
+          </ui:link>
+          <ui:button variant="secondary" t:bind-disabled="true">Reorder</ui:button>
+        </ui:fill>
+      </ui:page-header>
+      <div class="layout-body">
+        <div class="layout-split">
+          <ui:stack gap="lg">
+            <ui:card>
+              <ui:fill name="header">
+                <h2>Progress</h2>
+              </ui:fill>
+              <ui:timeline label="Order PF-1042 progress">
+                <ui:timeline-step title="Order received" state="done" time="Mon 09:12"/>
+                <ui:timeline-step title="Proof approved" state="done" time="Mon 14:40">
+                  Approved by Amira Hassan.
+                </ui:timeline-step>
+                <ui:timeline-step title="Printing" state="current" time="Today">
+                  On press 2, 400gsm matt with soft-touch laminate.
+                </ui:timeline-step>
+                <ui:timeline-step title="Dispatched" time="Est. Wed"/>
+                <ui:timeline-step title="Delivered" time="Est. Thu 13 Nov"/>
+              </ui:timeline>
+            </ui:card>
+            <ui:card>
+              <ui:fill name="header">
+                <h2>Details</h2>
+              </ui:fill>
+              <ui:description-list>
+                <ui:description-item term="Product">Business cards, 85 × 55 mm</ui:description-item>
+                <ui:description-item term="Quantity">500 cards</ui:description-item>
+                <ui:description-item term="Paper">400gsm matt, soft-touch laminate</ui:description-item>
+                <ui:description-item term="Delivery">Courier, tracked</ui:description-item>
+                <ui:description-item term="Deliver to">Amira Hassan, 1 Example Lane, Papertown PT1 1AA</ui:description-item>
+                <ui:description-item term="Total">£58.80 including VAT</ui:description-item>
+              </ui:description-list>
+            </ui:card>
+          </ui:stack>
+          <ui:stack gap="lg">
+            <ui:stat label="Estimated delivery" value="Thu 13 Nov" change="On schedule" trend="flat"/>
+            <ui:card>
+              <ui:fill name="header">
+                <h2>Documents</h2>
+              </ui:fill>
+              <ui:file-list>
+                <ui:file-item href="#invoice-pf-1042" name="Invoice PF-1042.pdf" type="PDF" size="84 KB"/>
+                <ui:file-item href="#proof-pf-1042" name="Approved proof, version 3.pdf" type="PDF" size="2.4 MB"/>
+              </ui:file-list>
+            </ui:card>
+            <ui:alert>
+              <ui:fill name="title">Need to change something?</ui:fill>
+              <p>Printing has started, so changes now need a reprint. Call the studio on 0161 496 0000.</p>
+            </ui:alert>
+          </ui:stack>
+        </div>
+        <ui:table caption="Recent orders">
+          <ui:fill name="head">
             <tr>
-              <th scope="row">
-                Business cards
-                <br/>
-                <span class="recipe-small recipe-muted">Soft-touch · 450gsm · Double-sided</span>
-              </th>
-              <td>500</td>
-              <td>£48.00</td>
+              <th scope="col">Order</th>
+              <th scope="col">Placed</th>
+              <th scope="col">Product</th>
+              <th scope="col">Status</th>
+              <th scope="col">Total</th>
             </tr>
-            <tr>
-              <th scope="row">
-                A5 postcards
-                <br/>
-                <span class="recipe-small recipe-muted">Uncoated · 350gsm · Full colour</span>
-              </th>
-              <td>250</td>
-              <td>£55.00</td>
-            </tr>
-          </ui:table>
-        </ui:card>
+          </ui:fill>
+          <tr>
+            <td>
+              <ui:link href="#pf-1042">PF-1042</ui:link>
+            </td>
+            <td>3 Nov</td>
+            <td>Business cards</td>
+            <td>
+              <ui:badge variant="warning" t:bind-dot="true">In production</ui:badge>
+            </td>
+            <td>£58.80</td>
+          </tr>
+          <tr>
+            <td>
+              <ui:link href="#pf-1038">PF-1038</ui:link>
+            </td>
+            <td>28 Oct</td>
+            <td>Folded leaflets</td>
+            <td>
+              <ui:badge variant="primary" t:bind-dot="true">Awaiting proof</ui:badge>
+            </td>
+            <td>£81.60</td>
+          </tr>
+          <tr>
+            <td>
+              <ui:link href="#pf-1021">PF-1021</ui:link>
+            </td>
+            <td>12 Oct</td>
+            <td>Letterheads</td>
+            <td>
+              <ui:badge variant="success" t:bind-dot="true">Delivered</ui:badge>
+            </td>
+            <td>£62.40</td>
+          </tr>
+        </ui:table>
       </div>
-      <aside class="recipe-stack" aria-label="Delivery and order details">
-        <ui:card>
-          <ui:fill name="header">
-            <h2>Delivering to</h2>
-          </ui:fill>
-          <address>
-            Alex Morgan
-            <br/>
-            Studio North
-            <br/>
-            24 Example Lane
-            <br/>
-            Bristol BS1 2AB
-            <br/>
-            United Kingdom
-          </address>
-          <p class="recipe-small recipe-muted">Standard delivery · £6.00</p>
-        </ui:card>
-        <ui:card>
-          <ui:fill name="header">
-            <h2>Order summary</h2>
-          </ui:fill>
-          <dl class="summary-list">
-            <div>
-              <dt>Print subtotal</dt>
-              <dd>£103.00</dd>
-            </div>
-            <div>
-              <dt>Delivery</dt>
-              <dd>£6.00</dd>
-            </div>
-            <div>
-              <dt>VAT (20%)</dt>
-              <dd>£21.80</dd>
-            </div>
-            <div class="summary-total">
-              <dt>Total paid</dt>
-              <dd>£130.80</dd>
-            </div>
-          </dl>
-        </ui:card>
-        <ui:disclosure>
-          <ui:fill name="summary">Something changed?</ui:fill>
-          <p>Production has started. In a live portal, contact your print team to discuss changes or delivery questions.</p>
-        </ui:disclosure>
-      </aside>
-    </div>
-    <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>
-  </div>
-</main>
+    </ui:container>
+  </main>
+  <ui:site-footer>
+    <p>Paper &amp; Form · Business print, made well and delivered fast.</p>
+    <nav aria-label="Footer">
+      <ui:nav-link href="#delivery">Delivery</ui:nav-link>
+      <ui:nav-link href="#contact">Contact</ui:nav-link>
+    </nav>
+    <ui:fill name="legal">
+      <p>Sample layout · Fictional data · Business actions are disabled</p>
+    </ui:fill>
+  </ui:site-footer>
+</div>
 ```
 
-## Order request
+## API reference
 
-A guided product configuration with artwork guidance and an adjacent quote summary.
+Developer documentation: endpoints with parameter tables, copyable code samples in tabs and a masked API key with a copy button.
 
-Components: `card`, `field`, `input`, `select`, `badge`, `alert`, `button`, `disclosure`.
+Components: `site-header`, `page-header`, `breadcrumbs`, `code-block`, `endpoint`, `property-table`, `tabs`, `tab-panel`, `card`, `key-display`, `kbd`, `site-footer`.
 
-Keep editable configuration outside the replaceable quote region. Calculate and validate prices on the server. Wire submission to a protected Lua action; group related writes in the platform transaction capability. Connect authorised Folder uploads separately; this sample does not accept files or orders.
+Generate endpoints and property tables from your API description in Lua and pass tabs from loader data. Render key-display only on authorised, uncached pages, mask the key on the server and pass the full value only to the signed-in owner; prefer showing a new secret once. Copy buttons and tabs need the Portal runtime; without it every sample still shows. The key here is fictional.
 
-[DataXML source](../examples/layout-order-request.html) · [Rendered example](../rendered/layout-order-request.html)
+[DataXML source](../examples/layout-api.html) · [Rendered example](../rendered/layout-api.html)
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-layout layout-order-request">
-  <header class="recipe-header">
-    <a class="recipe-brand" href="#page-content">
-      <span aria-hidden="true">p.</span>
-       Paper &amp; Form
-    </a>
-    <span class="recipe-header-label">Create a print order</span>
-  </header>
-  <div class="recipe-content" id="page-content">
-    <p class="recipe-kicker">SMALL DETAILS. BIG IMPRESSION.</p>
-    <h1>Make it your business card.</h1>
-    <p class="recipe-muted">Choose the finish, feel and format. We’ll take care of the print.</p>
-    <div class="request-layout">
-      <div class="recipe-stack">
-        <div class="print-art print-art-cards" aria-hidden="true">
-          <div class="print-sheet">
-            <span>Paper &amp; Form</span>
-            <strong>
-              Studio
-              <br/>
-              North.
-            </strong>
-            <i>Made to make an impression.</i>
-          </div>
+<div class="portal-theme portal-layout">
+  <ui:site-header>
+    <ui:fill name="brand">
+      <a href="#top">
+        <ui:icon name="layers" size="lg"/>
+        Paper &amp; Form Developers
+      </a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#guides">Guides</ui:nav-link>
+      <ui:nav-link href="#reference" t:bind-current="true">API reference</ui:nav-link>
+      <ui:nav-link href="#changelog">Changelog</ui:nav-link>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:link href="#dashboard" variant="button">
+        Dashboard
+        <ui:icon name="arrow-up-right" size="sm"/>
+      </ui:link>
+    </ui:fill>
+  </ui:site-header>
+  <main id="top">
+    <ui:container>
+      <ui:page-header title="Orders API" description="Place, track and reorder print from your own systems. Every request is authenticated with a secret key and returns JSON.">
+        <ui:fill name="breadcrumbs">
+          <ui:breadcrumbs>
+            <li>
+              <a href="#reference">API reference</a>
+            </li>
+            <li>
+              <span aria-current="page">Orders</span>
+            </li>
+          </ui:breadcrumbs>
+        </ui:fill>
+        <ui:fill name="actions">
+          <ui:link href="#openapi">
+            <ui:icon name="download" size="sm"/>
+            OpenAPI document
+          </ui:link>
+        </ui:fill>
+      </ui:page-header>
+      <div class="layout-split">
+        <div class="layout-body">
+          <section aria-labelledby="authentication">
+            <h2 id="authentication">Authentication</h2>
+            <p>Send your secret key as a bearer token and keep it on your server. Test keys never print or charge.</p>
+            <ui:code-block language="Shell">curl https://print.example/v1/orders \
+  -H "Authorization: Bearer $PAPER_AND_FORM_KEY"</ui:code-block>
+          </section>
+          <section aria-labelledby="endpoints">
+            <h2 id="endpoints">Endpoints</h2>
+            <ui:endpoint method="GET" path="/v1/orders/{reference}" summary="Retrieve one order with its line items and production status.">
+              <ui:property-table caption="Path parameters">
+                <tr>
+                  <td>
+                    <code>reference</code>
+                  </td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>The order reference, for example PF-1042.</td>
+                </tr>
+              </ui:property-table>
+            </ui:endpoint>
+            <ui:endpoint method="POST" path="/v1/orders" summary="Place an order from an accepted estimate.">
+              <ui:property-table caption="Body fields">
+                <tr>
+                  <td>
+                    <code>estimate</code>
+                  </td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>The estimate to accept. Prices are fixed when it was issued.</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>deliveryNote</code>
+                  </td>
+                  <td>string or null</td>
+                  <td>No</td>
+                  <td>Instructions for the courier.</td>
+                </tr>
+              </ui:property-table>
+            </ui:endpoint>
+            <ui:endpoint method="DELETE" path="/v1/orders/{reference}" summary="Cancel an order before its proof is approved."/>
+          </section>
+          <section aria-labelledby="examples">
+            <h2 id="examples">Examples</h2>
+            <ui:tabs label="Example language" t:bind-tabs="input.tabs">
+              <ui:tab-panel id="example-shell" title="Shell">
+                <ui:code-block language="Shell">curl https://print.example/v1/orders/PF-1042 \
+  -H "Authorization: Bearer $PAPER_AND_FORM_KEY"</ui:code-block>
+              </ui:tab-panel>
+              <ui:tab-panel id="example-javascript" title="JavaScript">
+                <ui:code-block language="JavaScript">const response = await fetch("https://print.example/v1/orders/PF-1042", {
+  headers: { Authorization: `Bearer ${process.env.PAPER_AND_FORM_KEY}` },
+});
+const order = await response.json();</ui:code-block>
+              </ui:tab-panel>
+              <ui:tab-panel id="example-response" title="Response">
+                <ui:code-block language="JSON">{
+  "reference": "PF-1042",
+  "status": "printing",
+  "total": "58.80",
+  "currency": "GBP"
+}</ui:code-block>
+              </ui:tab-panel>
+            </ui:tabs>
+          </section>
         </div>
-        <ui:card>
-          <ui:fill name="header">
-            <h2>01 · The details</h2>
-          </ui:fill>
-          <div class="recipe-fields">
-            <div class="recipe-field-grid">
-              <ui:field for="size" label="Finished size">
-                <ui:select id="size" name="size">
-                  <option>85 × 55 mm · Standard</option>
-                  <option>55 × 55 mm · Square</option>
-                </ui:select>
-              </ui:field>
-              <ui:field for="paper" label="Paper &amp; finish">
-                <ui:select id="paper" name="paper">
-                  <option>450gsm · Soft-touch</option>
-                  <option>350gsm · Uncoated</option>
-                </ui:select>
-              </ui:field>
-              <ui:field for="quantity" label="Quantity">
-                <ui:input id="quantity" name="quantity" type="number" value="500" min="250" step="250" max="10000">
-                </ui:input>
-              </ui:field>
-              <ui:field for="printing" label="Printing">
-                <ui:select id="printing" name="printing">
-                  <option>Double-sided colour</option>
-                  <option>Single-sided colour</option>
-                </ui:select>
-              </ui:field>
-            </div>
-            <ui:field for="reference" label="Your project reference">
-              <ui:input id="reference" name="reference" type="text" value="Autumn studio collection">
-              </ui:input>
-            </ui:field>
-          </div>
-        </ui:card>
-        <ui:card>
-          <ui:fill name="header">
-            <h2>02 · Your artwork</h2>
-          </ui:fill>
-          <p>Supply a print-ready PDF with 3 mm bleed. Keep important details at least 4 mm from the trim edge.</p>
-          <ui:alert variant="info">
-            This static example has no upload service. Connect your portal’s authorised Folder upload flow before accepting artwork.
-          </ui:alert>
-          <ui:disclosure>
-            <ui:fill name="summary">Artwork checklist</ui:fill>
-            <ul>
-              <li>CMYK colour, with images at 300 dpi.</li>
-              <li>Fonts embedded or converted to outlines.</li>
-              <li>Front and back supplied as separate PDF pages.</li>
-            </ul>
-          </ui:disclosure>
-        </ui:card>
+        <div class="layout-sticky">
+          <ui:card>
+            <ui:fill name="header">
+              <h2>Your keys</h2>
+            </ui:fill>
+            <ui:stack>
+              <ui:key-display label="Test key" value="pf_test_4Rk8Wm2QxN7cTb5Lp9Hs1Vd6" masked="pf_test_••••1Vd6"/>
+              <p>
+                Rotate keys from the dashboard. Press
+                <ui:kbd>Ctrl</ui:kbd>
+                +
+                <ui:kbd>K</ui:kbd>
+                to search the reference.
+              </p>
+            </ui:stack>
+          </ui:card>
+        </div>
       </div>
-      <aside class="recipe-stack request-summary" aria-label="Example quote">
-        <ui:card>
-          <p class="recipe-kicker">YOUR PRINT, AT A GLANCE</p>
-          <h2>Business cards</h2>
-          <p class="recipe-muted">
-            500 cards · 85 × 55 mm
-            <br/>
-            450gsm soft-touch · Double-sided
-          </p>
-          <ui:badge variant="neutral">
-            Sample quote
-          </ui:badge>
-          <dl class="summary-list">
-            <div>
-              <dt>Printing</dt>
-              <dd>£48.00</dd>
-            </div>
-            <div>
-              <dt>Standard delivery</dt>
-              <dd>£6.00</dd>
-            </div>
-            <div>
-              <dt>VAT (20%)</dt>
-              <dd>£10.80</dd>
-            </div>
-            <div class="summary-total">
-              <dt>Total</dt>
-              <dd>£64.80</dd>
-            </div>
-          </dl>
-          <p class="recipe-small recipe-muted">Estimated dispatch in 3–5 working days after artwork approval.</p>
-          <ui:button t:bind-disabled="true" size="lg">
-            Review your order
-          </ui:button>
-          <p class="recipe-small recipe-muted">Illustrative pricing. Changing options does not recalculate this sample quote.</p>
-        </ui:card>
-        <ui:disclosure>
-          <ui:fill name="summary">What happens next?</ui:fill>
-          <p>In a connected portal, the server recalculates your quote and validates artwork before accepting your order. Always confirm the final price before payment.</p>
-        </ui:disclosure>
-      </aside>
-    </div>
-    <p class="recipe-demo-note">Sample layout · Fictional data · Business actions are disabled</p>
-  </div>
-</main>
+    </ui:container>
+  </main>
+  <ui:site-footer>
+    <p>Paper &amp; Form Developers · Version 2026-11-01</p>
+    <nav aria-label="Footer">
+      <ui:nav-link href="#status">API status</ui:nav-link>
+      <ui:nav-link href="#support">Support</ui:nav-link>
+    </nav>
+    <ui:fill name="legal">
+      <p>Sample layout · Fictional data · Business actions are disabled</p>
+    </ui:fill>
+  </ui:site-footer>
+</div>
 ```

@@ -1,0 +1,13 @@
+<props>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<kbd class="portal-kbd">
+  <ui:outlet name="default"/>
+</kbd>
+</template>
+
+<style>
+.portal-kbd { display: inline-block; min-inline-size: 1.75em; padding-inline: .375em; border: 1px solid var(--_hairline); border-block-end-width: 2px; border-radius: .375em; background: var(--portal-surface); color: var(--portal-text); font-size: .8125em; line-height: 1.6; text-align: center; }
+</style>

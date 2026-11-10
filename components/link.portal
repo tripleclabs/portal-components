@@ -1,0 +1,71 @@
+<props>
+  <prop name="href" type="string" required="true"/>
+  <prop name="variant" type="string" default="text" enum="text button"/>
+  <prop name="label" type="string" nullable="true"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<a class="portal-link" t:attr-href="props.href" t:attr-data-variant="props.variant" t:attr-aria-label="props.label">
+  <ui:outlet name="default"/>
+</a>
+</template>
+
+<style>
+.portal-link[data-variant="button"] {
+  --_bg: var(--portal-button-background, var(--_primary));
+  /* --_state is the background of the current state; the derived text colour
+     follows it, so hover and pressed keep legible text. */
+  --_state: var(--_bg);
+  --_fg: var(--portal-button-color, var(--portal-primary-content, oklch(from var(--_state) clamp(0, (0.62 - l) * 1000, 1) 0 0)));
+  --_border: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--_s)*2);
+  min-block-size: calc(var(--_s)*10);
+  padding-block: calc(var(--_s)*2);
+  padding-inline: calc(var(--_s)*4);
+  border: 1px solid var(--_border);
+  border-radius: var(--portal-radius);
+  background: var(--_state);
+  color: var(--_fg);
+  box-shadow: var(--portal-shadow-sm);
+  font: inherit;
+  font-size: .875rem;
+  font-weight: var(--_portal-weight-medium);
+  line-height: 1.25rem;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition-property: background-color, border-color, color, box-shadow, opacity;
+  transition-duration: var(--portal-motion);
+  transition-timing-function: ease-out;
+}
+.portal-link[data-variant="button"]:hover { --_state: oklch(from var(--_bg) calc(l + (0.5 - l) * 0.16) c h); }
+.portal-link[data-variant="button"]:active { --_state: oklch(from var(--_bg) calc(l + (0.5 - l) * 0.28) c h); box-shadow: none; }
+.portal-link[data-variant="button"]:where(.portal-theme[data-preset="studio"] *) { border-radius: 999px; }
+
+/* Link: quiet text with a brand underline that firms up on hover. */
+.portal-link {
+  color: var(--portal-text);
+  font-weight: var(--_portal-weight-medium);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in oklab, var(--_primary) 55%, transparent);
+  text-underline-offset: .25em;
+  transition-property: text-decoration-color, color;
+  transition-duration: var(--portal-motion);
+}
+.portal-link:hover { text-decoration-color: var(--_primary); }
+
+/* Browsers without CSS relative colour (oklch(from …)) keep a usable button:
+   text is --portal-primary-content or white, and hover and pressed mix the
+   background toward the canvas instead of shifting its lightness. */
+@supports not (color: oklch(from red l c h)) {
+  .portal-link[data-variant="button"] { --_fg: var(--portal-button-color, var(--portal-primary-content, var(--portal-canvas))); }
+  .portal-link[data-variant="button"]:hover { --_state: color-mix(in oklab, var(--_bg) 88%, var(--portal-canvas)); }
+  .portal-link[data-variant="button"]:active { --_state: color-mix(in oklab, var(--_bg) 76%, var(--portal-text)); }
+}
+</style>

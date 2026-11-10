@@ -1,0 +1,7 @@
+<template>
+<hr class="portal-separator"/>
+</template>
+
+<style>
+.portal-separator { border: 0; border-block-start: 1px solid var(--_hairline); margin-block: calc(var(--_s)*6); }
+</style>

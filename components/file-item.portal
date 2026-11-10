@@ -1,0 +1,35 @@
+<props>
+  <prop name="href" type="string" required="true"/>
+  <prop name="name" type="string" required="true"/>
+  <prop name="size" type="string" nullable="true"/>
+  <prop name="type" type="string" nullable="true"/>
+</props>
+
+<template>
+<li class="portal-file-item">
+  <a t:attr-href="props.href" download="">
+    <ui:icon name="file-text"/>
+    <span class="portal-file-item__text">
+      <span class="portal-file-item__name" t:text="props.name"/>
+      <span class="portal-file-item__meta" t:if="props.type ?? props.size">
+        <span t:if="props.type" t:text="props.type"/>
+        <span t:if="props.size" t:text="props.size"/>
+      </span>
+    </span>
+    <ui:icon name="download" size="sm"/>
+  </a>
+</li>
+</template>
+
+<style>
+.portal-file-item__meta { color: var(--portal-text-muted); font-size: .875rem; }
+.portal-file-item + .portal-file-item { border-block-start: 1px solid var(--_hairline); }
+.portal-file-item a { display: flex; align-items: center; gap: calc(var(--_s)*3); padding: calc(var(--_s)*3) calc(var(--_s)*4); color: var(--portal-text); text-decoration: none; }
+.portal-file-item a:hover { background: var(--_subtle); }
+.portal-file-item a:focus-visible { outline-offset: -2px; }
+.portal-file-item .portal-icon { color: var(--portal-text-muted); }
+.portal-file-item__text { display: grid; flex: 1; min-inline-size: 0; overflow-wrap: anywhere; }
+.portal-file-item__name { font-size: .9375rem; font-weight: var(--_portal-weight-medium); }
+.portal-file-item__meta { font-size: .8125rem; }
+.portal-file-item__meta span + span::before { content: " · "; }
+</style>

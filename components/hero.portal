@@ -1,0 +1,67 @@
+<props>
+  <prop name="eyebrow" type="string" nullable="true"/>
+  <prop name="title" type="string" required="true"/>
+  <prop name="lead" type="string" nullable="true"/>
+  <slot name="actions"/>
+  <slot name="media"/>
+</props>
+
+<template>
+<section class="portal-hero">
+  <div class="portal-hero__inner">
+    <div class="portal-hero__content">
+      <p class="portal-hero__eyebrow" t:if="props.eyebrow" t:text="props.eyebrow"/>
+      <h1 t:text="props.title"/>
+      <p class="portal-hero__lead" t:if="props.lead" t:text="props.lead"/>
+      <div class="portal-hero__actions" t:if="slots.actions">
+        <ui:outlet name="actions"/>
+      </div>
+    </div>
+    <div class="portal-hero__media" t:if="slots.media">
+      <ui:outlet name="media"/>
+    </div>
+  </div>
+</section>
+</template>
+
+<style>
+/* Hero: a display h1 with a brand-ruled eyebrow; two columns when it has media
+   and room for them. */
+.portal-hero { container: portal-hero / inline-size; color: var(--portal-text); }
+.portal-hero__inner {
+  display: grid;
+  gap: calc(var(--_s)*10);
+  align-items: center;
+  max-inline-size: var(--portal-content-width);
+  margin-inline: auto;
+  padding-block: calc(var(--_s)*12);
+  padding-inline: calc(var(--_s)*4);
+}
+.portal-hero__content { min-inline-size: 0; max-inline-size: 40rem; }
+.portal-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--_s)*2.5);
+  margin-block: 0 calc(var(--_s)*4);
+  color: var(--portal-text-muted);
+  font-size: .875rem;
+  font-weight: var(--_portal-weight-medium);
+}
+.portal-hero__eyebrow::before { content: ""; flex: none; inline-size: 1.5rem; block-size: 2px; border-radius: 1px; background: var(--_primary); }
+.portal-hero h1 {
+  margin: 0;
+  font-size: calc(1rem * pow(var(--portal-type-ratio), 4));
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.portal-hero__lead { margin-block: calc(var(--_s)*4) 0; color: var(--portal-text-muted); font-size: 1.125rem; line-height: 1.6; text-wrap: pretty; }
+.portal-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--_s)*3) calc(var(--_s)*5); margin-block-start: calc(var(--_s)*8); }
+.portal-hero__media { min-inline-size: 0; }
+.portal-hero__media img { display: block; inline-size: 100%; block-size: auto; border-radius: calc(var(--portal-radius)*1.5); }
+@container portal-hero (min-width: 48rem) {
+  .portal-hero__inner { padding-block: calc(var(--_s)*20); }
+  .portal-hero__inner:has(> .portal-hero__media) { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: calc(var(--_s)*12); }
+  .portal-hero h1 { font-size: calc(1rem * pow(var(--portal-type-ratio), 5)); }
+}
+</style>

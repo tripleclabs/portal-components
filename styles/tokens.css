@@ -1,122 +1,357 @@
-/* Portal Components 0.2.0 — MIT. Theme tokens inherit; no global reset. */
+/* Portal Components 0.4.0 — MIT. Theme tokens inherit; no global reset.
+ *
+ * Two tiers. Knobs are the everyday controls: one brand colour, one radius,
+ * two font stacks and a density. Semantic tokens are what presets set.
+ * Choose a preset with data-preset="editorial|studio" on the theme root
+ * (absent = Neutral) and a mode with data-theme="dark"; they combine.
+ *
+ * Three semantic roles are deliberately never declared here, so they are
+ * resolved where a component uses them and a nested --portal-brand override
+ * re-derives them: --portal-primary (defaults to the brand),
+ * --portal-primary-content (black or white by the primary's OKLCH lightness)
+ * and --portal-focus (defaults to the brand). Hover and pressed (an OKLCH
+ * lightness shift toward mid-lightness), tint and ring colours are derived
+ * inside component rules for the same reason.
+ *
+ * Preset and mode selectors are .portal-theme:where(...), all as specific as
+ * .portal-theme alone: source order decides between them, and any author class
+ * rule (.portal-theme.my-brand) beats every preset in light and dark mode.
+ */
+/* Bundled preset fonts (SIL OFL 1.1, see fonts/NOTICE.md), served by the Portal
+ * host under the library version, so an upgrade changes every font URL and the
+ * host can cache them as immutable. Set --portal-font to a system stack to opt
+ * out: a face downloads only when used. */
+@font-face {
+  font-family: "Inter";
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/_portal/fonts/0.4.0/inter-latin-ext.woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Inter";
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/_portal/fonts/0.4.0/inter-latin.woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Fraunces";
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/_portal/fonts/0.4.0/fraunces-latin-ext.woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Fraunces";
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/_portal/fonts/0.4.0/fraunces-latin.woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/_portal/fonts/0.4.0/plus-jakarta-sans-latin-ext.woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/_portal/fonts/0.4.0/plus-jakarta-sans-latin.woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
 .portal-theme {
   color-scheme: light;
-  --portal-canvas: #f7f8fa;
-  --portal-surface: #ffffff;
-  --portal-surface-muted: #eef1f5;
-  --portal-text: #17212f;
-  --portal-text-muted: #536171;
-  --portal-border: #8491a1;
-  --portal-primary: #1657c0;
-  --portal-primary-content: #ffffff;
-  --portal-danger: #a51d2d;
-  --portal-danger-content: #ffffff;
-  --portal-success: #17603b;
-  --portal-warning: #795300;
-  --portal-info: #1657c0;
-  --portal-info-content: #ffffff;
-  --portal-success-content: #ffffff;
-  --portal-warning-content: #ffffff;
-  --portal-secondary: #eef1f5;
-  --portal-secondary-content: #17212f;
-  --portal-accent: #6e3db4;
-  --portal-accent-content: #ffffff;
-  --portal-focus: #1657c0;
-  --portal-font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --portal-font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
-  --portal-font-size: 1rem;
-  --portal-line-height: 1.55;
-  --portal-font-size-xs: .8125rem;
-  --portal-font-size-sm: .875rem;
-  --portal-font-size-lg: 1.125rem;
-  --portal-font-size-xl: 1.25rem;
-  --portal-font-weight-normal: 400;
-  --portal-font-weight-medium: 650;
-  --portal-font-weight-bold: 700;
-  --portal-letter-spacing: normal;
-  --portal-heading-font-family: inherit;
-  --portal-heading-font-weight: 700;
-  --portal-heading-line-height: 1.2;
-  --portal-heading-letter-spacing: normal;
-  --portal-heading-size-1: 2rem;
-  --portal-heading-size-2: 1.5rem;
-  --portal-heading-size-3: 1.25rem;
-  --portal-heading-size-4: 1rem;
-  --portal-heading-size-5: .875rem;
-  --portal-heading-size-6: .8125rem;
-  --portal-control-font-family: inherit;
-  --portal-control-font-size: 1em;
-  --portal-control-font-weight: 400;
-  --portal-control-line-height: inherit;
-  --portal-space-1: .25rem;
-  --portal-space-2: .5rem;
-  --portal-space-3: .75rem;
-  --portal-space-4: 1rem;
-  --portal-space-6: 1.5rem;
-  --portal-space-8: 2rem;
-  --portal-radius-sm: .35rem;
-  --portal-radius-md: .65rem;
-  --portal-radius-lg: 1rem;
-  --portal-border-width: 1px;
-  --portal-border-style: solid;
-  --portal-border-width-strong: 2px;
-  --portal-border-width-accent: 4px;
-  --portal-radius-pill: 999px;
-  --portal-focus-width: 3px;
-  --portal-focus-offset: 3px;
-  --portal-disabled-opacity: .55;
-  --portal-control-height: 2.75rem;
-  --portal-control-height-sm: 2.25rem;
-  --portal-control-height-lg: 3.25rem;
-  --portal-choice-size: 1.2rem;
-  --portal-content-width: 72rem;
-  --portal-reading-width: 48rem;
-  --portal-shadow: 0 2px 8px #17212f0a;
-  --portal-shadow-control: none;
-  --portal-shadow-button: none;
-  --portal-shadow-overlay: 0 12px 32px #17212f26;
-  --portal-motion-duration: 120ms;
-  font: var(--portal-font-size)/var(--portal-line-height) var(--portal-font-family);
-  font-weight: var(--portal-font-weight-normal);
-  letter-spacing: var(--portal-letter-spacing);
+  --portal-brand: #18181b; /* @knob */
+  --portal-radius: .5rem; /* @knob */
+  --portal-font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; /* @knob */
+  --portal-font-heading: var(--portal-font); /* @knob */
+  --portal-density: 1; /* @knob */
+  --portal-canvas: #fafafa; /* @semantic */
+  --portal-surface: #ffffff; /* @semantic */
+  --portal-surface-muted: #f4f4f5; /* @semantic */
+  --portal-text: #09090b; /* @semantic */
+  --portal-text-muted: #66666e; /* @semantic */
+  --portal-border: #8a8a93; /* @semantic */
+  --portal-secondary: #f4f4f5; /* @semantic */
+  --portal-secondary-content: #18181b; /* @semantic */
+  --portal-accent: #e4e4e7; /* @semantic */
+  --portal-accent-content: #18181b; /* @semantic */
+  --portal-success: #15803d; /* @semantic */
+  --portal-success-content: #ffffff; /* @semantic */
+  --portal-warning: #b45309; /* @semantic */
+  --portal-warning-content: #ffffff; /* @semantic */
+  --portal-danger: #dc2626; /* @semantic */
+  --portal-danger-content: #ffffff; /* @semantic */
+  --portal-info: #2563eb; /* @semantic */
+  --portal-info-content: #ffffff; /* @semantic */
+  --portal-shadow-sm: 0 1px 2px rgb(9 9 11 / .05); /* @semantic */
+  --portal-shadow-md: 0 1px 3px rgb(9 9 11 / .08), 0 1px 2px -1px rgb(9 9 11 / .06); /* @semantic */
+  --portal-shadow-lg: 0 16px 40px -16px rgb(9 9 11 / .24), 0 4px 10px -4px rgb(9 9 11 / .08); /* @semantic */
+  --portal-font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace; /* @semantic */
+  --portal-content-width: 72rem; /* @semantic */
+  --portal-reading-width: 42rem; /* @semantic */
+  --portal-type-ratio: 1.2; /* @semantic */
+  --portal-motion: 140ms; /* @semantic */
+  /* Preset typography character; private, not public tokens. */
+  --_portal-weight-medium: 500;
+  --_portal-weight-strong: 600;
+  --_portal-heading-weight: 600;
+  --_portal-heading-tracking: -.02em;
+  font-family: var(--portal-font);
+  font-size: 1rem;
+  line-height: 1.5;
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
   color: var(--portal-text);
   background-color: var(--portal-canvas);
 }
-.portal-theme[data-theme="dark"] {
+.portal-theme:where([data-theme="dark"]) {
   color-scheme: dark;
-  --portal-canvas: #111923;
-  --portal-surface: #182331;
-  --portal-surface-muted: #243244;
-  --portal-text: #edf2f8;
-  --portal-text-muted: #bac7d8;
-  --portal-border: #64748b;
-  --portal-primary: #9fc3ff;
-  --portal-primary-content: #112b55;
-  --portal-danger: #ffb4b8;
-  --portal-danger-content: #500d16;
-  --portal-success: #8dd7ad;
-  --portal-warning: #efd087;
-  --portal-info: #9fc3ff;
-  --portal-info-content: #112b55;
-  --portal-success-content: #123a27;
-  --portal-warning-content: #3f2c00;
-  --portal-secondary: #243244;
-  --portal-secondary-content: #edf2f8;
-  --portal-accent: #d6baff;
-  --portal-accent-content: #35155d;
-  --portal-focus: #b9d3ff;
-  --portal-shadow: none;
+  --portal-brand: #fafafa;
+  --portal-canvas: #09090b;
+  --portal-surface: #111113;
+  --portal-surface-muted: #27272a;
+  --portal-text: #fafafa;
+  --portal-text-muted: #a1a1aa;
+  --portal-border: #71717a;
+  --portal-secondary: #27272a;
+  --portal-secondary-content: #fafafa;
+  --portal-accent: #3f3f46;
+  --portal-accent-content: #fafafa;
+  --portal-success: #4ade80;
+  --portal-success-content: #052e16;
+  --portal-warning: #fbbf24;
+  --portal-warning-content: #451a03;
+  --portal-danger: #f87171;
+  --portal-danger-content: #450a0a;
+  --portal-info: #60a5fa;
+  --portal-info-content: #172554;
+  --portal-shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
+  --portal-shadow-md: 0 1px 3px rgb(0 0 0 / .5), 0 1px 2px -1px rgb(0 0 0 / .4);
+  --portal-shadow-lg: 0 16px 40px -12px rgb(0 0 0 / .7), 0 4px 10px -4px rgb(0 0 0 / .5);
 }
-.portal-theme[data-theme="atelier"] {
-  --portal-primary: #145744;
-  --portal-primary-content: #ffffff;
-  --portal-focus: #145744;
-  --portal-canvas: #f6f3ed;
-  --portal-surface-muted: #eeeee5;
-  --portal-radius-sm: .15rem;
-  --portal-radius-md: .25rem;
-  --portal-radius-lg: .4rem;
+
+/* Editorial: warm paper, serif display headings, crisp corners, no shadows. */
+.portal-theme:where([data-preset="editorial"]) {
+  --portal-brand: #7c2d12;
+  --portal-radius: .25rem;
+  --portal-font-heading: Fraunces, Georgia, "Times New Roman", serif;
+  --portal-canvas: #f7f4ee;
+  --portal-surface: #fffdf9;
+  --portal-surface-muted: #efe9df;
+  --portal-text: #1c1917;
+  --portal-text-muted: #6b635c;
+  --portal-border: #958b7f;
+  --portal-secondary: #efe9df;
+  --portal-secondary-content: #1c1917;
+  --portal-accent: #e7dccb;
+  --portal-accent-content: #1c1917;
+  --portal-shadow-sm: none;
+  --portal-shadow-md: none;
+  --portal-shadow-lg: none;
+  --portal-type-ratio: 1.25;
+  --_portal-heading-weight: 600;
+  --_portal-heading-tracking: -.01em;
 }
+.portal-theme:where([data-preset="editorial"][data-theme="dark"]) {
+  --portal-brand: #fdba74;
+  --portal-canvas: #1c1917;
+  --portal-surface: #231f1c;
+  --portal-surface-muted: #2e2924;
+  --portal-text: #f5efe6;
+  --portal-text-muted: #b3a99c;
+  --portal-border: #857a6d;
+  --portal-secondary: #2e2924;
+  --portal-secondary-content: #f5efe6;
+  --portal-accent: #3a332c;
+  --portal-accent-content: #f5efe6;
+  --portal-shadow-sm: none;
+  --portal-shadow-md: none;
+  --portal-shadow-lg: none;
+}
+
+/* Studio: lavender canvas, vivid brand, friendly geometric sans, soft lift. */
+.portal-theme:where([data-preset="studio"]) {
+  --portal-brand: #6d28d9;
+  --portal-radius: .75rem;
+  --portal-font: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --portal-canvas: #f5f3ff;
+  --portal-surface: #ffffff;
+  --portal-surface-muted: #ede9fe;
+  --portal-text: #1e1b4b;
+  --portal-text-muted: #5e5c7f;
+  --portal-border: #8a86b4;
+  --portal-secondary: #ede9fe;
+  --portal-secondary-content: #1e1b4b;
+  --portal-accent: #fce7f3;
+  --portal-accent-content: #831843;
+  --portal-shadow-sm: 0 1px 2px rgb(30 27 75 / .06);
+  --portal-shadow-md: 0 1px 2px rgb(30 27 75 / .06), 0 4px 14px rgb(30 27 75 / .08);
+  --portal-shadow-lg: 0 2px 4px rgb(30 27 75 / .06), 0 20px 44px -12px rgb(30 27 75 / .22);
+  --portal-type-ratio: 1.22;
+  --_portal-heading-weight: 750;
+  --_portal-heading-tracking: -.03em;
+}
+.portal-theme:where([data-preset="studio"][data-theme="dark"]) {
+  --portal-brand: #a78bfa;
+  --portal-canvas: #13111f;
+  --portal-surface: #1c1930;
+  --portal-surface-muted: #29254a;
+  --portal-text: #f5f3ff;
+  --portal-text-muted: #b4b0d6;
+  --portal-border: #77729f;
+  --portal-secondary: #29254a;
+  --portal-secondary-content: #f5f3ff;
+  --portal-accent: #4a1d3a;
+  --portal-accent-content: #fce7f3;
+  --portal-shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
+  --portal-shadow-md: 0 1px 3px rgb(0 0 0 / .5), 0 4px 14px rgb(0 0 0 / .3);
+  --portal-shadow-lg: 0 2px 4px rgb(0 0 0 / .4), 0 20px 44px -12px rgb(0 0 0 / .7);
+}
+
+.portal-theme[data-density="compact"] { --portal-density: .875; }
+.portal-theme[data-density="roomy"] { --portal-density: 1.125; }
 @media (prefers-reduced-motion: reduce) {
-  .portal-theme { --portal-motion-duration: 0ms; }
+  .portal-theme { --portal-motion: 0ms; }
+}
+
+/* Shared foundations: the rules every component relies on (box sizing, the
+ * --_* derivations, focus, headings, reduced motion) and the classes several
+ * components render (choice, table, panel, floating panel, copy button, label,
+ * field error). A component's own rules live in the <style> of its
+ * components/<name>.portal. The host inlines these on every page, before the
+ * CSS of the components the page uses.
+ *
+ * Derived colours (hover, pressed, tint, ring, brand foreground) are computed on
+ * library elements or in the rule that uses them, from --portal-primary and
+ * --portal-focus with the brand as fallback, never on the theme root. A nested
+ * wrapper that sets --portal-brand therefore re-derives them.
+ * Spacing is calc(var(--_s)*N), one step being .25rem × density; logical properties only.
+ */
+.portal-theme *, .portal-theme *::before, .portal-theme *::after { box-sizing: border-box; }
+/* Shared derivations, recomputed on every library element so a wrapper that
+   overrides --portal-brand or --portal-density re-derives them inside it. --_s is
+   one spacing step (.25rem × density); --_subtle is a quiet raised surface. */
+:where([class*="portal-"]) {
+  --_s: calc(.25rem * var(--portal-density));
+  --_primary: var(--portal-primary, var(--portal-brand));
+  --_focus: var(--portal-focus, var(--portal-brand));
+  --_focus-solid: color-mix(in oklab, var(--_focus) 50%, var(--portal-text));
+  --_ring: color-mix(in oklab, var(--_focus) 45%, transparent);
+  --_tint: color-mix(in oklab, var(--_primary) 10%, var(--portal-surface));
+  --_hairline: color-mix(in oklab, var(--portal-border) 40%, var(--portal-surface));
+  --_subtle: color-mix(in oklab, var(--portal-surface-muted) 55%, var(--portal-surface));
+}
+/* Enhancement-only controls stay hidden whatever display a component gives them. */
+.portal-theme [hidden] { display: none !important; }
+.portal-visually-hidden { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.portal-theme :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--portal-focus, var(--portal-brand)) 50%, var(--portal-text));
+  outline-offset: 2px;
+}
+
+/* Typography is opt-in to the theme root; headings remain author-owned HTML. */
+.portal-theme :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--portal-font-heading);
+  font-weight: var(--_portal-heading-weight);
+  letter-spacing: var(--_portal-heading-tracking);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+/* Long words and URLs break rather than widen the page, at any text size. */
+.portal-theme :where(h1, h2, h3, h4, h5, h6, p) { overflow-wrap: anywhere; }
+.portal-theme :where(h1) { font-size: calc(1rem * pow(var(--portal-type-ratio), 4)); line-height: 1.1; }
+.portal-theme :where(h2) { font-size: calc(1rem * pow(var(--portal-type-ratio), 3)); line-height: 1.15; }
+.portal-theme :where(h3) { font-size: calc(1rem * pow(var(--portal-type-ratio), 2)); }
+.portal-theme :where(h4) { font-size: calc(1rem * var(--portal-type-ratio)); }
+.portal-theme :where(h5, h6) { font-size: 1rem; }
+.portal-theme :where(code, pre, kbd, samp) { font-family: var(--portal-font-mono); font-size: .875em; }
+.portal-label { font-size: .875rem; font-weight: var(--_portal-weight-medium); line-height: 1.25rem; }
+.portal-field__error {
+  color: color-mix(in oklab, var(--portal-danger) 80%, var(--portal-text));
+  font-size: .875rem;
+  font-weight: var(--_portal-weight-medium);
+  margin-block: calc(var(--_s)*1);
+  margin-inline: 0;
+}
+
+/* Checkbox and radio */
+.portal-choice {
+  display: flex;
+  align-items: start;
+  gap: calc(var(--_s)*3);
+  padding-block: calc(var(--_s)*1.5);
+  cursor: pointer;
+}
+.portal-choice input {
+  inline-size: 1rem;
+  block-size: 1rem;
+  margin: 0;
+  margin-block-start: .25rem;
+  accent-color: var(--_primary);
+  flex-shrink: 0;
+  cursor: inherit;
+}
+.portal-choice:has(input:disabled) { color: var(--portal-text-muted); cursor: not-allowed; }
+
+/* Table */
+.portal-table-wrap {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--_hairline);
+  border-radius: var(--portal-radius);
+  background: var(--portal-surface);
+}
+.portal-table { inline-size: 100%; border-collapse: collapse; text-align: start; font-size: .875rem; }
+.portal-table caption {
+  text-align: start;
+  font-weight: var(--_portal-weight-strong);
+  font-size: 1rem;
+  padding-block: calc(var(--_s)*3);
+  padding-inline: calc(var(--_s)*4);
+}
+.portal-table th, .portal-table td {
+  padding-block: calc(var(--_s)*3);
+  padding-inline: calc(var(--_s)*4);
+  border-block-start: 1px solid var(--_hairline);
+  text-align: start;
+  vertical-align: top;
+}
+.portal-table thead th { color: var(--portal-text-muted); font-weight: var(--_portal-weight-medium); background: var(--_subtle); }
+.portal-table tbody tr { transition: background-color var(--portal-motion); }
+.portal-table tbody tr:hover { background: color-mix(in oklab, var(--portal-surface-muted) 45%, var(--portal-surface)); }
+.portal-panel {
+  border: 1px solid var(--_hairline);
+  border-radius: calc(var(--portal-radius)*1.5);
+  background: var(--portal-surface);
+  color: var(--portal-text);
+  box-shadow: var(--portal-card-shadow, var(--portal-shadow-sm));
+}
+.portal-panel__title { margin-block-end: calc(var(--_s)*3); padding: 0; font-size: .875rem; font-weight: var(--_portal-weight-medium); }
+.portal-panel__actions { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--_s)*2) calc(var(--_s)*4); margin-block-start: calc(var(--_s)*2); font-size: .875rem; }
+.portal-panel { padding: calc(var(--_s)*6); }
+.portal-panel__title { margin-block-start: 0; font-size: 1.125rem; }
+.portal-panel__total { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 calc(var(--_s)*4); margin: calc(var(--_s)*4) 0 0; padding-block-start: calc(var(--_s)*4); border-block-start: 1px solid var(--_hairline); font-weight: var(--_portal-weight-strong); }
+.portal-panel__total dd { min-inline-size: 0; margin: 0; font-size: 1.375rem; letter-spacing: -.01em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.portal-panel__actions { display: grid; margin-block-start: calc(var(--_s)*5); justify-items: center; }
+.portal-panel__actions > .portal-button { inline-size: 100%; }
+.portal-floating { border: 1px solid var(--_hairline); background: var(--portal-surface); color: var(--portal-text); box-shadow: var(--portal-shadow-lg); }
+.portal-floating > :first-child { margin-block-start: 0; }
+.portal-floating > :last-child { margin-block-end: 0; }
+.portal-copy { display: inline-flex; align-items: center; gap: .375rem; border: 0; border-radius: var(--portal-radius); background: none; color: var(--portal-text-muted); font: inherit; cursor: pointer; transition: color var(--portal-motion), background-color var(--portal-motion); }
+.portal-copy:hover { background: var(--portal-surface-muted); color: var(--portal-text); }
+.portal-floating { inline-size: max-content; max-inline-size: min(20rem, calc(100vw - 2rem)); padding: calc(var(--_s)*1); border-radius: var(--portal-radius); font-size: .875rem; }
+@supports (position-area: block-end) {
+  .portal-floating { inset: auto; margin: .375rem 0 0; position-area: block-end span-inline-end; position-try-fallbacks: flip-block, flip-inline; }
+}
+.portal-copy { margin-inline-start: auto; padding: .25rem .5rem; font-size: .8125rem; }
+.portal-copy [data-icon="check"], [data-portal-copied] .portal-copy [data-icon="copy"] { display: none; }
+[data-portal-copied] .portal-copy [data-icon="check"] { display: inline-block; color: color-mix(in oklab, var(--portal-success) 75%, var(--portal-text)); }
+/* Reduced motion wins over any --portal-motion value a theme sets. */
+@media (prefers-reduced-motion: reduce) {
+  .portal-theme, .portal-theme :where(*, *::before, *::after) { transition-duration: 0s !important; animation: none !important; }
 }

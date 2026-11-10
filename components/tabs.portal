@@ -1,0 +1,25 @@
+<props>
+  <prop name="label" type="string" required="true"/>
+  <prop name="tabs" type="array" required="true" description="One {id, title, selected?} per tab-panel, in the same order; id equals the panel id."/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<div class="portal-tabs" data-portal-behavior="tabs">
+  <div class="portal-tabs__list" data-portal-tablist="" t:attr-aria-label="props.label">
+    <button type="button" class="portal-tabs__tab" data-portal-tab="" data-portal-enhanced-only="" hidden="hidden" t:for="props.tabs" t:as="tab" t:attr-id="tab.id | append:'-tab'" t:attr-aria-controls="tab.id" t:attr-aria-selected="tab.selected ? 'true' : null" t:text="tab.title"/>
+  </div>
+  <ui:outlet name="default"/>
+</div>
+</template>
+
+<style>
+.portal-tabs__list { display: flex; gap: calc(var(--_s)*1); margin-block-end: calc(var(--_s)*5); overflow-x: auto; border-block-end: 1px solid var(--_hairline); }
+.portal-tabs__list:not(:has(> :not([hidden]))) { display: none; }
+.portal-tabs__tab { padding: calc(var(--_s)*2.5) calc(var(--_s)*3); border: 0; background: none; color: var(--portal-text-muted); font: inherit; font-size: .875rem; font-weight: var(--_portal-weight-medium); white-space: nowrap; cursor: pointer; transition: color var(--portal-motion), box-shadow var(--portal-motion); }
+.portal-tabs__tab:hover { color: var(--portal-text); }
+.portal-tabs__tab[aria-selected="true"] { color: var(--portal-text); box-shadow: inset 0 -2px var(--_primary); }
+@media (forced-colors: active) {
+  .portal-tabs__tab[aria-selected="true"] { border: 1px solid ButtonText; }
+}
+</style>

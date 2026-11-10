@@ -1,0 +1,22 @@
+<props>
+  <prop name="direction" type="string" default="vertical" enum="vertical horizontal"/>
+  <prop name="gap" type="string" default="md" enum="sm md lg"/>
+  <prop name="align" type="string" default="stretch" enum="stretch start center end"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<div class="portal-stack" t:attr-data-direction="props.direction" t:attr-data-gap="props.gap" t:attr-data-align="props.align">
+  <ui:outlet name="default"/>
+</div>
+</template>
+
+<style>
+.portal-stack { display: flex; flex-direction: column; gap: calc(var(--_s)*4); align-items: stretch; }
+.portal-stack[data-direction="horizontal"] { flex-direction: row; flex-wrap: wrap; }
+.portal-stack[data-align="start"] { align-items: flex-start; }
+.portal-stack[data-align="center"] { align-items: center; }
+.portal-stack[data-align="end"] { align-items: flex-end; }
+.portal-stack[data-gap="sm"] { gap: calc(var(--_s)*2); }
+.portal-stack[data-gap="lg"] { gap: calc(var(--_s)*6); }
+</style>

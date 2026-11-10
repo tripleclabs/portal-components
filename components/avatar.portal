@@ -1,0 +1,21 @@
+<props>
+  <prop name="name" type="string" required="true"/>
+  <prop name="initials" type="string" required="true"/>
+  <prop name="src" type="string" nullable="true"/>
+  <prop name="size" type="string" default="md" enum="sm md lg"/>
+</props>
+
+<template>
+<span class="portal-avatar" role="img" t:attr-aria-label="props.name" t:attr-data-size="props.size">
+  <span aria-hidden="true" t:text="props.initials"/>
+  <img t:if="props.src" t:attr-src="props.src" alt=""/>
+</span>
+</template>
+
+<style>
+/* General */
+.portal-avatar { position: relative; display: inline-grid; flex: none; place-items: center; inline-size: 2.5rem; block-size: 2.5rem; overflow: clip; border-radius: 50%; background: color-mix(in oklab, var(--_primary) 14%, var(--portal-surface)); color: var(--portal-text); font-size: .875rem; font-weight: var(--_portal-weight-medium); }
+.portal-avatar[data-size="sm"] { inline-size: 2rem; block-size: 2rem; font-size: .75rem; }
+.portal-avatar[data-size="lg"] { inline-size: 3.5rem; block-size: 3.5rem; font-size: 1.125rem; }
+.portal-avatar img { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; }
+</style>

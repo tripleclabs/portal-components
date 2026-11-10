@@ -1,0 +1,31 @@
+<props>
+  <prop name="label" type="string" required="true"/>
+  <prop name="value" type="string" required="true"/>
+  <prop name="change" type="string" nullable="true"/>
+  <prop name="trend" type="string" enum="up down flat" nullable="true"/>
+</props>
+
+<template>
+<div class="portal-stat portal-panel">
+  <p class="portal-stat__label" t:text="props.label"/>
+  <p class="portal-stat__value" t:text="props.value"/>
+  <p class="portal-stat__change" t:if="props.change" t:attr-data-trend="props.trend">
+    <ui:icon name="arrow-up-right" size="sm" t:if="props.trend"/>
+    <ui:icon name="arrow-right" size="sm" t:if="props.trend"/>
+    <span t:text="props.change"/>
+  </p>
+</div>
+</template>
+
+<style>
+.portal-stat__label { color: var(--portal-text-muted); font-size: .875rem; }
+.portal-stat { padding: calc(var(--_s)*5); }
+.portal-stat p { margin: 0; overflow-wrap: anywhere; }
+.portal-stat__value { margin-block: calc(var(--_s)*1) !important; font-family: var(--portal-font-heading); font-size: 1.75rem; font-weight: var(--_portal-weight-strong); letter-spacing: var(--_portal-heading-tracking); line-height: 1.15; font-variant-numeric: tabular-nums; }
+.portal-stat__change { display: flex; align-items: center; gap: .25rem; font-size: .8125rem; font-weight: var(--_portal-weight-medium); }
+.portal-stat__change[data-trend="up"] { color: color-mix(in oklab, var(--portal-success) 75%, var(--portal-text)); }
+.portal-stat__change[data-trend="down"] { color: color-mix(in oklab, var(--portal-danger) 75%, var(--portal-text)); }
+/* t:if is truthiness-only, so both arrows render and the trend picks one. */
+.portal-stat__change[data-trend="flat"] [data-icon="arrow-up-right"], .portal-stat__change:not([data-trend="flat"]) [data-icon="arrow-right"] { display: none; }
+.portal-stat__change[data-trend="down"] .portal-icon { scale: 1 -1; }
+</style>

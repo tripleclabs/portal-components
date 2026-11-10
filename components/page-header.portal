@@ -1,0 +1,41 @@
+<props>
+  <prop name="title" type="string" required="true"/>
+  <prop name="description" type="string" nullable="true"/>
+  <slot name="breadcrumbs"/>
+  <slot name="actions"/>
+</props>
+
+<template>
+<header class="portal-page-header">
+  <div class="portal-page-header__breadcrumbs" t:if="slots.breadcrumbs">
+    <ui:outlet name="breadcrumbs"/>
+  </div>
+  <div class="portal-page-header__row">
+    <div class="portal-page-header__text">
+      <h1 t:text="props.title"/>
+      <p class="portal-page-header__description" t:if="props.description" t:text="props.description"/>
+    </div>
+    <div class="portal-page-header__actions" t:if="slots.actions">
+      <ui:outlet name="actions"/>
+    </div>
+  </div>
+</header>
+</template>
+
+<style>
+/* Page header: breadcrumbs, then the h1 and description, with actions at the
+   end of the title row (beneath it when narrow). */
+.portal-page-header {
+  container: portal-page-header / inline-size;
+  padding-block: calc(var(--_s)*8) calc(var(--_s)*6);
+}
+.portal-page-header__breadcrumbs { margin-block-end: calc(var(--_s)*3); }
+.portal-page-header__row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: calc(var(--_s)*4) calc(var(--_s)*6); }
+.portal-page-header__text { flex: 1 1 24rem; min-inline-size: 0; }
+.portal-page-header h1 { margin: 0; overflow-wrap: anywhere; hyphens: auto; }
+.portal-page-header__description { max-inline-size: var(--portal-reading-width); margin-block: calc(var(--_s)*2) 0; color: var(--portal-text-muted); font-size: 1.0625rem; }
+.portal-page-header__actions { display: flex; flex-wrap: wrap; gap: calc(var(--_s)*2); }
+@container portal-page-header (max-width: 36rem) {
+  .portal-page-header h1 { font-size: calc(1rem * pow(var(--portal-type-ratio), 3)); }
+}
+</style>

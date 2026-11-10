@@ -1,0 +1,22 @@
+<props>
+  <prop name="width" type="string" default="default" enum="default reading full"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<div class="portal-container" t:attr-data-width="props.width">
+  <ui:outlet name="default"/>
+</div>
+</template>
+
+<style>
+/* Layout primitives */
+.portal-container {
+  inline-size: 100%;
+  max-inline-size: var(--portal-content-width);
+  margin-inline: auto;
+  padding-inline: calc(var(--_s)*4);
+}
+.portal-container[data-width="reading"] { max-inline-size: var(--portal-reading-width); }
+.portal-container[data-width="full"] { max-inline-size: none; }
+</style>

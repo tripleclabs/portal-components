@@ -1,0 +1,47 @@
+<props>
+  <prop name="href" type="string" required="true"/>
+  <prop name="current" type="boolean" default="false"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<a class="portal-nav-link" t:attr-href="props.href" t:attr-aria-current="props.current ? 'page' : null">
+  <ui:outlet name="default"/>
+</a>
+</template>
+
+<style>
+/* Nav link: quiet muted text; hover gains the text colour and a soft surface. */
+.portal-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--_s)*1.5);
+  min-block-size: calc(var(--_s)*9);
+  padding-block: calc(var(--_s)*1);
+  padding-inline: calc(var(--_s)*2.5);
+  border-radius: var(--portal-radius);
+  color: var(--portal-text-muted);
+  font-size: .875rem;
+  font-weight: var(--_portal-weight-medium);
+  line-height: 1.25rem;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition-property: color, background-color;
+  transition-duration: var(--portal-motion);
+  transition-timing-function: ease-out;
+}
+.portal-nav-link:hover { color: var(--portal-text); background: color-mix(in oklab, var(--portal-surface-muted) 75%, transparent); }
+/* Current is bolder and underlined as well as tinted, so it never relies on
+   colour alone; the underline also survives forced-colours mode. */
+.portal-nav-link[aria-current="page"] {
+  color: var(--portal-text);
+  background: color-mix(in oklab, var(--_primary) 9%, transparent);
+  font-weight: var(--_portal-weight-strong);
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: color-mix(in oklab, var(--_primary) 75%, var(--portal-text));
+  text-underline-offset: .45em;
+}
+.portal-nav-link[aria-current="page"]:hover { background: color-mix(in oklab, var(--_primary) 14%, transparent); }
+.portal-nav-link:where(.portal-theme[data-preset="studio"] *) { border-radius: 999px; }
+</style>

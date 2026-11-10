@@ -1,0 +1,14 @@
+<props>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<ul class="portal-file-list">
+  <ui:outlet name="default"/>
+</ul>
+</template>
+
+<style>
+.portal-file-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.portal-file-list { border: 1px solid var(--_hairline); border-radius: var(--portal-radius); background: var(--portal-surface); overflow: clip; }
+</style>

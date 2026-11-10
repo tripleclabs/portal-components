@@ -1,0 +1,28 @@
+<props>
+  <prop name="for" type="string" required="true"/>
+  <prop name="label" type="string" required="true"/>
+  <prop name="description" type="string" default=""/>
+  <prop name="error" type="string" default=""/>
+  <prop name="required" type="boolean" default="false"/>
+  <prop name="descriptionId" type="string" nullable="true"/>
+  <prop name="errorId" type="string" nullable="true"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<div class="portal-field">
+  <label class="portal-label" t:attr-for="props.for">
+    <span t:text="props.label"/>
+    <span t:if="props.required" aria-hidden="true"> *</span>
+  </label>
+  <p class="portal-field__description" t:attr-id="props.descriptionId" t:if="props.description" t:text="props.description"/>
+  <ui:outlet name="default"/>
+  <p class="portal-field__error" t:attr-id="props.errorId" t:if="props.error" t:text="props.error"/>
+</div>
+</template>
+
+<style>
+/* Fields */
+.portal-field { display: grid; gap: calc(var(--_s)*2); }
+.portal-field__description { color: var(--portal-text-muted); font-size: .875rem; margin: 0; }
+</style>

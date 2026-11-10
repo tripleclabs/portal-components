@@ -1,0 +1,37 @@
+<props>
+  <prop name="title" type="string" required="true"/>
+  <slot name="default"/>
+  <slot name="actions"/>
+</props>
+
+<template>
+<section class="portal-empty-state">
+  <h2 t:text="props.title"/>
+  <div>
+    <ui:outlet name="default"/>
+  </div>
+  <div t:if="slots.actions">
+    <ui:outlet name="actions"/>
+  </div>
+</section>
+</template>
+
+<style>
+/* Empty state */
+.portal-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: calc(var(--_s)*2);
+  text-align: center;
+  padding-block: calc(var(--_s)*10);
+  padding-inline: calc(var(--_s)*6);
+  border: 1px dashed var(--_hairline);
+  border-radius: calc(var(--portal-radius)*1.5);
+  color: var(--portal-text-muted);
+}
+.portal-empty-state h2 { margin: 0; font-size: 1.125rem; color: var(--portal-text); }
+.portal-empty-state > div { max-inline-size: var(--portal-reading-width); }
+.portal-empty-state > div > :first-child { margin-block-start: 0; }
+.portal-empty-state > div > :last-child { margin-block-end: 0; }
+.portal-empty-state > div:last-child:not(:nth-child(2)) { margin-block-start: calc(var(--_s)*3); }
+</style>

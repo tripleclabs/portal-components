@@ -1,0 +1,58 @@
+<props>
+  <prop name="id" type="string" required="true"/>
+  <prop name="name" type="string" required="true"/>
+  <prop name="value" type="string" default=""/>
+  <prop name="disabled" type="boolean" default="false"/>
+  <prop name="required" type="boolean" default="false"/>
+  <prop name="invalid" type="boolean" default="false"/>
+  <prop name="describedby" type="string" nullable="true"/>
+  <prop name="autocomplete" type="string" nullable="true"/>
+  <prop name="rows" type="number" default="4"/>
+  <prop name="placeholder" type="string" nullable="true"/>
+  <prop name="readonly" type="boolean" default="false"/>
+</props>
+
+<template>
+<textarea class="portal-textarea" t:attr-id="props.id" t:attr-name="props.name" t:attr-rows="props.rows" t:attr-placeholder="props.placeholder" t:attr-disabled="props.disabled" t:attr-required="props.required" t:attr-readonly="props.readonly" t:attr-aria-invalid="props.invalid" t:attr-aria-describedby="props.describedby" t:attr-autocomplete="props.autocomplete" t:text="props.value"/>
+</template>
+
+<style>
+.portal-textarea {
+  inline-size: 100%;
+  min-block-size: calc(var(--_s)*10);
+  padding-block: calc(var(--_s)*2);
+  padding-inline: calc(var(--_s)*3);
+  color: var(--portal-input-color, var(--portal-text));
+  background: var(--portal-input-background, var(--portal-surface));
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius);
+  box-shadow: var(--portal-shadow-sm);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  transition-property: border-color, box-shadow, background-color;
+  transition-duration: var(--portal-motion);
+  transition-timing-function: ease-out;
+}
+.portal-textarea { resize: vertical; min-block-size: calc(var(--_s)*20); }
+.portal-textarea::placeholder { color: var(--portal-text-muted); opacity: 1; }
+.portal-textarea:hover:not(:disabled, :focus-visible) { border-color: color-mix(in oklab, var(--portal-border) 70%, var(--portal-text)); }
+.portal-textarea:focus-visible {
+  /* Transparent outline keeps a visible indicator in forced-colours mode. */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--_focus-solid);
+  box-shadow: 0 0 0 3px var(--_ring);
+}
+.portal-textarea[aria-invalid="true"] {
+  --_focus: var(--portal-danger);
+  border-color: var(--portal-danger);
+}
+.portal-textarea:disabled {
+  background: var(--portal-surface-muted);
+  color: var(--portal-text-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.portal-textarea:read-only:not(:disabled) { background: var(--_subtle); }
+</style>

@@ -1,0 +1,17 @@
+{
+  "tabs": [
+    {
+      "id": "product-details",
+      "title": "Details",
+      "selected": true
+    },
+    {
+      "id": "product-delivery",
+      "title": "Delivery"
+    },
+    {
+      "id": "product-artwork",
+      "title": "Artwork"
+    }
+  ]
+}

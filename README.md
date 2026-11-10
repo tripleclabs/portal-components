@@ -2,14 +2,14 @@
 
 This repository is a **generated distribution mirror**. Authoritative source is maintained in platform at `packages/portal-components`. Make changes upstream; the library, docs and production-rendered previews are exported here. Public CI needs Node only and never depends on platform. Platform runtime consumes a pinned public commit, not the authoring directory.
 
-Ownable, token-styled DataXML building blocks for server-rendered PortalSites. The library supplies 24 components spanning forms, layout, navigation and status. It uses native HTML and the Portal runtime; it does not require Vue, React, Tailwind or authored browser JavaScript.
+Ownable, token-styled DataXML building blocks for server-rendered PortalSites. The library supplies 59 components spanning site structure, forms, commerce, status and tracking, native overlays and developer documentation, with three theme presets in light and dark. It uses native HTML and the Portal runtime; it does not require Vue, React, Tailwind or authored browser JavaScript.
 
 ## Use the bundled library
 
 Compatible Portal runtimes bundle a pinned library version. Use a component directly:
 
 ```xml
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme">
+<main class="portal-theme">
   <ui:card>
     <ui:fill name="header"><h1>Your next print project</h1></ui:fill>
     <p>Start with a print-ready PDF.</p>
@@ -22,31 +22,43 @@ Compatible Portal runtimes bundle a pinned library version. Use a component dire
 </main>
 ```
 
-A submit button needs a surrounding form to perform an action. Complete executable examples and all supported props/slots are in [the component reference](docs/components.md). See [authoring](docs/authoring.md), [themes](docs/themes.md), and [LLM instructions](LLM.md).
+In a `.portal` page the `ui:` and `t:` prefixes are implicit; a plain `.html` page declares `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` on its root. A submit button needs a surrounding form to perform an action. Complete executable examples and all supported props/slots are in [the component reference](docs/components.md). See [authoring](docs/authoring.md), [themes](docs/themes.md), and [LLM instructions](LLM.md).
 
-Copy both `components/card.html` and `components/card.json` into your site's `components/` directory to own that component. A complete local pair overrides the bundled component by name. Keep the contract compatible with existing usages, or update them together. Copy the MIT license when distributing source.
+Each component is one file, `components/<name>.portal`: its props, template and CSS together. Copy `components/card.portal` into your site's `components/` directory to own that component; the local file overrides the bundled component by name, CSS included. Keep its props compatible with existing usages, or update them together. Copy the MIT license when distributing source.
+
+## Components with behaviour
+
+A component can handle its own events. `t:click` on a button (or `t:submit` on a form, or `t:change` with `t:live` parts) calls a typed export in the file's `<server>` block, which runs only when the visitor acts, never while the page renders. Pure components (the default) get the language only; `security="privileged"` ones run with the visitor's Portal access and call your site's own Lua modules. `buy-now` is the worked example: its privileged `submit` asks your `lib/checkout.lua` for a checkout and redirects there. We recommend Stripe hosted Checkout, so card details never touch your portal. This library is not a shop: checkout, baskets and prices stay in your site's code. See "Component events" in [authoring](docs/authoring.md).
 
 The default theme is opt-in through the `portal-theme` class; the host includes the bundled CSS. A copied component remains ordinary DataXML. Override CSS tokens for branding without copying templates.
 
+## Theming in one line
+
+```html
+<main class="portal-theme" style="--portal-brand:#145744">…</main>
+```
+
+One brand colour drives every interactive state. Five knobs (`--portal-brand`, `--portal-radius`, `--portal-font`, `--portal-font-heading`, `--portal-density`) cover most brands; pick a preset with `data-preset="editorial"` or `"studio"` (Neutral when absent) and dark mode with `data-theme="dark"`. See [themes](docs/themes.md).
+
 ## Develop this repository
 
-Node 22 or later is sufficient for catalogue validation, documentation generation and the static site build. No npm publication is needed.
+Node 22 or later and pnpm (pinned by `packageManager` in `package.json`; `corepack enable` provides it) are sufficient for catalogue validation, documentation generation and the static site build. Nothing is published to a package registry.
 
 ```sh
-npm ci            # install pinned development/test dependencies
-npm run docs       # regenerate Markdown, machine catalogue and LLM reference
-npm run check      # validate contracts, examples and generated docs
-npm test          # test public build tooling
-npm run build     # build site/ from checked-in actual-renderer output
-npx playwright install chromium
-npm run test:browser # audit examples and native interactions in Chromium
+pnpm install --frozen-lockfile  # install pinned development/test dependencies
+pnpm run docs                   # regenerate Markdown, machine catalogue and LLM reference
+pnpm run check                  # validate contracts, examples and generated docs
+pnpm test                       # test public build tooling
+pnpm run build                  # build site/ from checked-in actual-renderer output
+pnpm exec playwright install chromium
+pnpm run test:browser           # audit examples and native interactions in Chromium
 ```
 
 `rendered/` contains HTML generated by the production Swift Portal compiler, with input/output digests. This public repository does not contain a second DataXML renderer. The platform integration job regenerates those artifacts and checks them. The site build refuses missing or stale render artifacts; a source edit must be rendered before publication. See [showcase pipeline](docs/showcase.md).
 
 ## Compatibility and scope
 
-Library 0.1.1 targets Portal component contract 1. Existing plain HTML/Lua sites remain valid. Reusable components are presentation-only; page-owned Lua handles fetching/actions. Stateful browser widgets and file transfers need separate trusted runtime capabilities and are not implied by a styled control.
+Library 0.4.0 targets Portal component contract 1. Existing plain HTML/Lua sites remain valid. Components render purely; page-owned Lua handles fetching and page actions, and a component's own events run only its declared exports. Stateful browser widgets and file transfers need separate trusted runtime capabilities and are not implied by a styled control.
 
 The supplied themes and semantics are tested, but copying components or overriding tokens can affect accessibility. Test your finished application with keyboard navigation, representative content and assistive technology.
 
@@ -55,8 +67,8 @@ MIT licensed. Repository publication and GitHub Pages deployment are separate re
 ## Complete page examples
 
 The [page examples](https://tripleclabs.github.io/portal-components/layouts.html)
-show components working together in a sign-in page, print catalogue, order tracker
-and guided order request. Preview your theme at mobile or desktop widths, then
+show components working together in a print shop, a private B2B ordering portal,
+job tracking and an API reference. Preview your theme at mobile or desktop widths, then
 copy the DataXML and shared CSS. See [recipes and integration notes](docs/layouts.md).
 They use fictional data and disabled business actions, not live authentication or commerce.
 

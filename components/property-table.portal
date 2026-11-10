@@ -1,0 +1,32 @@
+<props>
+  <prop name="caption" type="string" required="true"/>
+  <prop name="nameLabel" type="string" default="Name"/>
+  <prop name="typeLabel" type="string" default="Type"/>
+  <prop name="requiredLabel" type="string" default="Required"/>
+  <prop name="descriptionLabel" type="string" default="Description"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<div class="portal-table-wrap" tabindex="0" role="region" t:attr-aria-label="props.caption">
+  <table class="portal-table portal-property-table">
+    <caption t:text="props.caption"/>
+    <thead>
+      <tr>
+        <th scope="col" t:text="props.nameLabel"/>
+        <th scope="col" t:text="props.typeLabel"/>
+        <th scope="col" t:text="props.requiredLabel"/>
+        <th scope="col" t:text="props.descriptionLabel"/>
+      </tr>
+    </thead>
+    <tbody>
+      <ui:outlet name="default"/>
+    </tbody>
+  </table>
+</div>
+</template>
+
+<style>
+.portal-table-wrap .portal-property-table td:first-child code { font-weight: var(--_portal-weight-medium); white-space: nowrap; }
+.portal-table-wrap .portal-property-table td:nth-child(2) { color: var(--portal-text-muted); font-family: var(--portal-font-mono); font-size: .8125rem; }
+</style>

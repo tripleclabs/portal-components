@@ -1,0 +1,29 @@
+<props>
+  <prop name="name" type="string" required="true" enum="arrow-left arrow-right arrow-up-right check chevron-down chevron-left chevron-right chevron-up circle-alert circle-check circle-help clock copy credit-card download external-link eye eye-off file file-text info key-round layers log-out mail map-pin menu minus package plus printer receipt search settings shopping-cart truck upload user x zap"/>
+  <prop name="label" type="string" nullable="true"/>
+  <prop name="size" type="string" default="md" enum="sm md lg"/>
+</props>
+
+<template>
+<span class="portal-icon" t:attr-data-icon="props.name" t:attr-data-size="props.size" t:attr-role="props.label ? 'img' : null" t:attr-aria-label="props.label ? props.label : null" t:attr-aria-hidden="props.label ? null : 'true'"/>
+</template>
+
+<style>
+/* Icon: a Lucide shape (styles/icons.css sets --_icon) used as a mask over the
+   current text colour, so icons follow links, buttons and dark mode. Sizes are
+   in em to track the surrounding type; flex parents centre them instead. */
+.portal-icon {
+  display: inline-block;
+  flex: none;
+  inline-size: 1.25em;
+  block-size: 1.25em;
+  vertical-align: -.275em;
+  background-color: currentColor;
+  -webkit-mask: var(--_icon) center / contain no-repeat;
+  mask: var(--_icon) center / contain no-repeat;
+  /* Keep the shape visible in forced colours: currentColor is already forced. */
+  forced-color-adjust: none;
+}
+.portal-icon[data-size="sm"] { inline-size: 1em; block-size: 1em; vertical-align: -.15em; }
+.portal-icon[data-size="lg"] { inline-size: 1.5em; block-size: 1.5em; vertical-align: -.4em; }
+</style>

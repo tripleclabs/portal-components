@@ -1,0 +1,15 @@
+<props>
+  <prop name="label" type="string" required="true"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<ol class="portal-timeline" t:attr-aria-label="props.label">
+  <ui:outlet name="default"/>
+</ol>
+</template>
+
+<style>
+/* Status: timeline, stat, estimate and files */
+.portal-timeline { display: grid; margin: 0; padding: 0; list-style: none; }
+</style>

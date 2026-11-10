@@ -16,8 +16,8 @@
 }
 :root.custom-theme {
  --docs-canvas:var(--portal-canvas); --docs-surface:var(--portal-surface); --docs-soft:var(--portal-surface-muted);
- --docs-text:var(--portal-text); --docs-muted:var(--portal-text-muted); --docs-accent:var(--portal-primary);
- --docs-on-accent:var(--portal-primary-content); --docs-border:var(--portal-border); --docs-control-border:var(--portal-border);
+ --docs-text:var(--portal-text); --docs-muted:var(--portal-text-muted); --docs-accent:var(--portal-primary,var(--portal-brand));
+ --docs-on-accent:var(--portal-primary-content,oklch(from var(--portal-primary,var(--portal-brand)) clamp(0,(0.62 - l)*1000,1) 0 0)); --docs-border:var(--portal-border); --docs-control-border:var(--portal-border);
  --docs-code:var(--portal-surface-muted); --docs-code-text:var(--portal-text);
 }
 :root:not(.custom-theme) { font-family:'Sofia Sans',sans-serif; font-size:17px; font-weight:400; line-height:1.6; }

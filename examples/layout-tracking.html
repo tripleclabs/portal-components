@@ -1,0 +1,146 @@
+<div class="portal-theme portal-layout">
+  <ui:site-header>
+    <ui:fill name="brand">
+      <a href="#top">
+        <ui:icon name="layers" size="lg"/>
+        Paper &amp; Form
+      </a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#shop">Shop</ui:nav-link>
+      <ui:nav-link href="#orders" t:bind-current="true">Orders</ui:nav-link>
+      <ui:nav-link href="#help">Help</ui:nav-link>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:avatar name="Amira Hassan" initials="AH" size="sm"/>
+    </ui:fill>
+  </ui:site-header>
+  <main id="top">
+    <ui:container>
+      <ui:page-header title="Order PF-1042" description="Placed on Monday 3 November by Amira Hassan. Your proof is approved and the cards are on press.">
+        <ui:fill name="breadcrumbs">
+          <ui:breadcrumbs>
+            <li>
+              <a href="#orders">Orders</a>
+            </li>
+            <li>
+              <span aria-current="page">PF-1042</span>
+            </li>
+          </ui:breadcrumbs>
+        </ui:fill>
+        <ui:fill name="actions">
+          <ui:link href="#invoice-pf-1042">
+            <ui:icon name="receipt" size="sm"/>
+            Invoice
+          </ui:link>
+          <ui:button variant="secondary" t:bind-disabled="true">Reorder</ui:button>
+        </ui:fill>
+      </ui:page-header>
+      <div class="layout-body">
+        <div class="layout-split">
+          <ui:stack gap="lg">
+            <ui:card>
+              <ui:fill name="header">
+                <h2>Progress</h2>
+              </ui:fill>
+              <ui:timeline label="Order PF-1042 progress">
+                <ui:timeline-step title="Order received" state="done" time="Mon 09:12"/>
+                <ui:timeline-step title="Proof approved" state="done" time="Mon 14:40">
+                  Approved by Amira Hassan.
+                </ui:timeline-step>
+                <ui:timeline-step title="Printing" state="current" time="Today">
+                  On press 2, 400gsm matt with soft-touch laminate.
+                </ui:timeline-step>
+                <ui:timeline-step title="Dispatched" time="Est. Wed"/>
+                <ui:timeline-step title="Delivered" time="Est. Thu 13 Nov"/>
+              </ui:timeline>
+            </ui:card>
+            <ui:card>
+              <ui:fill name="header">
+                <h2>Details</h2>
+              </ui:fill>
+              <ui:description-list>
+                <ui:description-item term="Product">Business cards, 85 × 55 mm</ui:description-item>
+                <ui:description-item term="Quantity">500 cards</ui:description-item>
+                <ui:description-item term="Paper">400gsm matt, soft-touch laminate</ui:description-item>
+                <ui:description-item term="Delivery">Courier, tracked</ui:description-item>
+                <ui:description-item term="Deliver to">Amira Hassan, 1 Example Lane, Papertown PT1 1AA</ui:description-item>
+                <ui:description-item term="Total">£58.80 including VAT</ui:description-item>
+              </ui:description-list>
+            </ui:card>
+          </ui:stack>
+          <ui:stack gap="lg">
+            <ui:stat label="Estimated delivery" value="Thu 13 Nov" change="On schedule" trend="flat"/>
+            <ui:card>
+              <ui:fill name="header">
+                <h2>Documents</h2>
+              </ui:fill>
+              <ui:file-list>
+                <ui:file-item href="#invoice-pf-1042" name="Invoice PF-1042.pdf" type="PDF" size="84 KB"/>
+                <ui:file-item href="#proof-pf-1042" name="Approved proof, version 3.pdf" type="PDF" size="2.4 MB"/>
+              </ui:file-list>
+            </ui:card>
+            <ui:alert>
+              <ui:fill name="title">Need to change something?</ui:fill>
+              <p>Printing has started, so changes now need a reprint. Call the studio on 0161 496 0000.</p>
+            </ui:alert>
+          </ui:stack>
+        </div>
+        <ui:table caption="Recent orders">
+          <ui:fill name="head">
+            <tr>
+              <th scope="col">Order</th>
+              <th scope="col">Placed</th>
+              <th scope="col">Product</th>
+              <th scope="col">Status</th>
+              <th scope="col">Total</th>
+            </tr>
+          </ui:fill>
+          <tr>
+            <td>
+              <ui:link href="#pf-1042">PF-1042</ui:link>
+            </td>
+            <td>3 Nov</td>
+            <td>Business cards</td>
+            <td>
+              <ui:badge variant="warning" t:bind-dot="true">In production</ui:badge>
+            </td>
+            <td>£58.80</td>
+          </tr>
+          <tr>
+            <td>
+              <ui:link href="#pf-1038">PF-1038</ui:link>
+            </td>
+            <td>28 Oct</td>
+            <td>Folded leaflets</td>
+            <td>
+              <ui:badge variant="primary" t:bind-dot="true">Awaiting proof</ui:badge>
+            </td>
+            <td>£81.60</td>
+          </tr>
+          <tr>
+            <td>
+              <ui:link href="#pf-1021">PF-1021</ui:link>
+            </td>
+            <td>12 Oct</td>
+            <td>Letterheads</td>
+            <td>
+              <ui:badge variant="success" t:bind-dot="true">Delivered</ui:badge>
+            </td>
+            <td>£62.40</td>
+          </tr>
+        </ui:table>
+      </div>
+    </ui:container>
+  </main>
+  <ui:site-footer>
+    <p>Paper &amp; Form · Business print, made well and delivered fast.</p>
+    <nav aria-label="Footer">
+      <ui:nav-link href="#delivery">Delivery</ui:nav-link>
+      <ui:nav-link href="#contact">Contact</ui:nav-link>
+    </nav>
+    <ui:fill name="legal">
+      <p>Sample layout · Fictional data · Business actions are disabled</p>
+    </ui:fill>
+  </ui:site-footer>
+</div>

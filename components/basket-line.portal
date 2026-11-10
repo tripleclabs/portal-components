@@ -1,0 +1,73 @@
+<props>
+  <prop name="title" type="string" required="true"/>
+  <prop name="detail" type="string" nullable="true"/>
+  <prop name="quantity" type="string" nullable="true"/>
+  <prop name="total" type="string" required="true"/>
+  <prop name="line" type="object" nullable="true" description="The basket line this row edits. With it, the row shows a quantity control and Update and Remove buttons, handled by the site's lib/basket.lua.">
+    <prop name="id" type="string" required="true"/>
+    <prop name="quantity" type="integer" required="true"/>
+  </prop>
+  <prop name="quantityLabel" type="string" default="Quantity"/>
+  <prop name="updateLabel" type="string" default="Update"/>
+  <prop name="removeLabel" type="string" default="Remove"/>
+  <slot name="media"/>
+  <slot name="actions"/>
+</props>
+
+<template>
+<article class="portal-basket-line">
+  <div class="portal-basket-line__media" t:if="slots.media">
+    <ui:outlet name="media"/>
+  </div>
+  <div class="portal-basket-line__main">
+    <h3 class="portal-basket-line__title" t:text="props.title"/>
+    <p class="portal-basket-line__detail" t:if="props.detail" t:text="props.detail"/>
+    <p class="portal-basket-line__detail" t:if="props.quantity" t:text="props.quantity"/>
+    <div class="portal-basket-line__actions" t:if="slots.actions">
+      <ui:outlet name="actions"/>
+    </div>
+    <div class="portal-basket-line__edit" t:if="props.line">
+      <ui:quantity-input t:bind-id="component.id | append:'-quantity'" name="quantity" t:bind-label="props.quantityLabel" t:bind-value="props.line.quantity"/>
+      <button class="portal-button" data-variant="secondary" data-size="sm" t:click="update({ lineId = props.line.id })">
+        <span t:text="props.updateLabel"/>
+        <span class="portal-visually-hidden" t:text="props.title"/>
+      </button>
+      <button class="portal-button" data-variant="ghost" data-size="sm" t:click="remove({ lineId = props.line.id })">
+        <span t:text="props.removeLabel"/>
+        <span class="portal-visually-hidden" t:text="props.title"/>
+      </button>
+    </div>
+  </div>
+  <p class="portal-basket-line__total" t:text="props.total"/>
+</article>
+</template>
+
+<style>
+.portal-basket-line { display: flex; flex-wrap: wrap; align-items: flex-start; gap: calc(var(--_s)*2) calc(var(--_s)*4); padding-block: calc(var(--_s)*4); }
+.portal-basket-line + .portal-basket-line { border-block-start: 1px solid var(--_hairline); }
+.portal-basket-line__media { flex: none; inline-size: 4.5rem; }
+.portal-basket-line__main { flex: 1 1 12rem; min-inline-size: 0; }
+.portal-basket-line__title { margin: 0; font-size: 1rem; overflow-wrap: anywhere; hyphens: auto; }
+.portal-basket-line__detail { margin: .125rem 0 0; color: var(--portal-text-muted); font-size: .875rem; overflow-wrap: anywhere; }
+.portal-basket-line__total { min-inline-size: 0; margin: 0; margin-inline-start: auto; font-weight: var(--_portal-weight-strong); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.portal-basket-line__actions { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--_s)*2) calc(var(--_s)*4); margin-block-start: calc(var(--_s)*2); font-size: .875rem; }
+.portal-basket-line__edit { display: flex; flex-wrap: wrap; align-items: flex-end; gap: calc(var(--_s)*2); margin-block-start: calc(var(--_s)*3); }
+</style>
+
+<server security="privileged"><![CDATA[
+-- Update and Remove change the visitor's basket through the site's own module,
+-- lib/basket.lua, which owns the basket and checks that the line is this
+-- visitor's: the signed lineId only proves which row was clicked.
+function exports.update(props: Props, input: { lineId: string, quantity: integer }): ComponentResult
+  if input.quantity < 1 then
+    return { errors = { { path = "quantity", message = "Enter a quantity of 1 or more" } } }
+  end
+  ctx.script.load("basket").update(input.lineId, input.quantity)
+  return {}
+end
+
+function exports.remove(props: Props, input: { lineId: string }): ComponentResult
+  ctx.script.load("basket").remove(input.lineId)
+  return {}
+end
+]]></server>

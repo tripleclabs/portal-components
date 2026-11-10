@@ -1,0 +1,12 @@
+{
+  "tabs": [
+    {
+      "id": "order-invoice",
+      "title": "Invoice"
+    },
+    {
+      "id": "order-proof",
+      "title": "Proof"
+    }
+  ]
+}

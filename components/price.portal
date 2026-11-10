@@ -1,0 +1,20 @@
+<props>
+  <prop name="amount" type="string" required="true"/>
+  <prop name="unit" type="string" nullable="true"/>
+  <prop name="compareAt" type="string" nullable="true"/>
+  <prop name="compareAtLabel" type="string" default="Was"/>
+</props>
+
+<template>
+<span class="portal-price">
+  <span class="portal-price__amount" t:text="props.amount"/>
+  <span class="portal-price__unit" t:if="props.unit" t:text="props.unit"/>
+  <s class="portal-price__was" t:if="props.compareAt"><span class="portal-visually-hidden" t:text="props.compareAtLabel | append:' '"/> <span t:text="props.compareAt"/></s>
+</span>
+</template>
+
+<style>
+.portal-price { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0 .375em; min-inline-size: 0; overflow-wrap: anywhere; }
+.portal-price__amount { font-weight: var(--_portal-weight-strong); font-variant-numeric: tabular-nums; }
+.portal-price__unit, .portal-price__was { color: var(--portal-text-muted); font-size: .875em; }
+</style>

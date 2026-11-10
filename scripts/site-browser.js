@@ -15,31 +15,29 @@ filter?.addEventListener('input',()=>{
 });
 // Leave the navigation usable without JavaScript too.
 sidebar?.classList.add('navigation-enhanced');
-const storageKey='portal-components-theme-v1';
-const palettes=['light','dark','atelier'];
+const storageKey='portal-components-theme-v2';
+// Preset × mode; matches themeNames in site.mjs.
+const palettes=['neutral-light','neutral-dark','editorial-light','editorial-dark','studio-light','studio-dark'];
 const systemMode=window.matchMedia('(prefers-color-scheme: dark)');
 const frames=[...document.querySelectorAll('[data-example]')];
 const selector=document.querySelector('[data-theme-select]');
 const editor=document.querySelector('#theme-editor');
 const status=document.querySelector('#theme-status');
-let schema=[],paletteValues={},draft={base:'light',values:{}},active={mode:'system',base:systemMode.matches?'dark':'light',values:{}};
+const systemBase=()=>systemMode.matches?'neutral-dark':'neutral-light';
+let schema=[],paletteValues={},draft={base:'neutral-light',values:{}},active={mode:'system',base:systemBase(),values:{}};
 let persistent=true;
 function property(name){
   if(/shadow/.test(name))return 'box-shadow';
-  if(/font-family|font-mono/.test(name))return 'font-family';
-  if(/font-weight/.test(name))return 'font-weight';
-  if(/line-height/.test(name))return 'line-height';
-  if(/letter-spacing/.test(name))return 'letter-spacing';
-  if(/border-style/.test(name))return 'border-style';
-  if(/opacity/.test(name))return 'opacity';
-  if(/motion-duration/.test(name))return 'transition-duration';
-  if(/font-size|heading-size/.test(name))return 'font-size';
-  if(/space|height|width|radius|offset|choice-size/.test(name))return 'width';
+  if(/-font(-|$)/.test(name))return 'font-family';
+  // Unitless multipliers validate like a unitless line-height.
+  if(/density|ratio/.test(name))return 'line-height';
+  if(/motion/.test(name))return 'transition-duration';
+  if(/width|radius/.test(name))return 'width';
   return 'color';
 }
 function valid(name,value){return value.length<=200&&!/[;{}<>\r\n]|url\s*\(|@|\/\*/i.test(value)&&CSS.supports(property(name),value);}
 function clean(value){
-  const result={base:palettes.includes(value?.base)?value.base:'light',values:{}};
+  const result={base:palettes.includes(value?.base)?value.base:'neutral-light',values:{}};
   for(const token of schema){const v=value?.values?.[token.name];if(typeof v==='string'&&valid(token.name,v))result.values[token.name]=v;}
   return result;
 }
@@ -48,13 +46,15 @@ function announce(message){if(status)status.textContent=message+(persistent?'':'
 function baseValues(base){return {...Object.fromEntries(schema.map(t=>[t.name,t.default])),...(paletteValues[base]??{})};}
 
 function styleRoot(root,theme){
-  root.dataset.theme=theme.base;
+  const [preset,mode]=theme.base.split('-');
+  root.dataset.theme=mode;
+  if(preset==='neutral')delete root.dataset.preset;else root.dataset.preset=preset;
   for(const token of schema)root.style.removeProperty(token.name);
   for(const [name,value]of Object.entries(theme.values))root.style.setProperty(name,value);
 }
 function applySite(){
-  if(active.mode==='system')active.base=systemMode.matches?'dark':'light';
-  const root=document.documentElement,custom=active.mode==='custom',themed=custom||active.base!=='light';
+  if(active.mode==='system')active.base=systemBase();
+  const root=document.documentElement,custom=active.mode==='custom',themed=custom||active.base!=='neutral-light';
   root.classList.toggle('portal-theme',themed);root.classList.toggle('themed-docs',themed);root.classList.toggle('custom-theme',custom);
   styleRoot(root,active);
   if(selector)selector.value=active.mode;
@@ -65,7 +65,7 @@ function applyFrame(frame){
   doc.querySelectorAll('.portal-theme').forEach(root=>styleRoot(root,theme));
   const root=doc.querySelector('.portal-theme');
   if(root){if(!frame.hasAttribute('data-layout-example')){root.style.padding='24px';root.style.minHeight='130px';}doc.body.style.margin='0';doc.body.style.background=doc.defaultView.getComputedStyle(root).backgroundColor;
-    root.querySelectorAll('.portal-demo-box').forEach(box=>{box.style.padding='16px';box.style.background='var(--portal-surface-muted)';box.style.borderRadius='var(--portal-radius-md)';});}
+    root.querySelectorAll('.portal-demo-box').forEach(box=>{box.style.padding='16px';box.style.background='var(--portal-surface-muted)';box.style.borderRadius='var(--portal-radius)';});}
   if(frame.hasAttribute('data-layout-example'))frame.style.height='600px';
   requestAnimationFrame(()=>{
     // Navigation can detach the frame or replace its document before this runs.
@@ -84,8 +84,13 @@ for(const button of document.querySelectorAll('[data-preview-width]'))button.add
 });
 function exportCSS(){
   const output=document.querySelector('#theme-css');if(!output)return;
-  const values={...baseValues(draft.base),...draft.values};
-  const source=`/* Portal Components theme; load after bundled styles. */\n.portal-theme.my-theme {\n  color-scheme: ${draft.base==='dark'?'dark':'light'};\n${schema.map(t=>`  ${t.name}: ${values[t.name]};`).join('\n')}\n}\n`;
+  // Only the starting preset's own values and the user's edits: re-declaring
+  // library defaults (density, motion) would override data-density and reduced motion.
+  const neutral=baseValues('neutral-light'),palette=baseValues(draft.base);
+  const values=Object.fromEntries(Object.entries(palette).filter(([name,value])=>value!==neutral[name]&&!['--portal-density','--portal-motion'].includes(name)));
+  Object.assign(values,draft.values);
+  const [preset]=draft.base.split('-');
+  const source=`/* Portal Components theme; load after bundled styles. Started from ${draft.base.replace('-',' ')}${preset==='neutral'?'':`; keep data-preset="${preset}" on the theme root for its preset-only details`}. */\n.portal-theme.my-theme {\n  color-scheme: ${draft.base.endsWith('-dark')?'dark':'light'};\n${schema.filter(t=>Object.hasOwn(values,t.name)).map(t=>`  ${t.name}: ${values[t.name]};`).join('\n')}\n}\n`;
   output.innerHTML=highlight(source,'css');
 }
 function refreshEditor(){
@@ -105,7 +110,7 @@ async function initialize(){
     const paletteResponse=await fetch(new URL('theme-palettes.json',script.src));if(!paletteResponse.ok)throw new Error('Palette catalogue unavailable');paletteValues=await paletteResponse.json();
     let saved;try{saved=JSON.parse(localStorage.getItem(storageKey)||'null');}catch{persistent=false;}
     draft=clean(saved?.draft);active={...clean(saved?.active),mode:[...palettes,'system','custom'].includes(saved?.active?.mode)?saved.active.mode:'system'};
-    if(active.mode!=='custom'){active.base=active.mode==='system'?(systemMode.matches?'dark':'light'):active.mode;active.values={};}
+    if(active.mode!=='custom'){active.base=active.mode==='system'?systemBase():active.mode;active.values={};}
     if(editor){
       editor.addEventListener('submit',event=>event.preventDefault());
       for(const input of editor.querySelectorAll('[data-token]')){
@@ -123,13 +128,13 @@ async function initialize(){
       }
       document.querySelector('#theme-base').addEventListener('change',event=>{draft.base=event.target.value;save();refreshEditor();});
       document.querySelector('#apply-theme').addEventListener('click',()=>{if(editor.querySelector('[aria-invalid="true"]'))return;active={...clean(draft),mode:'custom'};save();applySite();previews();announce('Your theme is applied across the showcase. Open any component to explore it.');});
-      document.querySelector('#reset-editor').addEventListener('click',()=>{draft={base:'light',values:{}};save();refreshEditor();announce('Editor reset. Your applied site theme is unchanged.');});
-      document.querySelector('#reset-site-theme').addEventListener('click',()=>{active={mode:'system',base:systemMode.matches?'dark':'light',values:{}};save();applySite();previews();announce('Site theme reset to System. Your editor draft is kept.');});
+      document.querySelector('#reset-editor').addEventListener('click',()=>{draft={base:'neutral-light',values:{}};save();refreshEditor();announce('Editor reset. Your applied site theme is unchanged.');});
+      document.querySelector('#reset-site-theme').addEventListener('click',()=>{active={mode:'system',base:systemBase(),values:{}};save();applySite();previews();announce('Site theme reset to System. Your editor draft is kept.');});
       document.querySelector('#preview-component').addEventListener('change',event=>{document.querySelectorAll('[data-preview-panel]').forEach(panel=>panel.hidden=panel.dataset.previewPanel!==event.target.value);previews();});
       refreshEditor();
     }
     selector?.addEventListener('change',()=>{
-      active=selector.value==='custom'?{...clean(draft),mode:'custom'}:{mode:selector.value,base:selector.value==='system'?(systemMode.matches?'dark':'light'):selector.value,values:{}};
+      active=selector.value==='custom'?{...clean(draft),mode:'custom'}:{mode:selector.value,base:selector.value==='system'?systemBase():selector.value,values:{}};
       save();applySite();previews();
     });
     applySite();previews();document.documentElement.dataset.themeReady='true';

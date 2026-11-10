@@ -1,0 +1,28 @@
+<props>
+  <prop name="title" type="string" default="Please check your details"/>
+  <prop name="id" type="string" default="form-errors"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<section class="portal-error-summary" tabindex="-1" t:attr-id="props.id" aria-label="Validation errors">
+  <h2 t:text="props.title"/>
+  <ui:outlet name="default"/>
+</section>
+</template>
+
+<style>
+/* Error summary */
+.portal-error-summary {
+  padding: calc(var(--_s)*5);
+  border: 1px solid var(--portal-danger);
+  border-inline-start-width: 3px;
+  border-radius: var(--portal-radius);
+  background: color-mix(in oklab, var(--portal-danger) 5%, var(--portal-surface));
+  color: var(--portal-text);
+}
+.portal-error-summary h2 { margin-block-start: 0; margin-block-end: calc(var(--_s)*2); font-size: 1rem; letter-spacing: normal; }
+.portal-error-summary ul { margin: 0; padding-inline-start: 1.25rem; }
+.portal-error-summary a { color: color-mix(in oklab, var(--portal-danger) 80%, var(--portal-text)); font-weight: var(--_portal-weight-medium); text-underline-offset: .2em; }
+.portal-error-summary a:hover { text-decoration-thickness: 2px; }
+</style>

@@ -1,0 +1,26 @@
+<props>
+  <prop name="id" type="string" nullable="true"/>
+  <prop name="label" type="string" required="true"/>
+  <prop name="triggerVariant" type="string" default="secondary" enum="primary secondary ghost"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<div class="portal-menu">
+  <button type="button" class="portal-button" t:attr-popovertarget="props.id ?? component.id" t:attr-data-variant="props.triggerVariant">
+    <span t:text="props.label"/>
+    <ui:icon name="chevron-down" size="sm"/>
+  </button>
+  <div class="portal-menu__panel portal-floating" popover="auto" t:attr-id="props.id ?? component.id">
+    <ul>
+      <ui:outlet name="default"/>
+    </ul>
+  </div>
+</div>
+</template>
+
+<style>
+.portal-menu { display: inline-block; }
+.portal-menu__panel { min-inline-size: 12rem; }
+.portal-menu__panel ul { display: grid; margin: 0; padding: 0; list-style: none; }
+</style>

@@ -1,0 +1,21 @@
+<props>
+  <prop name="title" type="string" default="Order summary" nullable="true"/>
+  <prop name="totalLabel" type="string" default="Total"/>
+  <prop name="total" type="string" required="true"/>
+  <slot name="default" required="true"/>
+  <slot name="actions"/>
+</props>
+
+<template>
+<section class="portal-order-summary portal-panel">
+  <h2 class="portal-panel__title" t:if="props.title" t:text="props.title"/>
+  <ui:outlet name="default"/>
+  <dl class="portal-panel__total">
+    <dt t:text="props.totalLabel"/>
+    <dd t:text="props.total"/>
+  </dl>
+  <div class="portal-panel__actions" t:if="slots.actions">
+    <ui:outlet name="actions"/>
+  </div>
+</section>
+</template>

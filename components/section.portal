@@ -1,0 +1,38 @@
+<props>
+  <prop name="title" type="string" nullable="true"/>
+  <prop name="width" type="string" default="content" enum="content reading full"/>
+  <prop name="tone" type="string" default="default" enum="default muted"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<section class="portal-section" t:attr-data-tone="props.tone">
+  <div class="portal-section__inner" t:attr-data-width="props.width">
+    <h2 class="portal-section__title" t:if="props.title" t:text="props.title"/>
+    <ui:outlet name="default"/>
+  </div>
+</section>
+</template>
+
+<style>
+.portal-section { padding-block: calc(var(--_s)*12); color: var(--portal-text); }
+.portal-section[data-tone="muted"] {
+  background: color-mix(in oklab, var(--portal-surface-muted) 60%, var(--portal-canvas));
+  border-block: 1px solid var(--_hairline);
+}
+.portal-section__inner {
+  max-inline-size: var(--portal-content-width);
+  margin-inline: auto;
+  padding-inline: calc(var(--_s)*4);
+}
+.portal-section__inner[data-width="reading"] { max-inline-size: var(--portal-reading-width); }
+.portal-section__inner[data-width="full"] { max-inline-size: none; }
+.portal-section__inner > :first-child { margin-block-start: 0; }
+.portal-section__inner > :last-child { margin-block-end: 0; }
+.portal-section__title {
+  margin-block: 0 calc(var(--_s)*6);
+  font-size: calc(1rem * pow(var(--portal-type-ratio), 2));
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+</style>

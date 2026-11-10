@@ -1,0 +1,42 @@
+<props>
+  <prop name="method" type="string" required="true" enum="GET POST PUT PATCH DELETE"/>
+  <prop name="path" type="string" required="true"/>
+  <prop name="summary" type="string" nullable="true"/>
+  <slot name="default"/>
+</props>
+
+<template>
+<section class="portal-endpoint" t:attr-data-method="props.method">
+  <h3 class="portal-endpoint__title">
+    <span class="portal-endpoint__method" t:text="props.method"/>
+    <code dir="ltr" t:text="props.path"/>
+  </h3>
+  <p class="portal-endpoint__summary" t:if="props.summary" t:text="props.summary"/>
+  <ui:outlet name="default"/>
+</section>
+</template>
+
+<style>
+.portal-endpoint__summary { color: var(--portal-text-muted); font-size: .875rem; }
+.portal-endpoint { padding-block: calc(var(--_s)*6); }
+.portal-endpoint + .portal-endpoint { border-block-start: 1px solid var(--_hairline); }
+.portal-endpoint > :last-child { margin-block-end: 0; }
+.portal-endpoint > :not(h3, p) { margin-block-start: calc(var(--_s)*4); }
+.portal-endpoint__title { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--_s)*2.5); margin: 0; font-size: 1rem; letter-spacing: normal; }
+.portal-endpoint__title code { min-inline-size: 0; font-size: .9375rem; overflow-wrap: anywhere; }
+.portal-endpoint__method {
+  --_tone: var(--portal-info);
+  padding: 0 .5rem;
+  border-radius: calc(var(--portal-radius)*.75);
+  background: color-mix(in oklab, var(--_tone) 14%, var(--portal-surface));
+  color: color-mix(in oklab, var(--_tone) 70%, var(--portal-text));
+  font-family: var(--portal-font-mono);
+  font-size: .75rem;
+  line-height: 1.5rem;
+  letter-spacing: .04em;
+}
+.portal-endpoint[data-method="POST"] > * > .portal-endpoint__method { --_tone: var(--portal-success); }
+.portal-endpoint:is([data-method="PUT"], [data-method="PATCH"]) > * > .portal-endpoint__method { --_tone: var(--portal-warning); }
+.portal-endpoint[data-method="DELETE"] > * > .portal-endpoint__method { --_tone: var(--portal-danger); }
+.portal-endpoint__summary { margin: calc(var(--_s)*2) 0 0; font-size: .9375rem; }
+</style>

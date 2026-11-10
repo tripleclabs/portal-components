@@ -1,0 +1,22 @@
+<props>
+  <prop name="src" type="string" required="true"/>
+  <prop name="alt" type="string" required="true"/>
+  <prop name="ratio" type="string" default="4/3" enum="1/1 4/3 3/2 16/9"/>
+  <prop name="fit" type="string" default="cover" enum="cover contain"/>
+</props>
+
+<template>
+<div class="portal-media" t:attr-data-ratio="props.ratio" t:attr-data-fit="props.fit">
+  <img t:attr-src="props.src" t:attr-alt="props.alt" loading="lazy" decoding="async"/>
+</div>
+</template>
+
+<style>
+/* Commerce */
+.portal-media { aspect-ratio: 4 / 3; overflow: clip; border-radius: var(--portal-radius); background: var(--portal-surface-muted); }
+.portal-media[data-ratio="1/1"] { aspect-ratio: 1; }
+.portal-media[data-ratio="3/2"] { aspect-ratio: 3 / 2; }
+.portal-media[data-ratio="16/9"] { aspect-ratio: 16 / 9; }
+.portal-media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.portal-media[data-fit="contain"] img { object-fit: contain; }
+</style>

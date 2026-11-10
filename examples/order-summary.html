@@ -1,0 +1,13 @@
+<main class="portal-theme portal-example">
+  <ui:order-summary total="£58.80">
+    <ui:description-list layout="inline">
+      <ui:description-item term="Subtotal">£42.00</ui:description-item>
+      <ui:description-item term="Delivery">£7.00</ui:description-item>
+      <ui:description-item term="VAT (20%)">£9.80</ui:description-item>
+    </ui:description-list>
+    <ui:fill name="actions">
+      <ui:button t:bind-disabled="true">Place order</ui:button>
+      <ui:link href="#basket">Back to basket</ui:link>
+    </ui:fill>
+  </ui:order-summary>
+</main>

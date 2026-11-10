@@ -1,81 +1,70 @@
 # Token reference
 
-Generated from styles/tokens.css. Override on the theme root or a component wrapper.
+Generated from styles/tokens.css. Set tokens on the theme root or on a wrapper around components. Presets (`data-preset="editorial"` or `"studio"`, absent for Neutral) and dark mode (`data-theme="dark"`) change the semantic values; the names stay the same.
 
-| Token | Light default |
+## Knobs
+
+The five everyday controls. Changing the brand re-derives hover and pressed (an OKLCH lightness shift toward mid-lightness), tint, focus ring and button text inside each component, so it also works on a nested wrapper. `--portal-density` is a unitless multiplier for spacing and control heights (`data-density="compact"` is .875, `"roomy"` is 1.125).
+
+| Token | Neutral light default |
 | --- | --- |
-| `--portal-canvas` | `#f7f8fa` |
+| `--portal-brand` | `#18181b` |
+| `--portal-radius` | `.5rem` |
+| `--portal-font` | `Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` |
+| `--portal-font-heading` | `var(--portal-font)` |
+| `--portal-density` | `1` |
+
+## Semantic tokens
+
+Set by presets. Each `-content` colour is the text colour used on its partner.
+
+| Token | Neutral light default |
+| --- | --- |
+| `--portal-canvas` | `#fafafa` |
 | `--portal-surface` | `#ffffff` |
-| `--portal-surface-muted` | `#eef1f5` |
-| `--portal-text` | `#17212f` |
-| `--portal-text-muted` | `#536171` |
-| `--portal-border` | `#8491a1` |
-| `--portal-primary` | `#1657c0` |
-| `--portal-primary-content` | `#ffffff` |
-| `--portal-danger` | `#a51d2d` |
-| `--portal-danger-content` | `#ffffff` |
-| `--portal-success` | `#17603b` |
-| `--portal-warning` | `#795300` |
-| `--portal-info` | `#1657c0` |
-| `--portal-info-content` | `#ffffff` |
+| `--portal-surface-muted` | `#f4f4f5` |
+| `--portal-text` | `#09090b` |
+| `--portal-text-muted` | `#66666e` |
+| `--portal-border` | `#8a8a93` |
+| `--portal-secondary` | `#f4f4f5` |
+| `--portal-secondary-content` | `#18181b` |
+| `--portal-accent` | `#e4e4e7` |
+| `--portal-accent-content` | `#18181b` |
+| `--portal-success` | `#15803d` |
 | `--portal-success-content` | `#ffffff` |
+| `--portal-warning` | `#b45309` |
 | `--portal-warning-content` | `#ffffff` |
-| `--portal-secondary` | `#eef1f5` |
-| `--portal-secondary-content` | `#17212f` |
-| `--portal-accent` | `#6e3db4` |
-| `--portal-accent-content` | `#ffffff` |
-| `--portal-focus` | `#1657c0` |
-| `--portal-font-family` | `ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif` |
-| `--portal-font-mono` | `ui-monospace, SFMono-Regular, Consolas, monospace` |
-| `--portal-font-size` | `1rem` |
-| `--portal-line-height` | `1.55` |
-| `--portal-font-size-xs` | `.8125rem` |
-| `--portal-font-size-sm` | `.875rem` |
-| `--portal-font-size-lg` | `1.125rem` |
-| `--portal-font-size-xl` | `1.25rem` |
-| `--portal-font-weight-normal` | `400` |
-| `--portal-font-weight-medium` | `650` |
-| `--portal-font-weight-bold` | `700` |
-| `--portal-letter-spacing` | `normal` |
-| `--portal-heading-font-family` | `inherit` |
-| `--portal-heading-font-weight` | `700` |
-| `--portal-heading-line-height` | `1.2` |
-| `--portal-heading-letter-spacing` | `normal` |
-| `--portal-heading-size-1` | `2rem` |
-| `--portal-heading-size-2` | `1.5rem` |
-| `--portal-heading-size-3` | `1.25rem` |
-| `--portal-heading-size-4` | `1rem` |
-| `--portal-heading-size-5` | `.875rem` |
-| `--portal-heading-size-6` | `.8125rem` |
-| `--portal-control-font-family` | `inherit` |
-| `--portal-control-font-size` | `1em` |
-| `--portal-control-font-weight` | `400` |
-| `--portal-control-line-height` | `inherit` |
-| `--portal-space-1` | `.25rem` |
-| `--portal-space-2` | `.5rem` |
-| `--portal-space-3` | `.75rem` |
-| `--portal-space-4` | `1rem` |
-| `--portal-space-6` | `1.5rem` |
-| `--portal-space-8` | `2rem` |
-| `--portal-radius-sm` | `.35rem` |
-| `--portal-radius-md` | `.65rem` |
-| `--portal-radius-lg` | `1rem` |
-| `--portal-border-width` | `1px` |
-| `--portal-border-style` | `solid` |
-| `--portal-border-width-strong` | `2px` |
-| `--portal-border-width-accent` | `4px` |
-| `--portal-radius-pill` | `999px` |
-| `--portal-focus-width` | `3px` |
-| `--portal-focus-offset` | `3px` |
-| `--portal-disabled-opacity` | `.55` |
-| `--portal-control-height` | `2.75rem` |
-| `--portal-control-height-sm` | `2.25rem` |
-| `--portal-control-height-lg` | `3.25rem` |
-| `--portal-choice-size` | `1.2rem` |
+| `--portal-danger` | `#dc2626` |
+| `--portal-danger-content` | `#ffffff` |
+| `--portal-info` | `#2563eb` |
+| `--portal-info-content` | `#ffffff` |
+| `--portal-shadow-sm` | `0 1px 2px rgb(9 9 11 / .05)` |
+| `--portal-shadow-md` | `0 1px 3px rgb(9 9 11 / .08), 0 1px 2px -1px rgb(9 9 11 / .06)` |
+| `--portal-shadow-lg` | `0 16px 40px -16px rgb(9 9 11 / .24), 0 4px 10px -4px rgb(9 9 11 / .08)` |
+| `--portal-font-mono` | `ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace` |
 | `--portal-content-width` | `72rem` |
-| `--portal-reading-width` | `48rem` |
-| `--portal-shadow` | `0 2px 8px #17212f0a` |
-| `--portal-shadow-control` | `none` |
-| `--portal-shadow-button` | `none` |
-| `--portal-shadow-overlay` | `0 12px 32px #17212f26` |
-| `--portal-motion-duration` | `120ms` |
+| `--portal-reading-width` | `42rem` |
+| `--portal-type-ratio` | `1.2` |
+| `--portal-motion` | `140ms` |
+
+## Resolved where used
+
+These roles are never declared on the theme root, so a nested `--portal-brand` override reaches them. Set them explicitly to decouple from the brand.
+
+| Token | When unset |
+| --- | --- |
+| `--portal-primary` | `var(--portal-brand)` |
+| `--portal-primary-content` | Black or white, whichever suits the primary's OKLCH lightness (threshold 0.62) |
+| `--portal-focus` | `var(--portal-brand)` |
+
+## Component overrides
+
+Optional and undeclared; each falls back to the semantic tokens.
+
+| Token | Falls back to |
+| --- | --- |
+| `--portal-button-background` | primary |
+| `--portal-button-color` | primary content (derived from the button background when unset) |
+| `--portal-input-background` | `--portal-surface` |
+| `--portal-input-color` | `--portal-text` |
+| `--portal-card-shadow` | `--portal-shadow-sm` |

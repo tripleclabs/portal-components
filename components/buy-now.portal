@@ -1,0 +1,44 @@
+<props>
+  <prop name="product" type="object" required="true" description="What the button buys. Its id reaches the checkout module signed, so a visitor cannot swap it.">
+    <prop name="id" type="string" required="true"/>
+    <prop name="name" type="string" required="true"/>
+  </prop>
+  <prop name="price" type="string" nullable="true" description="The price shown above the button, formatted by the server."/>
+  <prop name="label" type="string" default="Buy now"/>
+  <prop name="quantityLabel" type="string" default="Quantity"/>
+  <prop name="max" type="integer" default="99"/>
+</props>
+
+<template>
+<div class="portal-buy-now">
+  <p class="portal-buy-now__price" t:if="props.price" t:text="props.price"/>
+  <ui:quantity-input t:bind-id="component.id | append:'-quantity'" name="quantity" t:bind-label="props.quantityLabel" t:bind-max="props.max"/>
+  <div class="portal-buy-now__errors" role="alert" t:if="errors">
+    <p class="portal-field__error" t:for="errors" t:as="error" t:text="error.message"/>
+  </div>
+  <button class="portal-button" data-size="lg" t:click="submit">
+    <span t:text="props.label"/>
+    <span class="portal-visually-hidden" t:text="props.product.name"/>
+  </button>
+</div>
+</template>
+
+<style>
+.portal-buy-now { display: grid; justify-items: start; gap: calc(var(--_s)*3); }
+.portal-buy-now__price { margin: 0; font-size: 1.375rem; font-weight: var(--_portal-weight-strong); font-variant-numeric: tabular-nums; }
+.portal-buy-now__errors > * { margin: 0; }
+</style>
+
+<server security="privileged"><![CDATA[
+-- Buy now hands the visitor to checkout. The site's own module,
+-- lib/checkout.lua, creates the checkout (we recommend a Stripe hosted
+-- Checkout Session) and returns its https URL; this export redirects there.
+-- The product comes from the signed props, the quantity from the visitor.
+function exports.submit(props: Props, input: { quantity: integer }): ComponentResult
+  if input.quantity < 1 or input.quantity > props.max then
+    return { errors = { { path = "quantity", message = "Choose a quantity from 1 to " .. props.max } } }
+  end
+  local session = ctx.script.load("checkout").create({ productId = props.product.id, quantity = input.quantity })
+  return { redirect = session.url }
+end
+]]></server>

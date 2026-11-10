@@ -1,0 +1,35 @@
+<props>
+  <prop name="label" type="string" default="Breadcrumb"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<nav class="portal-breadcrumbs" t:attr-aria-label="props.label">
+  <ol>
+    <ui:outlet name="default"/>
+  </ol>
+</nav>
+</template>
+
+<style>
+/* Breadcrumbs and pagination */
+.portal-breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--_s)*2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.portal-breadcrumbs { font-size: .875rem; color: var(--portal-text-muted); }
+.portal-breadcrumbs li + li::before { content: "/"; margin-inline-end: calc(var(--_s)*2); color: color-mix(in oklab, var(--portal-text-muted) 70%, transparent); }
+.portal-breadcrumbs a {
+  color: var(--portal-text-muted);
+  text-decoration: none;
+  border-radius: calc(var(--portal-radius)*.6);
+  transition: color var(--portal-motion);
+}
+.portal-breadcrumbs a:hover { color: var(--portal-text); text-decoration: underline; text-underline-offset: .2em; }
+.portal-breadcrumbs [aria-current="page"] { color: var(--portal-text); font-weight: var(--_portal-weight-medium); }
+</style>

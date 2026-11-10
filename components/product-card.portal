@@ -1,0 +1,52 @@
+<props>
+  <prop name="href" type="string" required="true"/>
+  <prop name="title" type="string" required="true"/>
+  <slot name="media"/>
+  <slot name="meta"/>
+  <slot name="price"/>
+  <slot name="actions"/>
+</props>
+
+<template>
+<article class="portal-product-card">
+  <div class="portal-product-card__media" t:if="slots.media">
+    <ui:outlet name="media"/>
+  </div>
+  <div class="portal-product-card__body">
+    <div class="portal-product-card__head">
+      <h3 class="portal-product-card__title"><a t:attr-href="props.href" t:text="props.title"/></h3>
+      <div class="portal-product-card__meta" t:if="slots.meta">
+        <ui:outlet name="meta"/>
+      </div>
+    </div>
+    <div class="portal-product-card__price" t:if="slots.price">
+      <ui:outlet name="price"/>
+    </div>
+    <div class="portal-product-card__actions" t:if="slots.actions">
+      <ui:outlet name="actions"/>
+    </div>
+  </div>
+</article>
+</template>
+
+<style>
+.portal-product-card {
+  border: 1px solid var(--_hairline);
+  border-radius: calc(var(--portal-radius)*1.5);
+  background: var(--portal-surface);
+  color: var(--portal-text);
+  box-shadow: var(--portal-card-shadow, var(--portal-shadow-sm));
+}
+.portal-product-card { position: relative; display: flex; flex-direction: column; overflow: clip; transition: border-color var(--portal-motion), box-shadow var(--portal-motion); }
+.portal-product-card:hover { border-color: color-mix(in oklab, var(--portal-border) 75%, var(--portal-surface)); box-shadow: var(--portal-shadow-md); }
+/* The ring sits on the card, which is what the stretched link covers. */
+.portal-product-card:has(.portal-product-card__title a:focus-visible) { outline: 2px solid var(--_focus-solid); outline-offset: 2px; }
+.portal-product-card__title a:focus-visible { outline: 0; }
+.portal-product-card__media .portal-media { border-radius: 0; }
+.portal-product-card__body { display: flex; flex: 1; flex-direction: column; gap: calc(var(--_s)*2); padding: calc(var(--_s)*4); }
+.portal-product-card__head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: calc(var(--_s)*2); }
+.portal-product-card__title { min-inline-size: 0; margin: 0; font-size: 1.0625rem; line-height: 1.3; overflow-wrap: anywhere; hyphens: auto; }
+.portal-product-card__title a { color: inherit; text-decoration: none; }
+.portal-product-card__title a::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.portal-product-card__actions { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: calc(var(--_s)*2); margin-block-start: auto; padding-block-start: calc(var(--_s)*2); }
+</style>

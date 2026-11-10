@@ -1,0 +1,22 @@
+<props>
+  <prop name="legend" type="string" required="true"/>
+  <prop name="columns" type="string" default="3" enum="2 3 4"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<fieldset class="portal-option-cards" t:attr-data-columns="props.columns">
+  <legend t:text="props.legend"/>
+  <div class="portal-option-cards__grid">
+    <ui:outlet name="default"/>
+  </div>
+</fieldset>
+</template>
+
+<style>
+.portal-option-cards { min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+.portal-option-cards legend { margin-block-end: calc(var(--_s)*3); padding: 0; font-size: .875rem; font-weight: var(--_portal-weight-medium); }
+.portal-option-cards__grid { --_min: 11rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--_min)), 1fr)); gap: calc(var(--_s)*2); }
+.portal-option-cards[data-columns="2"] .portal-option-cards__grid { --_min: 15rem; }
+.portal-option-cards[data-columns="4"] .portal-option-cards__grid { --_min: 8.5rem; }
+</style>

@@ -1,0 +1,14 @@
+<main class="portal-theme portal-example">
+  <ui:estimate-panel total="£42.00" t:bind-unitPrice="0.084" currency="£" delivery="Arrives Thursday 13 November">
+    <ui:fill name="status">
+      <ui:badge variant="success" t:bind-dot="true">In stock</ui:badge>
+    </ui:fill>
+    <ui:quantity-input id="estimate-quantity" name="quantity" label="Business cards" t:bind-value="500" t:bind-step="50" t:bind-min="50"/>
+    <ui:description-list layout="inline">
+      <ui:description-item term="Price per card">8.4p</ui:description-item>
+    </ui:description-list>
+    <ui:fill name="actions">
+      <ui:button t:bind-disabled="true">Add to basket</ui:button>
+    </ui:fill>
+  </ui:estimate-panel>
+</main>

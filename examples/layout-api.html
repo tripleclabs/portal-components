@@ -1,0 +1,139 @@
+<div class="portal-theme portal-layout">
+  <ui:site-header>
+    <ui:fill name="brand">
+      <a href="#top">
+        <ui:icon name="layers" size="lg"/>
+        Paper &amp; Form Developers
+      </a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#guides">Guides</ui:nav-link>
+      <ui:nav-link href="#reference" t:bind-current="true">API reference</ui:nav-link>
+      <ui:nav-link href="#changelog">Changelog</ui:nav-link>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:link href="#dashboard" variant="button">
+        Dashboard
+        <ui:icon name="arrow-up-right" size="sm"/>
+      </ui:link>
+    </ui:fill>
+  </ui:site-header>
+  <main id="top">
+    <ui:container>
+      <ui:page-header title="Orders API" description="Place, track and reorder print from your own systems. Every request is authenticated with a secret key and returns JSON.">
+        <ui:fill name="breadcrumbs">
+          <ui:breadcrumbs>
+            <li>
+              <a href="#reference">API reference</a>
+            </li>
+            <li>
+              <span aria-current="page">Orders</span>
+            </li>
+          </ui:breadcrumbs>
+        </ui:fill>
+        <ui:fill name="actions">
+          <ui:link href="#openapi">
+            <ui:icon name="download" size="sm"/>
+            OpenAPI document
+          </ui:link>
+        </ui:fill>
+      </ui:page-header>
+      <div class="layout-split">
+        <div class="layout-body">
+          <section aria-labelledby="authentication">
+            <h2 id="authentication">Authentication</h2>
+            <p>Send your secret key as a bearer token and keep it on your server. Test keys never print or charge.</p>
+            <ui:code-block language="Shell">curl https://print.example/v1/orders \
+  -H "Authorization: Bearer $PAPER_AND_FORM_KEY"</ui:code-block>
+          </section>
+          <section aria-labelledby="endpoints">
+            <h2 id="endpoints">Endpoints</h2>
+            <ui:endpoint method="GET" path="/v1/orders/{reference}" summary="Retrieve one order with its line items and production status.">
+              <ui:property-table caption="Path parameters">
+                <tr>
+                  <td>
+                    <code>reference</code>
+                  </td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>The order reference, for example PF-1042.</td>
+                </tr>
+              </ui:property-table>
+            </ui:endpoint>
+            <ui:endpoint method="POST" path="/v1/orders" summary="Place an order from an accepted estimate.">
+              <ui:property-table caption="Body fields">
+                <tr>
+                  <td>
+                    <code>estimate</code>
+                  </td>
+                  <td>string</td>
+                  <td>Yes</td>
+                  <td>The estimate to accept. Prices are fixed when it was issued.</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>deliveryNote</code>
+                  </td>
+                  <td>string or null</td>
+                  <td>No</td>
+                  <td>Instructions for the courier.</td>
+                </tr>
+              </ui:property-table>
+            </ui:endpoint>
+            <ui:endpoint method="DELETE" path="/v1/orders/{reference}" summary="Cancel an order before its proof is approved."/>
+          </section>
+          <section aria-labelledby="examples">
+            <h2 id="examples">Examples</h2>
+            <ui:tabs label="Example language" t:bind-tabs="input.tabs">
+              <ui:tab-panel id="example-shell" title="Shell">
+                <ui:code-block language="Shell">curl https://print.example/v1/orders/PF-1042 \
+  -H "Authorization: Bearer $PAPER_AND_FORM_KEY"</ui:code-block>
+              </ui:tab-panel>
+              <ui:tab-panel id="example-javascript" title="JavaScript">
+                <ui:code-block language="JavaScript">const response = await fetch("https://print.example/v1/orders/PF-1042", {
+  headers: { Authorization: `Bearer ${process.env.PAPER_AND_FORM_KEY}` },
+});
+const order = await response.json();</ui:code-block>
+              </ui:tab-panel>
+              <ui:tab-panel id="example-response" title="Response">
+                <ui:code-block language="JSON">{
+  "reference": "PF-1042",
+  "status": "printing",
+  "total": "58.80",
+  "currency": "GBP"
+}</ui:code-block>
+              </ui:tab-panel>
+            </ui:tabs>
+          </section>
+        </div>
+        <div class="layout-sticky">
+          <ui:card>
+            <ui:fill name="header">
+              <h2>Your keys</h2>
+            </ui:fill>
+            <ui:stack>
+              <ui:key-display label="Test key" value="pf_test_4Rk8Wm2QxN7cTb5Lp9Hs1Vd6" masked="pf_test_••••1Vd6"/>
+              <p>
+                Rotate keys from the dashboard. Press
+                <ui:kbd>Ctrl</ui:kbd>
+                +
+                <ui:kbd>K</ui:kbd>
+                to search the reference.
+              </p>
+            </ui:stack>
+          </ui:card>
+        </div>
+      </div>
+    </ui:container>
+  </main>
+  <ui:site-footer>
+    <p>Paper &amp; Form Developers · Version 2026-11-01</p>
+    <nav aria-label="Footer">
+      <ui:nav-link href="#status">API status</ui:nav-link>
+      <ui:nav-link href="#support">Support</ui:nav-link>
+    </nav>
+    <ui:fill name="legal">
+      <p>Sample layout · Fictional data · Business actions are disabled</p>
+    </ui:fill>
+  </ui:site-footer>
+</div>

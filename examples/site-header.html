@@ -1,0 +1,34 @@
+<main class="portal-theme portal-example">
+  <ui:stack gap="lg">
+    <ui:site-header>
+      <ui:fill name="brand">
+        <a href="#home">
+          <ui:icon name="layers" size="lg"/>
+          Paper &amp; Form
+        </a>
+      </ui:fill>
+      <ui:fill name="nav">
+        <ui:nav-link href="#shop" t:bind-current="true">Shop</ui:nav-link>
+        <ui:nav-link href="#orders">Orders</ui:nav-link>
+        <ui:nav-link href="#help">Help</ui:nav-link>
+      </ui:fill>
+      <ui:fill name="actions">
+        <ui:link href="#basket" variant="button">
+          <ui:icon name="shopping-cart" size="sm"/>
+          Basket · 2
+        </ui:link>
+      </ui:fill>
+    </ui:site-header>
+    <ui:site-header navLabel="Shop sections">
+      <ui:fill name="brand">
+        <a href="#home">Druckerei Müller-Lüdenscheidt Geschäftsdrucksachen</a>
+      </ui:fill>
+      <ui:fill name="nav">
+        <ui:nav-link href="#visitenkarten" t:bind-current="true">Visitenkarten</ui:nav-link>
+        <ui:nav-link href="#sonderanfertigungen">Sonderanfertigungen</ui:nav-link>
+        <ui:nav-link href="#auftragsverfolgung">Auftragsverfolgung</ui:nav-link>
+        <ui:nav-link href="#kundendienst">Kundendienst</ui:nav-link>
+      </ui:fill>
+    </ui:site-header>
+  </ui:stack>
+</main>

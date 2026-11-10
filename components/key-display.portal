@@ -1,0 +1,31 @@
+<props>
+  <prop name="label" type="string" required="true"/>
+  <prop name="value" type="string" required="true"/>
+  <prop name="masked" type="string" required="true"/>
+  <prop name="copyLabel" type="string" default="Copy"/>
+  <prop name="copiedMessage" type="string" default="Copied"/>
+</props>
+
+<template>
+<div class="portal-key-display" data-portal-behavior="copy" role="group" t:attr-aria-labelledby="component.id | append:'-label'">
+  <span class="portal-label" t:attr-id="component.id | append:'-label'" t:text="props.label"/>
+  <div class="portal-key-display__row">
+    <ui:icon name="key-round" size="sm"/>
+    <code class="portal-key-display__masked" dir="ltr" t:text="props.masked"/>
+    <span data-portal-copy-source="" hidden="hidden" t:text="props.value"/>
+    <button type="button" class="portal-copy" data-portal-command="copy" data-portal-enhanced-only="" hidden="hidden">
+      <ui:icon name="copy" size="sm"/>
+      <ui:icon name="check" size="sm"/>
+      <span t:text="props.copyLabel"/>
+    </button>
+    <span data-portal-copied-text="" hidden="hidden" t:text="props.copiedMessage"/>
+  </div>
+</div>
+</template>
+
+<style>
+.portal-key-display__row { border: 1px solid var(--_hairline); border-radius: var(--portal-radius); background: var(--_subtle); }
+.portal-key-display { display: grid; gap: calc(var(--_s)*2); }
+.portal-key-display__row { display: flex; align-items: center; gap: calc(var(--_s)*2.5); min-block-size: calc(var(--_s)*10); padding: calc(var(--_s)*1); padding-inline-start: calc(var(--_s)*3); color: var(--portal-text-muted); }
+.portal-key-display__masked { flex: 1; min-inline-size: 0; color: var(--portal-text); overflow-wrap: anywhere; }
+</style>

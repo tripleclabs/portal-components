@@ -1,0 +1,56 @@
+<props>
+  <prop name="title" type="string" default="Estimate"/>
+  <prop name="totalLabel" type="string" default="Total"/>
+  <prop name="total" type="string" required="true"/>
+  <prop name="delivery" type="string" nullable="true"/>
+  <prop name="unitPrice" type="number" nullable="true" description="Price of one item. With it, the total follows the quantity control live."/>
+  <prop name="currency" type="string" default="" description="Written before a live total, for example £."/>
+  <slot name="default"/>
+  <slot name="status"/>
+  <slot name="actions"/>
+</props>
+
+<template>
+<section class="portal-estimate portal-panel" t:change="estimate">
+  <div class="portal-estimate__head">
+    <h2 class="portal-panel__title" t:text="props.title"/>
+    <div t:if="slots.status">
+      <ui:outlet name="status"/>
+    </div>
+  </div>
+  <ui:outlet name="default"/>
+  <dl class="portal-panel__total" t:live="total">
+    <dt t:text="props.totalLabel"/>
+    <dd t:if="result" t:text="result.total"/>
+    <dd t:else="" t:text="props.total"/>
+  </dl>
+  <p class="portal-estimate__delivery" t:if="props.delivery">
+    <ui:icon name="truck" size="sm"/>
+    <span t:text="props.delivery"/>
+  </p>
+  <div class="portal-panel__actions" t:if="slots.actions">
+    <ui:outlet name="actions"/>
+  </div>
+</section>
+</template>
+
+<style>
+.portal-estimate__delivery { color: var(--portal-text-muted); font-size: .875rem; }
+.portal-estimate__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: calc(var(--_s)*2); margin-block-end: calc(var(--_s)*3); }
+.portal-estimate__head .portal-panel__title { margin: 0; }
+.portal-estimate__delivery { display: flex; align-items: center; gap: calc(var(--_s)*2); margin: calc(var(--_s)*2) 0 0; }
+</style>
+
+<server><![CDATA[
+-- Runs when a control in the panel changes (never while it renders) and
+-- re-renders only the total. Name the quantity control "quantity". The
+-- estimate is not a quote: recalculate the payable price on the server.
+function exports.estimate(props: Props, input: { quantity: integer? }): ComponentResult
+  local quantity = input.quantity
+  local unitPrice = props.unitPrice
+  if unitPrice == nil or quantity == nil or quantity < 1 then
+    return { render = { total = props.total } }
+  end
+  return { render = { total = props.currency .. string.format("%.2f", quantity * unitPrice) } }
+end
+]]></server>

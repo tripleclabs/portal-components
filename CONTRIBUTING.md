@@ -2,7 +2,7 @@
 
 This repository is a **generated distribution mirror**. Authoritative source is maintained in platform at `packages/portal-components`. Make changes upstream; the library, docs and production-rendered previews are exported here. Public CI needs Node only and never depends on platform. Platform runtime consumes a pinned public commit, not the authoring directory.
 
-Keep components pure, semantic and copyable. Add contracts and real-renderer examples for every new prop/slot. Prefer native HTML behavior; do not add a visual simulation of an interactive widget without the behavior and keyboard tests.
+Keep components pure, semantic and copyable. Declare every new prop/slot in the component's `<props>` block and add a real-renderer example. Prefer native HTML behavior; do not add a visual simulation of an interactive widget without the behavior and keyboard tests.
 
 Run the commands in README. Source changes require regeneration through the platform Swift renderer before the public site build can pass. Keep the machine catalogue and LLM documentation generated from the same maintained sources. Do not edit generated HTML or generated reference files by hand.
 

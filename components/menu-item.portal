@@ -1,0 +1,19 @@
+<props>
+  <prop name="href" type="string" required="true"/>
+  <prop name="current" type="boolean" default="false"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<li class="portal-menu-item">
+  <a t:attr-href="props.href" t:attr-aria-current="props.current ? 'page' : null">
+    <ui:outlet name="default"/>
+  </a>
+</li>
+</template>
+
+<style>
+.portal-menu-item a { display: flex; align-items: center; gap: calc(var(--_s)*2.5); padding: calc(var(--_s)*2) calc(var(--_s)*3); border-radius: calc(var(--portal-radius)*.75); color: var(--portal-text); text-decoration: none; }
+.portal-menu-item a:hover { background: var(--portal-surface-muted); }
+.portal-menu-item [aria-current="page"] { background: color-mix(in oklab, var(--_primary) 9%, transparent); font-weight: var(--_portal-weight-strong); }
+</style>

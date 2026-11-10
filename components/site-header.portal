@@ -1,0 +1,78 @@
+<props>
+  <prop name="sticky" type="boolean" default="false"/>
+  <prop name="navLabel" type="string" default="Main"/>
+  <slot name="brand" required="true"/>
+  <slot name="nav"/>
+  <slot name="actions"/>
+</props>
+
+<template>
+<header class="portal-site-header" t:attr-data-sticky="props.sticky ? 'true' : null">
+  <div class="portal-site-header__inner">
+    <div class="portal-site-header__brand">
+      <ui:outlet name="brand"/>
+    </div>
+    <nav class="portal-site-header__nav" t:if="slots.nav" t:attr-aria-label="props.navLabel">
+      <ui:outlet name="nav"/>
+    </nav>
+    <div class="portal-site-header__actions" t:if="slots.actions">
+      <ui:outlet name="actions"/>
+    </div>
+  </div>
+</header>
+</template>
+
+<style>
+/* Site shell. Header, footer and sections are full-width bands whose inner
+   wrapper keeps the content width; they respond to their own width (container
+   queries), so they also work inside a narrow preview or column. */
+.portal-site-header {
+  container: portal-site-header / inline-size;
+  background: var(--portal-surface);
+  border-block-end: 1px solid var(--_hairline);
+  color: var(--portal-text);
+}
+.portal-site-header[data-sticky="true"] {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+  background: color-mix(in oklab, var(--portal-surface) 88%, transparent);
+  -webkit-backdrop-filter: saturate(1.5) blur(10px);
+  backdrop-filter: saturate(1.5) blur(10px);
+}
+.portal-site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--_s)*2) calc(var(--_s)*6);
+  max-inline-size: var(--portal-content-width);
+  min-block-size: calc(var(--_s)*15);
+  margin-inline: auto;
+  padding-block: calc(var(--_s)*2.5);
+  padding-inline: calc(var(--_s)*4);
+}
+.portal-site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--_s)*2.5);
+  min-inline-size: 0;
+  margin-inline-end: auto;
+  font-family: var(--portal-font-heading);
+  font-size: 1.0625rem;
+  font-weight: var(--_portal-weight-strong);
+  letter-spacing: var(--_portal-heading-tracking);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.portal-site-header__brand a { display: inline-flex; align-items: center; gap: inherit; color: inherit; text-decoration: none; border-radius: calc(var(--portal-radius)*.6); }
+.portal-site-header__brand img, .portal-site-header__brand svg { display: block; block-size: calc(var(--_s)*8); inline-size: auto; }
+.portal-site-header__nav, .portal-site-header__actions { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--_s)*1); min-inline-size: 0; }
+.portal-site-header__actions { gap: calc(var(--_s)*2); }
+/* Narrow: brand and actions share the first row; the nav wraps beneath, its
+   first link aligned with the brand. */
+@container portal-site-header (max-width: 48rem) {
+  .portal-site-header__inner { column-gap: calc(var(--_s)*3); }
+  .portal-site-header__brand { flex: 1 1 8rem; }
+  .portal-site-header__nav { order: 1; flex-basis: 100%; margin-inline: calc(var(--_s)*-2.5); }
+}
+</style>

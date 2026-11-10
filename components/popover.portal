@@ -1,0 +1,26 @@
+<props>
+  <prop name="id" type="string" nullable="true"/>
+  <prop name="label" type="string" required="true"/>
+  <prop name="iconOnly" type="boolean" default="false"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<span class="portal-popover">
+  <button type="button" class="portal-popover__trigger" t:attr-popovertarget="props.id ?? component.id">
+    <ui:icon name="circle-help" size="sm"/>
+    <span t:attr-class="props.iconOnly ? 'portal-visually-hidden' : null" t:text="props.label"/>
+  </button>
+  <span class="portal-popover__panel portal-floating" popover="auto" t:attr-id="props.id ?? component.id">
+    <ui:outlet name="default"/>
+  </span>
+</span>
+</template>
+
+<style>
+.portal-popover__trigger { display: inline-flex; align-items: center; gap: .375rem; border: 0; border-radius: var(--portal-radius); background: none; color: var(--portal-text-muted); font: inherit; cursor: pointer; transition: color var(--portal-motion), background-color var(--portal-motion); }
+.portal-popover__trigger:hover { background: var(--portal-surface-muted); color: var(--portal-text); }
+.portal-popover { display: inline-block; }
+.portal-popover__trigger { padding: .125rem .25rem; font-size: .875rem; text-decoration: underline dotted; text-underline-offset: .25em; }
+.portal-popover__panel { max-inline-size: min(18rem, calc(100vw - 2rem)); padding: calc(var(--_s)*3); line-height: 1.55; }
+</style>

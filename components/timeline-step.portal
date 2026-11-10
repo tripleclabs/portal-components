@@ -1,0 +1,56 @@
+<props>
+  <prop name="title" type="string" required="true"/>
+  <prop name="state" type="string" default="upcoming" enum="done current upcoming"/>
+  <prop name="time" type="string" nullable="true"/>
+  <prop name="stateLabel" type="string" nullable="true"/>
+  <slot name="default"/>
+</props>
+
+<template>
+<li class="portal-timeline-step" t:attr-data-state="props.state" t:attr-aria-current="props.state | remove:'done' | remove:'upcoming' ? 'step' : null">
+  <span class="portal-timeline-step__marker" aria-hidden="true">
+    <ui:icon name="check" size="sm"/>
+  </span>
+  <div class="portal-timeline-step__body">
+    <p class="portal-timeline-step__head">
+      <span class="portal-timeline-step__title">
+        <span class="portal-visually-hidden" t:if="props.stateLabel" t:text="props.stateLabel | append:' '"/>
+        <span class="portal-visually-hidden" t:elseif="props.state | remove:'current' | remove:'upcoming'" t:text="'Completed:' | append:' '"/>
+        <span class="portal-visually-hidden" t:elseif="props.state | remove:'done' | remove:'upcoming'" t:text="'Current step:' | append:' '"/>
+        <span class="portal-visually-hidden" t:else="" t:text="'Upcoming:' | append:' '"/>
+        <span t:text="props.title"/>
+      </span>
+      <span class="portal-timeline-step__time" t:if="props.time" t:text="props.time"/>
+    </p>
+    <div class="portal-timeline-step__detail" t:if="slots.default">
+      <ui:outlet name="default"/>
+    </div>
+  </div>
+</li>
+</template>
+
+<style>
+.portal-timeline-step { position: relative; display: flex; gap: calc(var(--_s)*3); padding-block-end: calc(var(--_s)*5); }
+.portal-timeline-step:last-child { padding-block-end: 0; }
+.portal-timeline-step:not(:last-child)::before { content: ""; position: absolute; inset-block: 1.625rem .25rem; inset-inline-start: calc(.625rem - 1px); inline-size: 2px; border-radius: 1px; background: var(--_hairline); }
+.portal-timeline-step[data-state="done"]::before { background: var(--_primary); }
+.portal-timeline-step__marker { display: grid; flex: none; place-items: center; inline-size: 1.25rem; block-size: 1.25rem; margin-block-start: .125rem; border: 1.5px solid var(--portal-border); border-radius: 50%; background: var(--portal-surface); font-size: .75rem; }
+.portal-timeline-step__marker > *, .portal-timeline-step__marker::after { grid-area: 1 / 1; }
+.portal-timeline-step:not([data-state="done"]) .portal-icon { display: none; }
+.portal-timeline-step[data-state="done"] .portal-timeline-step__marker { border-color: var(--_primary); background: var(--_primary); color: var(--portal-primary-content, oklch(from var(--_primary) clamp(0, (0.62 - l) * 1000, 1) 0 0)); }
+.portal-timeline-step[data-state="current"] .portal-timeline-step__marker { border-color: var(--_primary); box-shadow: 0 0 0 3px var(--_ring); }
+.portal-timeline-step[data-state="current"] .portal-timeline-step__marker::after { content: ""; inline-size: .5rem; block-size: .5rem; border-radius: 50%; background: var(--_primary); }
+.portal-timeline-step__body { flex: 1; min-inline-size: 0; }
+.portal-timeline-step__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 calc(var(--_s)*3); margin: 0; overflow-wrap: anywhere; }
+.portal-timeline-step__title { font-weight: var(--_portal-weight-medium); }
+.portal-timeline-step[data-state="upcoming"] .portal-timeline-step__title, .portal-timeline-step__time, .portal-timeline-step__detail { color: var(--portal-text-muted); font-size: .875rem; }
+.portal-timeline-step[data-state="upcoming"] .portal-timeline-step__title { font-size: 1rem; }
+.portal-timeline-step__detail { margin-block-start: .125rem; }
+
+/* Browsers without CSS relative colour (oklch(from …)) keep a usable button:
+   text is --portal-primary-content or white, and hover and pressed mix the
+   background toward the canvas instead of shifting its lightness. */
+@supports not (color: oklch(from red l c h)) {
+  .portal-timeline-step[data-state="done"] .portal-timeline-step__marker { color: var(--portal-primary-content, var(--portal-canvas)); }
+}
+</style>

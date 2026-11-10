@@ -1,6 +1,6 @@
 {
   "name": "@wearecococo/portal-components",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "Ownable DataXML components and design tokens for server-rendered portals",
@@ -8,9 +8,12 @@
   "engines": {
     "node": ">=22"
   },
+  "packageManager": "pnpm@11.22.0",
   "scripts": {
-    "check": "node scripts/catalogue.mjs --check",
+    "check": "node scripts/catalogue.mjs --check && node scripts/fonts.mjs --check && node scripts/icons.mjs --check",
     "docs": "node scripts/catalogue.mjs",
+    "fonts": "node scripts/fonts.mjs",
+    "icons": "node scripts/icons.mjs",
     "build": "node scripts/site.mjs",
     "test": "node --test scripts/*.test.mjs",
     "test:browser": "node scripts/browser.mjs && node scripts/responsive.mjs"
@@ -22,6 +25,8 @@
   "files": [
     "components",
     "styles",
+    "fonts",
+    "icons",
     "catalogue.json",
     "docs",
     "examples",
@@ -33,9 +38,13 @@
     "README.md"
   ],
   "devDependencies": {
+    "@fontsource-variable/fraunces": "5.3.0",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "5.3.0",
     "axe-core": "4.11.0",
     "esbuild": "0.28.2",
     "highlight.js": "11.12.0",
+    "lucide-static": "1.61.0",
     "playwright": "1.63.0"
   }
 }

@@ -1,0 +1,134 @@
+<div class="portal-theme portal-layout">
+  <ui:site-header t:bind-sticky="true">
+    <ui:fill name="brand">
+      <a href="#top">
+        <ui:icon name="layers" size="lg"/>
+        Paper &amp; Form
+      </a>
+    </ui:fill>
+    <ui:fill name="nav">
+      <ui:nav-link href="#shop" t:bind-current="true">Shop</ui:nav-link>
+      <ui:nav-link href="#business-cards">Business cards</ui:nav-link>
+      <ui:nav-link href="#stationery">Stationery</ui:nav-link>
+      <ui:nav-link href="#help">Help</ui:nav-link>
+    </ui:fill>
+    <ui:fill name="actions">
+      <ui:link href="#basket" variant="button">
+        <ui:icon name="shopping-cart" size="sm"/>
+        Basket · 2
+      </ui:link>
+    </ui:fill>
+  </ui:site-header>
+  <main id="top">
+    <ui:hero eyebrow="Business print, made well" title="Ideas deserve a little paper." lead="Cards, letterheads and leaflets on beautiful stock, proofed by a person and delivered in two working days.">
+      <ui:fill name="actions">
+        <ui:link href="#business-cards" variant="button">
+          Design your cards
+          <ui:icon name="arrow-right" size="sm"/>
+        </ui:link>
+        <ui:link href="#samples">Request free paper samples</ui:link>
+      </ui:fill>
+      <ui:fill name="media">
+        <ui:media src="/examples/images/business-cards.svg" alt="A stack of black business cards printed with the Paper &amp; Form wordmark"/>
+      </ui:fill>
+    </ui:hero>
+    <ui:section title="Bestsellers">
+      <ui:grid columns="4">
+        <ui:product-card href="#business-cards" title="Business cards">
+          <ui:fill name="media">
+            <ui:media src="/examples/images/business-cards.svg" alt=""/>
+          </ui:fill>
+          <ui:fill name="meta">
+            <ui:badge variant="success" t:bind-dot="true">Next day</ui:badge>
+          </ui:fill>
+          <ui:fill name="price">
+            <ui:price amount="£24.00" unit="/ 250"/>
+          </ui:fill>
+        </ui:product-card>
+        <ui:product-card href="#leaflets" title="Folded leaflets">
+          <ui:fill name="media">
+            <ui:media src="/examples/images/folded-leaflet.svg" alt=""/>
+          </ui:fill>
+          <ui:fill name="price">
+            <ui:price amount="£68.00" unit="/ 500"/>
+          </ui:fill>
+        </ui:product-card>
+        <ui:product-card href="#letterheads" title="Letterheads">
+          <ui:fill name="media">
+            <ui:media src="/examples/images/letterheads.svg" alt=""/>
+          </ui:fill>
+          <ui:fill name="meta">
+            <ui:badge>FSC paper</ui:badge>
+          </ui:fill>
+          <ui:fill name="price">
+            <ui:price amount="£52.00" unit="/ 500"/>
+          </ui:fill>
+        </ui:product-card>
+        <ui:product-card href="#stickers" title="Round stickers">
+          <ui:fill name="media">
+            <ui:media src="/examples/images/stickers.svg" alt=""/>
+          </ui:fill>
+          <ui:fill name="meta">
+            <ui:badge variant="primary" t:bind-dot="true">New</ui:badge>
+          </ui:fill>
+          <ui:fill name="price">
+            <ui:price amount="£18.00" unit="/ 100" compareAt="£22.00"/>
+          </ui:fill>
+        </ui:product-card>
+      </ui:grid>
+    </ui:section>
+    <section class="portal-section" data-tone="muted" aria-labelledby="business-cards-title">
+      <div class="portal-section__inner">
+        <h2 class="portal-section__title" id="business-cards-title">Business cards</h2>
+          <div class="layout-product" id="business-cards">
+          <ui:stack>
+            <ui:media src="/examples/images/business-cards.svg" alt="Business cards, front and back, on 400gsm matt board" ratio="1/1"/>
+            <ui:description-list>
+              <ui:description-item term="Size">85 × 55 mm</ui:description-item>
+              <ui:description-item term="Printing">Full colour, both sides</ui:description-item>
+            </ui:description-list>
+          </ui:stack>
+          <ui:stack gap="lg">
+            <ui:option-cards legend="Paper stock" columns="2">
+              <ui:option-card name="stock" value="matt-400" label="400gsm matt" description="Soft, writable finish" aside="Included" t:bind-checked="true"/>
+              <ui:option-card name="stock" value="silk-450" label="450gsm silk" description="Smooth, with a gentle sheen" aside="+ £4.00"/>
+              <ui:option-card name="stock" value="cotton-600" label="600gsm cotton" description="Thick and tactile" aside="+ £12.00"/>
+              <ui:option-card name="stock" value="kraft-350" label="350gsm kraft" description="Back in stock on 20 November" aside="+ £3.00" t:bind-disabled="true"/>
+            </ui:option-cards>
+            <ui:option-cards legend="Finish" columns="2">
+              <ui:option-card name="finish" value="none" label="No finish" t:bind-checked="true"/>
+              <ui:option-card name="finish" value="soft-touch" label="Soft-touch laminate" aside="+ £6.00"/>
+            </ui:option-cards>
+            <ui:quantity-input id="shop-quantity" name="quantity" label="Boxes of 250" t:bind-value="2" t:bind-max="40"/>
+          </ui:stack>
+          <div class="layout-sticky" data-portal-region="estimate">
+            <ui:estimate-panel total="£48.00" delivery="Arrives Thursday 13 November">
+              <ui:fill name="status">
+                <ui:badge variant="success" t:bind-dot="true">In stock</ui:badge>
+              </ui:fill>
+              <ui:description-list layout="inline">
+                <ui:description-item term="500 cards, 400gsm matt">£42.00</ui:description-item>
+                <ui:description-item term="Proof check">Free</ui:description-item>
+                <ui:description-item term="Delivery">£6.00</ui:description-item>
+              </ui:description-list>
+              <ui:fill name="actions">
+                <ui:button t:bind-disabled="true">Add to basket</ui:button>
+              </ui:fill>
+            </ui:estimate-panel>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <ui:site-footer>
+    <p>Paper &amp; Form · Business print, made well and delivered fast.</p>
+    <nav aria-label="Footer">
+      <ui:nav-link href="#delivery">Delivery</ui:nav-link>
+      <ui:nav-link href="#returns">Returns</ui:nav-link>
+      <ui:nav-link href="#contact">Contact</ui:nav-link>
+    </nav>
+    <ui:fill name="legal">
+      <p>Sample layout · Fictional data · Business actions are disabled</p>
+    </ui:fill>
+  </ui:site-footer>
+</div>

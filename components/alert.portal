@@ -1,0 +1,44 @@
+<props>
+  <prop name="variant" type="string" default="info" enum="info success warning danger"/>
+  <slot name="default" required="true"/>
+  <slot name="title"/>
+  <slot name="actions"/>
+</props>
+
+<template>
+<aside class="portal-alert" t:attr-data-variant="props.variant">
+  <div class="portal-alert__title" t:if="slots.title">
+    <ui:outlet name="title"/>
+  </div>
+  <div>
+    <ui:outlet name="default"/>
+  </div>
+  <div t:if="slots.actions">
+    <ui:outlet name="actions"/>
+  </div>
+</aside>
+</template>
+
+<style>
+/* Alert */
+.portal-alert {
+  --_tone: var(--portal-info);
+  padding-block: calc(var(--_s)*4);
+  padding-inline: calc(var(--_s)*4);
+  border: 1px solid var(--_hairline);
+  border-inline-start: 3px solid var(--_tone);
+  border-radius: var(--portal-radius);
+  background: color-mix(in oklab, var(--_tone) 5%, var(--portal-surface));
+  color: var(--portal-text);
+  font-size: .9375rem;
+}
+.portal-alert[data-variant="warning"] { --_tone: var(--portal-warning); }
+.portal-alert[data-variant="danger"] { --_tone: var(--portal-danger); }
+.portal-alert[data-variant="success"] { --_tone: var(--portal-success); }
+.portal-alert__title { font-weight: var(--_portal-weight-strong); margin-block-end: calc(var(--_s)*1); }
+.portal-alert p { margin-block: calc(var(--_s)*1); }
+.portal-alert > div:last-child:not(:first-child) { margin-block-start: calc(var(--_s)*3); }
+@media (forced-colors: active) {
+  .portal-alert { border: 1px solid ButtonText; }
+}
+</style>

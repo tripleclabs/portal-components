@@ -1,0 +1,99 @@
+<props>
+  <prop name="type" type="string" default="button" enum="button submit reset"/>
+  <prop name="variant" type="string" default="primary" enum="primary secondary ghost danger"/>
+  <prop name="size" type="string" default="md" enum="sm md lg"/>
+  <prop name="disabled" type="boolean" default="false"/>
+  <prop name="name" type="string" nullable="true"/>
+  <prop name="value" type="string" nullable="true"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<button class="portal-button" t:attr-type="props.type" t:attr-data-variant="props.variant" t:attr-data-size="props.size" t:attr-disabled="props.disabled" t:attr-name="props.name" t:attr-value="props.value">
+  <ui:outlet name="default"/>
+</button>
+</template>
+
+<style>
+/* Button */
+.portal-button {
+  --_bg: var(--portal-button-background, var(--_primary));
+  /* --_state is the background of the current state; the derived text colour
+     follows it, so hover and pressed keep legible text. */
+  --_state: var(--_bg);
+  --_fg: var(--portal-button-color, var(--portal-primary-content, oklch(from var(--_state) clamp(0, (0.62 - l) * 1000, 1) 0 0)));
+  --_border: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--_s)*2);
+  min-block-size: calc(var(--_s)*10);
+  padding-block: calc(var(--_s)*2);
+  padding-inline: calc(var(--_s)*4);
+  border: 1px solid var(--_border);
+  border-radius: var(--portal-radius);
+  background: var(--_state);
+  color: var(--_fg);
+  box-shadow: var(--portal-shadow-sm);
+  font: inherit;
+  font-size: .875rem;
+  font-weight: var(--_portal-weight-medium);
+  line-height: 1.25rem;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition-property: background-color, border-color, color, box-shadow, opacity;
+  transition-duration: var(--portal-motion);
+  transition-timing-function: ease-out;
+}
+/* Hover and pressed move the background's OKLCH lightness toward mid-lightness,
+   so a near-black or near-white brand still visibly responds. */
+.portal-button:hover:not(:disabled) { --_state: oklch(from var(--_bg) calc(l + (0.5 - l) * 0.16) c h); }
+.portal-button:active:not(:disabled) { --_state: oklch(from var(--_bg) calc(l + (0.5 - l) * 0.28) c h); box-shadow: none; }
+.portal-button[data-variant="secondary"] {
+  --_bg: var(--portal-secondary);
+  --_fg: var(--portal-secondary-content);
+  --_border: var(--_hairline);
+}
+.portal-button[data-variant="ghost"] {
+  --_bg: transparent;
+  --_fg: var(--portal-text);
+  box-shadow: none;
+}
+.portal-button[data-variant="ghost"]:hover:not(:disabled) { background: var(--_tint); }
+.portal-button[data-variant="ghost"]:active:not(:disabled) { background: color-mix(in oklab, var(--_primary) 18%, var(--portal-surface)); }
+.portal-button[data-variant="danger"] {
+  --_bg: var(--portal-danger);
+  --_fg: var(--portal-danger-content);
+}
+.portal-button[data-size="sm"] {
+  min-block-size: calc(var(--_s)*8);
+  padding-block: calc(var(--_s)*1);
+  padding-inline: calc(var(--_s)*3);
+  font-size: .8125rem;
+}
+.portal-button[data-size="lg"] {
+  min-block-size: calc(var(--_s)*11);
+  padding-inline: calc(var(--_s)*6);
+  font-size: 1rem;
+}
+/* Disabled is muted, not faded: its text stays readable on every preset. */
+.portal-button:disabled { --_state: var(--portal-surface-muted); border-color: var(--_hairline); color: var(--portal-text-muted); box-shadow: none; cursor: not-allowed; }
+/* Studio buttons are pills. :where keeps the preset as specific as the button
+   itself, so an author rule still wins. */
+.portal-button:where(.portal-theme[data-preset="studio"] *) { border-radius: 999px; }
+
+/* Browsers without CSS relative colour (oklch(from …)) keep a usable button:
+   text is --portal-primary-content or white, and hover and pressed mix the
+   background toward the canvas instead of shifting its lightness. */
+@supports not (color: oklch(from red l c h)) {
+  /* The canvas sits opposite the brand in every preset, so the label takes it. Hover lightens a little towards the canvas; pressed deepens towards the text, which only adds contrast. */
+  .portal-button { --_fg: var(--portal-button-color, var(--portal-primary-content, var(--portal-canvas))); }
+  .portal-button:hover:not(:disabled) { --_state: color-mix(in oklab, var(--_bg) 88%, var(--portal-canvas)); }
+  .portal-button:active:not(:disabled) { --_state: color-mix(in oklab, var(--_bg) 76%, var(--portal-text)); }
+}
+@media (forced-colors: active) {
+  .portal-button { border: 1px solid ButtonText; }
+}
+</style>

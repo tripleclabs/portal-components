@@ -1,0 +1,47 @@
+<props>
+  <prop name="label" type="string" default="Pagination"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<nav class="portal-pagination" t:attr-aria-label="props.label">
+  <ul>
+    <ui:outlet name="default"/>
+  </ul>
+</nav>
+</template>
+
+<style>
+.portal-pagination ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--_s)*2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.portal-pagination { font-size: .875rem; }
+.portal-pagination a, .portal-pagination span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: calc(var(--_s)*10);
+  min-block-size: calc(var(--_s)*10);
+  padding-inline: calc(var(--_s)*3);
+  border: 1px solid transparent;
+  border-radius: var(--portal-radius);
+  color: var(--portal-text);
+  font-weight: var(--_portal-weight-medium);
+  text-decoration: none;
+  transition-property: background-color, border-color;
+  transition-duration: var(--portal-motion);
+}
+.portal-pagination a:hover { background: var(--_tint); }
+.portal-pagination [aria-current="page"] { border-color: var(--_hairline); background: var(--portal-surface); box-shadow: var(--portal-shadow-sm); }
+.portal-pagination [aria-current="page"]:hover { background: var(--portal-surface); border-color: var(--portal-border); }
+.portal-pagination [aria-disabled="true"] { color: var(--portal-text-muted); cursor: not-allowed; }
+@media (forced-colors: active) {
+  .portal-pagination [aria-current="page"] { border: 1px solid ButtonText; }
+}
+</style>

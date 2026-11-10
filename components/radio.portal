@@ -1,0 +1,18 @@
+<props>
+  <prop name="name" type="string" required="true"/>
+  <prop name="value" type="string" default="on"/>
+  <prop name="checked" type="boolean" default="false"/>
+  <prop name="disabled" type="boolean" default="false"/>
+  <prop name="required" type="boolean" default="false"/>
+  <prop name="describedby" type="string" nullable="true"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<label class="portal-choice">
+  <input type="radio" t:attr-name="props.name" t:attr-value="props.value" t:attr-checked="props.checked" t:attr-disabled="props.disabled" t:attr-required="props.required" t:attr-aria-describedby="props.describedby"/>
+  <span>
+    <ui:outlet name="default"/>
+  </span>
+</label>
+</template>

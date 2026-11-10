@@ -22,13 +22,13 @@ let browser;
 function inspectLayout(){
   const problems=[], describe=node=>`${node.tagName.toLowerCase()}${node.id?'#'+node.id:''}.${String(node.className).trim().replaceAll(' ','.')} ${node.textContent.trim().slice(0,45)}`;
   if(document.documentElement.scrollWidth>innerWidth+1)problems.push(`document overflow ${document.documentElement.scrollWidth}/${innerWidth}`);
-  const critical=[...document.querySelectorAll('h1,h2,h3,p,label,summary,button,input,select,textarea,dt,dd,th,td,.recipe-brand')].filter(node=>!node.closest('[aria-hidden="true"]'));
+  const critical=[...document.querySelectorAll('h1,h2,h3,p,label,summary,button,input,select,textarea,dt,dd,th,td,code,.portal-price')].filter(node=>!node.closest('[aria-hidden="true"]'));
   for(const node of critical){
     const rect=node.getBoundingClientRect();if(!rect.width||!rect.height)continue;
     if(!node.matches('input,select,textarea')&&node.scrollWidth>node.clientWidth+2)problems.push(`text overflow: ${describe(node)} ${node.scrollWidth}/${node.clientWidth}`);
     for(let parent=node.parentElement;parent;parent=parent.parentElement){
       const s=getComputedStyle(parent),r=parent.getBoundingClientRect();
-      if(!node.closest('.portal-table-wrap[tabindex="0"]')&&['hidden','clip'].includes(s.overflowX)&&(rect.left<r.left-2||rect.right>r.right+2))problems.push(`clipped horizontally: ${describe(node)} by ${describe(parent)}`);
+      if(!node.closest('.portal-table-wrap[tabindex="0"],pre[tabindex="0"]')&&['hidden','clip'].includes(s.overflowX)&&(rect.left<r.left-2||rect.right>r.right+2))problems.push(`clipped horizontally: ${describe(node)} by ${describe(parent)}`);
       if(['hidden','clip'].includes(s.overflowY)&&(rect.top<r.top-2||rect.bottom>r.bottom+2))problems.push(`clipped vertically: ${describe(node)} by ${describe(parent)}`);
     }
     if(node.matches('input,select,textarea,button')&&!node.closest('.portal-table-wrap')){
@@ -37,18 +37,30 @@ function inspectLayout(){
       if(rect.left<0||rect.right>innerWidth+1)problems.push(`control escapes viewport: ${describe(node)}`);
     }
   }
-  for(const marker of document.querySelectorAll('.timeline-dot,.recipe-brand > span'))if(marker.scrollWidth>marker.clientWidth+2||marker.scrollHeight>marker.clientHeight+2)problems.push(`Marker content does not fit: ${describe(marker)}`);
+  for(const marker of document.querySelectorAll('.portal-timeline-step__marker,.portal-avatar'))if(marker.scrollWidth>marker.clientWidth+2||marker.scrollHeight>marker.clientHeight+2)problems.push(`Marker content does not fit: ${describe(marker)}`);
   for(const table of document.querySelectorAll('.portal-table-wrap')){
     if(table.scrollWidth>table.clientWidth+2&&table.tabIndex<0)problems.push('Overflowing order table has no keyboard-scroll focus target');
   }
   return [...new Set(problems)];
 }
+// Review focus 3: one long-text fixture per layout. Long product names, German
+// compounds, nine-digit prices and unbroken paths must wrap, never overflow.
+const longCompound='Hochglanzveredelungsgeschäftsausstattungsvisitenkartenbestellung';
+const longText={
+  'layout-shop':{'.portal-product-card__title a':longCompound,'.portal-price__amount':'€123.456.789,00','.portal-option-card__label':longCompound},
+  'layout-ordering-portal':{'.portal-basket-line__title':longCompound,'.portal-basket-line__total':'€987.654.321,00','.portal-panel__total dd':'€123.456.789.012,00'},
+  'layout-tracking':{'.portal-timeline-step__title > span:last-child':longCompound,'.portal-description-item dd':longCompound,'.portal-file-item__name':longCompound+'.pdf'},
+  'layout-api':{'.portal-endpoint__title code':'/v1/customers/{customerReference}/deliveryAddresses/{addressReference}/defaultPreferences/{preferenceReference}','.portal-key-display__masked':'pf_live_'+'•'.repeat(48)+'3sYb','.portal-property-table td:first-child code':'deliveryAddressDefaultPreferenceReference'},
+};
+const presets=['neutral','editorial','studio'];
 try{
   browser=await chromium.launch({headless:true});
   for(const layout of catalogue.layouts){
+    assert.ok(longText[layout.name],`${layout.name} needs a long-text fixture`);
     const page=await browser.newPage({viewport:{width:1440,height:900},javaScriptEnabled:false});
     await page.goto(address+layout.rendered);
-    for(const width of widths){
+    for(const preset of presets)for(const width of widths){
+      await page.evaluate(preset=>{const root=document.querySelector('.portal-layout');if(preset==='neutral')delete root.dataset.preset;else root.dataset.preset=preset;},preset);
       await page.setViewportSize({width,height:900});
       const problems=await page.evaluate(inspectLayout);
       for(const table of await page.locator('.portal-table-wrap').all()) {
@@ -62,9 +74,21 @@ try{
           await table.evaluate(node=>node.scrollLeft=0);
         }
       }
-      results.push({layout:layout.name,surface:'standalone',width,textScale:1,problems});
-      await page.screenshot({path:path.join(base,'responsive',`${layout.name}-${width}.png`),fullPage:true});
+      results.push({layout:layout.name,surface:`standalone-${preset}`,width,textScale:1,problems});
+      await page.screenshot({path:path.join(base,'responsive',`${layout.name}-${preset}-${width}.png`),fullPage:true});
     }
+    await page.evaluate(()=>delete document.querySelector('.portal-layout').dataset.preset);
+    // Long text, then the same page right-to-left, at the narrowest widths.
+    const missing=await page.evaluate(fixture=>Object.keys(fixture).filter(selector=>{const node=document.querySelector(selector);if(node)node.textContent=fixture[selector];return !node;}),longText[layout.name]);
+    assert.deepEqual(missing,[],`${layout.name}: long-text fixture targets exist`);
+    for(const dir of ['ltr','rtl'])for(const width of [320,375,768]){
+      await page.evaluate(dir=>document.documentElement.dir=dir,dir);
+      await page.setViewportSize({width,height:900});
+      results.push({layout:layout.name,surface:`long-text-${dir}`,width,textScale:1,problems:await page.evaluate(inspectLayout)});
+      await page.screenshot({path:path.join(base,'responsive',`${layout.name}-long-${dir}-${width}.png`),fullPage:true});
+    }
+    await page.evaluate(()=>document.documentElement.dir='ltr');
+    await page.reload();
     // Increased browser default font size exercises rem-based text/spacing without JS.
     for(const width of [320,768,1440]){
       await page.setViewportSize({width,height:900});

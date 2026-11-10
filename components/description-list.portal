@@ -1,0 +1,19 @@
+<props>
+  <prop name="layout" type="string" default="stacked" enum="stacked inline"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<dl class="portal-description-list" t:attr-data-layout="props.layout">
+  <ui:outlet name="default"/>
+</dl>
+</template>
+
+<style>
+/* Description list: stacked label-over-value cells, or inline rows. */
+.portal-description-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr)); gap: calc(var(--_s)*4) calc(var(--_s)*6); margin: 0; }
+.portal-description-list[data-layout="inline"] { display: block; }
+.portal-description-list[data-layout="inline"] .portal-description-item { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 calc(var(--_s)*4); padding-block: calc(var(--_s)*1.5); font-size: .9375rem; }
+.portal-description-list[data-layout="inline"] dt { font-size: inherit; }
+.portal-description-list[data-layout="inline"] dd { margin: 0; font-variant-numeric: tabular-nums; }
+</style>

@@ -1,5 +1,9 @@
-<main xmlns:ui="urn:cococo:ui" xmlns:t="urn:cococo:dataxml" class="portal-theme portal-example">
-  <ui:badge variant="success">
-    Ready for print
-  </ui:badge>
+<main class="portal-theme portal-example">
+  <ui:stack direction="horizontal" gap="sm">
+    <ui:badge>Draft</ui:badge>
+    <ui:badge variant="success" t:bind-dot="true">Ready for print</ui:badge>
+    <ui:badge variant="warning" t:bind-dot="true">In production</ui:badge>
+    <ui:badge variant="danger">Proof rejected</ui:badge>
+    <ui:badge variant="primary" t:bind-dot="true">New</ui:badge>
+  </ui:stack>
 </main>

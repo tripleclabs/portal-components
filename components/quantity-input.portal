@@ -1,0 +1,38 @@
+<props>
+  <prop name="id" type="string" nullable="true"/>
+  <prop name="name" type="string" required="true"/>
+  <prop name="label" type="string" required="true"/>
+  <prop name="value" type="integer" default="1"/>
+  <prop name="min" type="integer" default="1"/>
+  <prop name="max" type="integer" nullable="true"/>
+  <prop name="step" type="integer" default="1"/>
+  <prop name="disabled" type="boolean" default="false"/>
+  <prop name="decreaseLabel" type="string" default="Decrease quantity"/>
+  <prop name="increaseLabel" type="string" default="Increase quantity"/>
+</props>
+
+<template>
+<div class="portal-quantity">
+  <label class="portal-label" t:attr-for="props.id ?? component.id" t:text="props.label"/>
+  <div class="portal-quantity__control" data-portal-behavior="quantity">
+    <button type="button" class="portal-quantity__step" data-portal-command="decrement" data-portal-enhanced-only="" hidden="hidden" t:attr-aria-label="props.decreaseLabel">
+      <ui:icon name="minus" size="sm"/>
+    </button>
+    <input type="number" class="portal-input" data-portal-control="value" inputmode="numeric" t:attr-id="props.id ?? component.id" t:attr-name="props.name" t:attr-value="props.value" t:attr-min="props.min" t:attr-max="props.max" t:attr-step="props.step" t:attr-disabled="props.disabled"/>
+    <button type="button" class="portal-quantity__step" data-portal-command="increment" data-portal-enhanced-only="" hidden="hidden" t:attr-aria-label="props.increaseLabel">
+      <ui:icon name="plus" size="sm"/>
+    </button>
+  </div>
+</div>
+</template>
+
+<style>
+.portal-quantity { display: grid; justify-items: start; gap: calc(var(--_s)*2); }
+.portal-quantity__control { display: flex; }
+.portal-quantity .portal-input { inline-size: 6rem; text-align: center; font-variant-numeric: tabular-nums; }
+.portal-quantity__step { display: grid; place-items: center; inline-size: calc(var(--_s)*10); border: 1px solid var(--portal-border); background: var(--portal-surface); color: var(--portal-text); cursor: pointer; }
+.portal-quantity__step:hover { background: var(--portal-surface-muted); }
+.portal-quantity__step:first-child { border-inline-end: 0; border-start-start-radius: var(--portal-radius); border-end-start-radius: var(--portal-radius); }
+.portal-quantity__step:last-child { border-inline-start: 0; border-start-end-radius: var(--portal-radius); border-end-end-radius: var(--portal-radius); }
+.portal-quantity__step:not([hidden]) + .portal-input { inline-size: 4rem; border-radius: 0; }
+</style>

@@ -1,0 +1,45 @@
+<props>
+  <prop name="name" type="string" required="true"/>
+  <prop name="value" type="string" required="true"/>
+  <prop name="label" type="string" required="true"/>
+  <prop name="description" type="string" nullable="true"/>
+  <prop name="aside" type="string" nullable="true"/>
+  <prop name="checked" type="boolean" default="false"/>
+  <prop name="disabled" type="boolean" default="false"/>
+  <prop name="required" type="boolean" default="false"/>
+</props>
+
+<template>
+<label class="portal-option-card">
+  <input type="radio" t:attr-name="props.name" t:attr-value="props.value" t:attr-checked="props.checked" t:attr-disabled="props.disabled" t:attr-required="props.required"/>
+  <span class="portal-option-card__text">
+    <span class="portal-option-card__label" t:text="props.label"/>
+    <span class="portal-option-card__description" t:if="props.description" t:text="props.description"/>
+  </span>
+  <span class="portal-option-card__aside" t:if="props.aside" t:text="props.aside"/>
+</label>
+</template>
+
+<style>
+.portal-option-card:has(:focus-visible) { outline: 2px solid var(--_focus-solid); outline-offset: 2px; }
+.portal-option-card input:focus-visible { outline: 0; }
+.portal-option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--_s)*3);
+  padding: calc(var(--_s)*3) calc(var(--_s)*4);
+  border: 1px solid var(--_hairline);
+  border-radius: var(--portal-radius);
+  background: var(--portal-surface);
+  font-size: .875rem;
+  cursor: pointer;
+  transition: border-color var(--portal-motion), background-color var(--portal-motion), box-shadow var(--portal-motion);
+}
+.portal-option-card:hover { border-color: color-mix(in oklab, var(--portal-border) 75%, var(--portal-surface)); }
+.portal-option-card:has(:checked) { border-color: var(--_primary); background: color-mix(in oklab, var(--_primary) 6%, var(--portal-surface)); box-shadow: inset 0 0 0 1px var(--_primary); }
+.portal-option-card:has(:disabled) { background: var(--_subtle); color: var(--portal-text-muted); cursor: not-allowed; }
+.portal-option-card input { flex: none; inline-size: 1rem; block-size: 1rem; margin: .1875rem 0 0; accent-color: var(--_primary); cursor: inherit; }
+.portal-option-card__text { display: grid; flex: 1; gap: .125rem; min-inline-size: 0; overflow-wrap: anywhere; }
+.portal-option-card__label, .portal-option-card__aside { font-weight: var(--_portal-weight-medium); }
+.portal-option-card__description { color: var(--portal-text-muted); }
+</style>

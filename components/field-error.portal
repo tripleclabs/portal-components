@@ -1,0 +1,10 @@
+<props>
+  <prop name="id" type="string" required="true"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<p class="portal-field__error" t:attr-id="props.id">
+  <ui:outlet name="default"/>
+</p>
+</template>

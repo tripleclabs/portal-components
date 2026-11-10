@@ -1,0 +1,19 @@
+<props>
+  <prop name="term" type="string" required="true"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<div class="portal-description-item">
+  <dt t:text="props.term"/>
+  <dd>
+    <ui:outlet name="default"/>
+  </dd>
+</div>
+</template>
+
+<style>
+.portal-description-item { min-inline-size: 0; }
+.portal-description-item dt { color: var(--portal-text-muted); font-size: .8125rem; }
+.portal-description-item dd { margin: .125rem 0 0; overflow-wrap: anywhere; }
+</style>

@@ -1,0 +1,29 @@
+<main class="portal-theme portal-example">
+  <ui:grid columns="2">
+    <ui:product-card href="#business-cards" title="Business cards">
+      <ui:fill name="media">
+        <ui:media src="/examples/images/business-cards.svg" alt=""/>
+      </ui:fill>
+      <ui:fill name="meta">
+        <ui:badge variant="success" t:bind-dot="true">Next day</ui:badge>
+      </ui:fill>
+      <ui:fill name="price">
+        <ui:price amount="£24.00" unit="/ 250"/>
+      </ui:fill>
+      <ui:fill name="actions">
+        <ui:button variant="secondary" size="sm">
+          <ui:icon name="plus" size="sm"/>
+          Quick add
+        </ui:button>
+      </ui:fill>
+    </ui:product-card>
+    <ui:product-card href="#leaflets" title="Dreifach gefaltete Hochglanzproduktbroschüren">
+      <ui:fill name="media">
+        <ui:media src="/examples/images/folded-leaflet.svg" alt=""/>
+      </ui:fill>
+      <ui:fill name="price">
+        <ui:price amount="€123.456.789,00" unit="/ 500"/>
+      </ui:fill>
+    </ui:product-card>
+  </ui:grid>
+</main>

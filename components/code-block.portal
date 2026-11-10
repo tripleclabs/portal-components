@@ -1,0 +1,35 @@
+<props>
+  <prop name="language" type="string" nullable="true"/>
+  <prop name="copy" type="boolean" default="true"/>
+  <prop name="copyLabel" type="string" default="Copy"/>
+  <prop name="copiedMessage" type="string" default="Copied"/>
+  <slot name="default" required="true"/>
+</props>
+
+<template>
+<div class="portal-code-block" data-portal-behavior="copy">
+  <div class="portal-code-block__bar" t:if="props.language ?? props.copy">
+    <span class="portal-code-block__language" t:if="props.language" t:text="props.language"/>
+    <button type="button" class="portal-copy" data-portal-command="copy" data-portal-enhanced-only="" hidden="hidden" t:if="props.copy">
+      <ui:icon name="copy" size="sm"/>
+      <ui:icon name="check" size="sm"/>
+      <span t:text="props.copyLabel"/>
+    </button>
+    <span data-portal-copied-text="" hidden="hidden" t:if="props.copy" t:text="props.copiedMessage"/>
+  </div>
+  <pre tabindex="0" dir="ltr"><code data-portal-copy-source=""><ui:outlet name="default"/></code></pre>
+</div>
+</template>
+
+<style>
+.portal-code-block__bar:not(:has(> :not([hidden]))) { display: none; }
+
+/* Developer */
+.portal-code-block { border: 1px solid var(--_hairline); border-radius: var(--portal-radius); background: var(--_subtle); }
+.portal-code-block { overflow: clip; }
+.portal-code-block__bar { display: flex; align-items: center; justify-content: space-between; gap: calc(var(--_s)*2); padding-block: calc(var(--_s)*1.5); padding-inline: calc(var(--_s)*4) calc(var(--_s)*2); border-block-end: 1px solid var(--_hairline); color: var(--portal-text-muted); font-size: .8125rem; }
+.portal-code-block__language { font-weight: var(--_portal-weight-medium); }
+.portal-code-block pre { margin: 0; padding: calc(var(--_s)*4); overflow-x: auto; font-size: .8125rem; line-height: 1.7; tab-size: 2; }
+.portal-code-block pre:focus-visible { outline-offset: -2px; }
+.portal-code-block pre code { font-size: inherit; }
+</style>
