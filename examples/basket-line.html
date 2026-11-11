@@ -1,8 +1,8 @@
 <main class="portal-theme portal-example">
   <div>
-    <ui:basket-line title="Business cards" detail="85 × 55 mm, 400gsm matt, double-sided" total="£42.00" t:bind-line="input.line">
+    <ui:basket-line t:for="input.lines" t:as="item" t:bind-key="item.line.id" t:bind-title="item.title" t:bind-detail="item.detail" t:bind-total="item.total" t:bind-line="item.line">
       <ui:fill name="media">
-        <ui:media src="/examples/images/business-cards.svg" alt="" ratio="1/1"/>
+        <ui:media t:bind-src="item.image" alt="" ratio="1/1"/>
       </ui:fill>
     </ui:basket-line>
     <ui:basket-line title="Letterheads" detail="A4, 120gsm uncoated" quantity="Quantity: 2,500" total="£96.00">

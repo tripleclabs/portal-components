@@ -1,10 +1,16 @@
 # Changelog
 
+## 0.4.1 — 2026-11-11
+
+- `quantity-input` renders its number input `required`, so an emptied quantity is caught before it posts.
+- The basket-line example loops over its lines with `t:bind-key="item.line.id"`.
+- Authoring docs describe what an event re-renders (a pure export its own instance from the props it was rendered with; a privileged export the whole page), how the runtime 0.4.0 morph keeps focus and typed values, and why repeated instances need a key.
+
 ## 0.4.0 — 2026-11-10
 
 It supersedes the unpublished 0.3.0, whose notes follow.
 
-- Single-file components: each component is one `components/<name>.portal` file holding its props (`<props>`), template, CSS (`<style>`) and optional event handlers (`<server>`). The `.html` + `.json` pairs and `styles/components.css` are gone. Copying a component copies its CSS too.
+- Single-file components: each component is one `components/<name>.portal` file holding its props (`<props>`), template, CSS (`<style>`) and optional event handlers (`<server>`). The `.html` + `.json` pairs and `styles/components.css` are gone. Copying a component copies its own CSS too; rules several components share (choice, table, panel and the like) stay in the base stylesheet.
 - `ui:` and `t:` are implicit in `.portal` files; examples drop their `xmlns` declarations.
 - Per-page CSS: the host inlines the base stylesheet (tokens, shared foundations, icons, layouts) and only the CSS of the components a page shows, including markup that carries a component's root class. Every selector in a component's `<style>` starts with its root class. `styles/layouts.css` is now part of the bundle.
 - Component events: `t:click`, `t:submit`, `t:change` with `t:live`, bound to typed exports (`function exports.name(props: Props, input: { … }): ComponentResult`). Pure by default; `security="privileged"` gives exports `ctx`. Props travel in a sealed, visitor-bound token.

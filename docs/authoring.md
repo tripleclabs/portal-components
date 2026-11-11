@@ -119,9 +119,15 @@ end
 | `{ errors = { { path = "quantity", message = "…" } } }` | Re-renders with status 422; the template sees the list as `errors` |
 | `{ redirect = "/orders" }` | 303 to a published page of the site |
 | `{ redirect = "https://checkout.stripe.com/…" }` | Privileged only: 303 to an absolute `https://` URL, such as a payment provider's hosted checkout. Pure components stay on the site; any other scheme is refused |
-| `{}` | Re-renders the page as it now is |
+| `{}` | Re-renders as after `render`, with `result` nil |
 
-Before any event `result` and `errors` are nil, so guard with `t:if="result"`. Components keep no state between events: a later event sees only its props and its own input, so anything that must persist is a control value or a prop. With JavaScript the runtime swaps just the instance (or, for `t:change`, its live parts); without it the page re-renders whole.
+Before any event `result` and `errors` are nil, so guard with `t:if="result"`. Components keep no state between events: a later event sees only its props and its own input, so anything that must persist is a control value or a prop.
+
+**What re-renders.** A pure export cannot change data, so the server re-renders only its instance (or, for `t:change`, its live parts) from the props it was rendered with, and runs no page loader. Those props are the ones sealed when the page was rendered; a pure component never sees newer data until the page renders again. A privileged export may have changed data shown anywhere, so the server re-renders the whole page, loaders included, and a basket total in the header updates with the line. A pure instance whose caller filled one of its slots also gets the whole page, because slot content is not sealed with its props.
+
+With JavaScript the runtime *morphs* the response into the page: it changes only what differs, so focus, the caret, half-typed values, open disclosures and scroll position survive. A control keeps what the visitor typed unless the server now renders a different value for it. Following a link to another page still replaces the page. Without JavaScript the browser loads the whole page.
+
+**Key repeated instances.** The runtime finds each instance again by its key. Without one, the key is the instance's place in the template plus its props, so a basket row whose quantity changed looks like a new row: it is replaced rather than patched, and keyboard focus moves to the surrounding region. Inside `t:for`, give each instance a stable key from its data, for example `<ui:basket-line t:bind-key="line.id" …>`.
 
 **Trust.** Props are trusted, controls are not. The props a component rendered with travel in a sealed instance token: encrypted, so they are not readable in the page, and bound to the visitor's session, the site version and the Portal, so it cannot be replayed by someone else or after a republish (the visitor reloads instead). An export receives those props, never values posted by the browser. Signing proves which button was pressed, not that the visitor may act on it: an export still checks, for example, that the basket line belongs to this visitor. A host with no token secret, and the static showcase, renders event buttons disabled.
 

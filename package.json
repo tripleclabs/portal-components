@@ -1,6 +1,6 @@
 {
   "name": "@wearecococo/portal-components",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "type": "module",
   "description": "Ownable DataXML components and design tokens for server-rendered portals",

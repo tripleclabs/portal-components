@@ -1,6 +1,6 @@
 {
   "name": "@wearecococo/portal-components",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "contractVersion": 1,
   "license": "MIT",
   "components": [
@@ -371,7 +371,7 @@
       "source": "components/quantity-input.portal",
       "example": "examples/quantity-input.html",
       "rendered": "rendered/quantity-input.html",
-      "accessibility": "The number input is the control: it is labelled, typeable, honours min, max and step and submits without JavaScript. The runtime quantity behaviour reveals the − and + buttons, which carry translatable aria-labels and fire native input and change events. Validate the quantity again on the server.",
+      "accessibility": "The number input is the control: it is labelled, typeable, required, honours min, max and step and submits without JavaScript. The runtime quantity behaviour reveals the − and + buttons, which carry translatable aria-labels and fire native input and change events. Validate the quantity again on the server.",
       "tokenReference": "docs/tokens.md"
     },
     {

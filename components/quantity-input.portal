@@ -18,7 +18,7 @@
     <button type="button" class="portal-quantity__step" data-portal-command="decrement" data-portal-enhanced-only="" hidden="hidden" t:attr-aria-label="props.decreaseLabel">
       <ui:icon name="minus" size="sm"/>
     </button>
-    <input type="number" class="portal-input" data-portal-control="value" inputmode="numeric" t:attr-id="props.id ?? component.id" t:attr-name="props.name" t:attr-value="props.value" t:attr-min="props.min" t:attr-max="props.max" t:attr-step="props.step" t:attr-disabled="props.disabled"/>
+    <input type="number" class="portal-input" data-portal-control="value" inputmode="numeric" required="required" t:attr-id="props.id ?? component.id" t:attr-name="props.name" t:attr-value="props.value" t:attr-min="props.min" t:attr-max="props.max" t:attr-step="props.step" t:attr-disabled="props.disabled"/>
     <button type="button" class="portal-quantity__step" data-portal-command="increment" data-portal-enhanced-only="" hidden="hidden" t:attr-aria-label="props.increaseLabel">
       <ui:icon name="plus" size="sm"/>
     </button>

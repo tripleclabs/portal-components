@@ -7,7 +7,7 @@ Read `docs/authoring.md` and `docs/components.md` before generating a page. `cat
 1. Write XML-shaped HTML. In a `.portal` file `ui:` and `t:` are implicit; a plain `.html` page declares `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` on its root. Close void elements in source: `<input/>`.
 2. Invoke `<ui:button variant="secondary" t:bind-disabled="input.disabled">`. Literal attributes supply strings; `t:bind-PROP` supplies a typed DataXML expression. No JavaScript expressions, Vue bindings or prop child elements.
 3. Unnamed children fill the default slot. Named content uses `<ui:fill name="footer">`. Templates use `<ui:outlet/>`. Caller slots keep caller scope; component internals only receive `props`, slot-presence flags and `component.id`.
-4. Only use declared props and slots. Names/enum values are exact and case-sensitive, including camelCase props. Use `t:bind-disabled="true"` / `"false"` for boolean constants and `t:bind-value="65"` for a numeric prop. Literal `disabled="true"` is a string and fails a boolean contract. Use `key` or `t:bind-key` for component identity, not a prop. The old portal-component/portal-prop/portal-fill/portal-outlet syntax is rejected.
+4. Only use declared props and slots. Names/enum values are exact and case-sensitive, including camelCase props. Use `t:bind-disabled="true"` / `"false"` for boolean constants and `t:bind-value="65"` for a numeric prop. Literal `disabled="true"` is a string and fails a boolean contract. Use `key` or `t:bind-key` for component identity, not a prop; inside `t:for`, key every evented instance from its data (`t:bind-key="line.id"`) so an update patches the row instead of replacing it. The old portal-component/portal-prop/portal-fill/portal-outlet syntax is rejected.
 5. Components render purely: they never fetch while rendering. Keep page data in page Lua and page forms. A component may handle its own events with `t:click` (on a `<button>`), `<form t:submit>` or `t:change` plus `t:live`, bound to typed exports in its `<server>` block; see "Component events" in `docs/authoring.md`. No `<script>`, onclick, client Lua or arbitrary networking.
 6. Use real HTML labels, control ids, names and native form semantics. Set button type=submit intentionally. Provide unique ids for repeated controls, and match `for`/`describedby` exactly.
 7. Internal URLs use the standard Portal mount-aware helpers/HTML handling. Do not hardcode a staff-preview prefix.
@@ -172,9 +172,15 @@ end
 | `{ errors = { { path = "quantity", message = "…" } } }` | Re-renders with status 422; the template sees the list as `errors` |
 | `{ redirect = "/orders" }` | 303 to a published page of the site |
 | `{ redirect = "https://checkout.stripe.com/…" }` | Privileged only: 303 to an absolute `https://` URL, such as a payment provider's hosted checkout. Pure components stay on the site; any other scheme is refused |
-| `{}` | Re-renders the page as it now is |
+| `{}` | Re-renders as after `render`, with `result` nil |
 
-Before any event `result` and `errors` are nil, so guard with `t:if="result"`. Components keep no state between events: a later event sees only its props and its own input, so anything that must persist is a control value or a prop. With JavaScript the runtime swaps just the instance (or, for `t:change`, its live parts); without it the page re-renders whole.
+Before any event `result` and `errors` are nil, so guard with `t:if="result"`. Components keep no state between events: a later event sees only its props and its own input, so anything that must persist is a control value or a prop.
+
+**What re-renders.** A pure export cannot change data, so the server re-renders only its instance (or, for `t:change`, its live parts) from the props it was rendered with, and runs no page loader. Those props are the ones sealed when the page was rendered; a pure component never sees newer data until the page renders again. A privileged export may have changed data shown anywhere, so the server re-renders the whole page, loaders included, and a basket total in the header updates with the line. A pure instance whose caller filled one of its slots also gets the whole page, because slot content is not sealed with its props.
+
+With JavaScript the runtime *morphs* the response into the page: it changes only what differs, so focus, the caret, half-typed values, open disclosures and scroll position survive. A control keeps what the visitor typed unless the server now renders a different value for it. Following a link to another page still replaces the page. Without JavaScript the browser loads the whole page.
+
+**Key repeated instances.** The runtime finds each instance again by its key. Without one, the key is the instance's place in the template plus its props, so a basket row whose quantity changed looks like a new row: it is replaced rather than patched, and keyboard focus moves to the surrounding region. Inside `t:for`, give each instance a stable key from its data, for example `<ui:basket-line t:bind-key="line.id" …>`.
 
 **Trust.** Props are trusted, controls are not. The props a component rendered with travel in a sealed instance token: encrypted, so they are not readable in the page, and bound to the visitor's session, the site version and the Portal, so it cannot be replayed by someone else or after a republish (the visitor reloads instead). An export receives those props, never values posted by the browser. Signing proves which button was pressed, not that the visitor may act on it: an export still checks, for example, that the basket line belongs to this visitor. A host with no token secret, and the static showcase, renders event buttons disabled.
 
@@ -416,7 +422,7 @@ Optional and undeclared; each falls back to the semantic tokens.
 
 # Component reference
 
-Generated from catalogue.json, the component files (components/<name>.portal) and executable example source. Do not edit this file directly. Library 0.4.0, contract 1.
+Generated from catalogue.json, the component files (components/<name>.portal) and executable example source. Do not edit this file directly. Library 0.4.1, contract 1.
 
 Usage snippets go inside a page template. In a `.portal` file the `ui:` and `t:` prefixes are implicit; a plain `.html` page declares `xmlns:ui="urn:cococo:ui"` and `xmlns:t="urn:cococo:dataxml"` on its root.
 
@@ -1678,7 +1684,7 @@ None.
 
 ### Accessibility and limits
 
-The number input is the control: it is labelled, typeable, honours min, max and step and submits without JavaScript. The runtime quantity behaviour reveals the − and + buttons, which carry translatable aria-labels and fire native input and change events. Validate the quantity again on the server.
+The number input is the control: it is labelled, typeable, required, honours min, max and step and submits without JavaScript. The runtime quantity behaviour reveals the − and + buttons, which carry translatable aria-labels and fire native input and change events. Validate the quantity again on the server.
 
 ## basket-line
 
@@ -1706,9 +1712,9 @@ Slots:
 
 ```xml
 <div>
-  <ui:basket-line title="Business cards" detail="85 × 55 mm, 400gsm matt, double-sided" total="£42.00" t:bind-line="input.line">
+  <ui:basket-line t:for="input.lines" t:as="item" t:bind-key="item.line.id" t:bind-title="item.title" t:bind-detail="item.detail" t:bind-total="item.total" t:bind-line="item.line">
     <ui:fill name="media">
-      <ui:media src="/examples/images/business-cards.svg" alt="" ratio="1/1"/>
+      <ui:media t:bind-src="item.image" alt="" ratio="1/1"/>
     </ui:fill>
   </ui:basket-line>
   <ui:basket-line title="Letterheads" detail="A4, 120gsm uncoated" quantity="Quantity: 2,500" total="£96.00">
